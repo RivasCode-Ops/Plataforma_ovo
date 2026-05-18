@@ -1,5 +1,6 @@
 import { pool, withTransaction } from '../db.js';
 import { gerarLinkWhatsApp } from '../integrations/whatsapp.js';
+import { baixarEstoqueFifo } from './lotes.js';
 
 const STATUS_VALIDOS = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado'];
 
@@ -134,10 +135,7 @@ export async function criarPedido({ cliente, itens, observacao, confirmar = true
         [pedido.id, item.produto_id, item.quantidade, item.preco_unitario, item.subtotal]
       );
       if (confirmar) {
-        await client.query(
-          'UPDATE produtos SET estoque = estoque - $1, updated_at = NOW() WHERE id = $2',
-          [item.quantidade, item.produto_id]
-        );
+        await baixarEstoqueFifo(client, item.produto_id, item.quantidade);
       }
     }
 

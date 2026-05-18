@@ -91,6 +91,16 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     }),
+  listarLotes: ({ comEstoque, produto_id } = {}) => {
+    const q = new URLSearchParams();
+    if (comEstoque) q.set('com_estoque', '1');
+    if (produto_id) q.set('produto_id', produto_id);
+    const s = q.toString();
+    return request(`/lotes${s ? `?${s}` : ''}`);
+  },
+  lotesAlertas: (dias = 7) => request(`/lotes/alertas?dias=${dias}`),
+  registrarLote: (payload) =>
+    request('/lotes', { method: 'POST', body: JSON.stringify(payload) }),
 };
 
 export async function downloadRelatorioCsv(de, ate) {

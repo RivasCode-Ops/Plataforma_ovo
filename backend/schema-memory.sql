@@ -62,6 +62,18 @@ CREATE TABLE assinatura_itens (
   quantidade integer NOT NULL
 );
 
+CREATE TABLE lotes (
+  id serial PRIMARY KEY,
+  produto_id integer NOT NULL REFERENCES produtos (id),
+  codigo varchar(50),
+  quantidade integer NOT NULL,
+  quantidade_inicial integer NOT NULL,
+  data_validade date NOT NULL,
+  data_entrada date NOT NULL DEFAULT CURRENT_DATE,
+  observacao text,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
 INSERT INTO produtos (nome, unidade, preco, estoque) VALUES
   ('Ovos Brancos', 'dúzia', 12, 100),
   ('Ovos Caipira', 'dúzia', 18, 80),

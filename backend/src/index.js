@@ -11,6 +11,7 @@ import whatsappRouter from './routes/whatsapp.js';
 import relatoriosRouter from './routes/relatorios.js';
 import clientesRouter from './routes/clientes.js';
 import assinaturasRouter from './routes/assinaturas.js';
+import lotesRouter from './routes/lotes.js';
 import webhookRouter from './routes/webhook.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -73,6 +74,7 @@ app.use('/api/whatsapp', whatsappRouter);
 app.use('/api/relatorios', relatoriosRouter);
 app.use('/api/clientes', clientesRouter);
 app.use('/api/assinaturas', assinaturasRouter);
+app.use('/api/lotes', lotesRouter);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;
