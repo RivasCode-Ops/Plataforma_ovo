@@ -13,6 +13,7 @@ import InstalarApp from './components/InstalarApp.jsx';
 import OperadoresPainel from './components/OperadoresPainel.jsx';
 import NotificacoesPainel from './components/NotificacoesPainel.jsx';
 import RotasPainel from './components/RotasPainel.jsx';
+import PrevisaoPainel from './components/PrevisaoPainel.jsx';
 import { useNotificacoes } from './hooks/useNotificacoes.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
@@ -29,6 +30,7 @@ const MENU = [
   { id: 'produtos', label: 'Produtos' },
   { id: 'clientes', label: 'Clientes' },
   { id: 'relatorio', label: 'Relatório' },
+  { id: 'previsao', label: 'Previsão', admin: true },
   { id: 'whatsapp', label: 'WhatsApp' },
   { id: 'operadores', label: 'Operadores', admin: true },
 ];
@@ -139,6 +141,8 @@ export default function App() {
         return <ClientesPainel />;
       case 'relatorio':
         return <RelatorioPainel />;
+      case 'previsao':
+        return papel === 'admin' ? <PrevisaoPainel /> : null;
       case 'whatsapp':
         return <WhatsAppPainel />;
       case 'operadores':

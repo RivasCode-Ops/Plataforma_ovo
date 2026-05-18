@@ -16,6 +16,7 @@ import operadoresRouter from './routes/operadores.js';
 import notificacoesRouter from './routes/notificacoes.js';
 import rotasRouter from './routes/rotas.js';
 import pixRouter from './routes/pix.js';
+import previsaoRouter from './routes/previsao.js';
 import webhookRouter from './routes/webhook.js';
 import { seedOperadorAdmin } from './services/operadores.js';
 import path from 'path';
@@ -84,6 +85,7 @@ app.use('/api/operadores', operadoresRouter);
 app.use('/api/notificacoes', notificacoesRouter);
 app.use('/api/rotas', rotasRouter);
 app.use('/api/pix', pixRouter);
+app.use('/api/previsao', previsaoRouter);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;

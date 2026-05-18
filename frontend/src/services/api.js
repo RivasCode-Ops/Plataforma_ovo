@@ -111,6 +111,13 @@ export const api = {
   registrarLote: (payload) =>
     request('/lotes', { method: 'POST', body: JSON.stringify(payload) }),
   listarNotificacoes: () => request('/notificacoes'),
+  previsaoDemanda: (dias, periodo) => {
+    const q = new URLSearchParams();
+    if (dias) q.set('dias', dias);
+    if (periodo) q.set('periodo', periodo);
+    const s = q.toString();
+    return request(`/previsao${s ? `?${s}` : ''}`);
+  },
   pixStatus: () => request('/pix/status'),
   pedidoPix: (id) => request(`/pedidos/${id}/pix`),
   listarRotas: (ativas) => request(`/rotas${ativas ? '?ativas=1' : ''}`),
