@@ -164,11 +164,13 @@ export async function pedidosDoDia(dataRef) {
 
   const { rows } = await pool.query(
     `SELECT p.id, p.status, p.total, p.observacao, p.data_pedido,
-            c.nome AS cliente_nome, c.telefone AS cliente_telefone, c.endereco AS cliente_endereco
+            c.nome AS cliente_nome, c.telefone AS cliente_telefone, c.endereco AS cliente_endereco,
+            c.rota_id, r.nome AS rota_nome, COALESCE(r.ordem, 9999) AS rota_ordem
      FROM pedidos p
      JOIN clientes c ON c.id = p.cliente_id
+     LEFT JOIN rotas r ON r.id = c.rota_id AND r.ativo = TRUE
      WHERE DATE(p.data_pedido) = $1::date
-     ORDER BY p.data_pedido ASC`,
+     ORDER BY rota_ordem, r.nome NULLS LAST, p.data_pedido ASC`,
     [dia]
   );
 
@@ -197,10 +199,48 @@ export async function pedidosDoDia(dataRef) {
     .filter((p) => p.status !== 'cancelado')
     .reduce((acc, p) => acc + p.total, 0);
 
+  const grupos = new Map();
+  const semRota = [];
+
+  for (const p of pedidos) {
+    if (!p.rota_id) {
+      semRota.push(p);
+      continue;
+    }
+    const key = p.rota_id;
+    if (!grupos.has(key)) {
+      grupos.set(key, {
+        rota_id: p.rota_id,
+        rota_nome: p.rota_nome,
+        rota_ordem: p.rota_ordem,
+        pedidos: [],
+      });
+    }
+    grupos.get(key).pedidos.push(p);
+  }
+
+  const por_rota = [...grupos.values()]
+    .sort((a, b) => a.rota_ordem - b.rota_ordem || a.rota_nome.localeCompare(b.rota_nome))
+    .map((g) => ({
+      ...g,
+      qtd: g.pedidos.length,
+      total: g.pedidos
+        .filter((p) => p.status !== 'cancelado')
+        .reduce((acc, p) => acc + p.total, 0),
+    }));
+
   return {
     dia,
     qtd: pedidos.length,
     total: totalDia,
     pedidos,
+    por_rota,
+    sem_rota: {
+      qtd: semRota.length,
+      total: semRota
+        .filter((p) => p.status !== 'cancelado')
+        .reduce((acc, p) => acc + p.total, 0),
+      pedidos: semRota,
+    },
   };
 }

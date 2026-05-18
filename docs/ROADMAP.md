@@ -24,6 +24,6 @@
 ## Fase 3 — Evolução
 
 - [x] Preço atacado por cliente — [PRECO_ATACADO.md](PRECO_ATACADO.md)
-- [ ] Rotas de entrega
+- [x] Rotas de entrega — [ROTAS_ENTREGA.md](ROTAS_ENTREGA.md)
 - [ ] Integração financeira (PIX automático)
 - [ ] Previsão de demanda

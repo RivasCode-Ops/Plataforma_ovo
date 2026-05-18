@@ -12,6 +12,7 @@ import DashboardPainel from './components/DashboardPainel.jsx';
 import InstalarApp from './components/InstalarApp.jsx';
 import OperadoresPainel from './components/OperadoresPainel.jsx';
 import NotificacoesPainel from './components/NotificacoesPainel.jsx';
+import RotasPainel from './components/RotasPainel.jsx';
 import { useNotificacoes } from './hooks/useNotificacoes.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
@@ -21,6 +22,7 @@ const MENU = [
   { id: 'alertas', label: 'Alertas', badge: true },
   { id: 'novo', label: 'Novo pedido' },
   { id: 'hoje', label: 'Pedidos do dia' },
+  { id: 'rotas', label: 'Rotas' },
   { id: 'pedidos', label: 'Pedidos' },
   { id: 'assinaturas', label: 'Assinaturas' },
   { id: 'lotes', label: 'Lotes' },
@@ -36,6 +38,7 @@ const SECOES_OPERADOR = new Set([
   'alertas',
   'novo',
   'hoje',
+  'rotas',
   'pedidos',
   'assinaturas',
   'lotes',
@@ -114,6 +117,8 @@ export default function App() {
         return <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />;
       case 'hoje':
         return <PedidosHojePainel />;
+      case 'rotas':
+        return <RotasPainel />;
       case 'pedidos':
         return (
           <PedidosLista

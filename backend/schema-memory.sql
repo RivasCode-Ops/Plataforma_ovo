@@ -11,11 +11,20 @@ CREATE TABLE produtos (
   updated_at timestamp NOT NULL DEFAULT now()
 );
 
+CREATE TABLE rotas (
+  id serial PRIMARY KEY,
+  nome varchar(80) NOT NULL,
+  ordem integer NOT NULL DEFAULT 0,
+  ativo boolean NOT NULL DEFAULT true,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
 CREATE TABLE clientes (
   id serial PRIMARY KEY,
   nome varchar(100) NOT NULL,
   telefone varchar(20) NOT NULL,
   endereco text,
+  rota_id integer REFERENCES rotas (id) ON DELETE SET NULL,
   created_at timestamp NOT NULL DEFAULT now()
 );
 
@@ -98,3 +107,8 @@ INSERT INTO produtos (nome, unidade, preco, estoque) VALUES
   ('Ovos Brancos', 'dúzia', 12, 100),
   ('Ovos Caipira', 'dúzia', 18, 80),
   ('Ovos Vermelhos', 'dúzia', 15, 60);
+
+INSERT INTO rotas (nome, ordem) VALUES
+  ('Centro', 1),
+  ('Zona Norte', 2),
+  ('Zona Sul', 3);

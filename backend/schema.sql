@@ -12,15 +12,25 @@ CREATE TABLE IF NOT EXISTS produtos (
   updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS rotas (
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(80) NOT NULL,
+  ordem INTEGER NOT NULL DEFAULT 0,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS clientes (
   id SERIAL PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   telefone VARCHAR(20) NOT NULL,
   endereco TEXT,
+  rota_id INTEGER REFERENCES rotas (id) ON DELETE SET NULL,
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_clientes_telefone ON clientes (telefone);
+CREATE INDEX IF NOT EXISTS idx_clientes_rota ON clientes (rota_id);
 
 CREATE TABLE IF NOT EXISTS cliente_precos (
   id SERIAL PRIMARY KEY,

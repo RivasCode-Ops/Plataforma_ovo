@@ -111,6 +111,16 @@ export const api = {
   registrarLote: (payload) =>
     request('/lotes', { method: 'POST', body: JSON.stringify(payload) }),
   listarNotificacoes: () => request('/notificacoes'),
+  listarRotas: (ativas) => request(`/rotas${ativas ? '?ativas=1' : ''}`),
+  criarRota: (payload) =>
+    request('/rotas', { method: 'POST', body: JSON.stringify(payload) }),
+  atualizarRota: (id, payload) =>
+    request(`/rotas/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  atribuirClienteRota: (clienteId, rotaId) =>
+    request(`/rotas/cliente/${clienteId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ rota_id: rotaId }),
+    }),
   listarOperadores: () => request('/operadores'),
   criarOperador: (payload) =>
     request('/operadores', { method: 'POST', body: JSON.stringify(payload) }),

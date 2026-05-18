@@ -12,6 +12,7 @@ export default function ClientesPainel() {
   const [busca, setBusca] = useState('');
   const [detalhe, setDetalhe] = useState(null);
   const [produtos, setProdutos] = useState([]);
+  const [rotas, setRotas] = useState([]);
   const [precosForm, setPrecosForm] = useState({});
   const [erro, setErro] = useState('');
   const [msg, setMsg] = useState('');
@@ -35,6 +36,7 @@ export default function ClientesPainel() {
   }, [carregar]);
 
   useEffect(() => {
+    api.listarRotas(true).then(setRotas).catch(() => {});
     if (isAdmin) {
       api.listarProdutosGerenciar().then(setProdutos).catch(() => {});
     }
@@ -67,6 +69,17 @@ export default function ClientesPainel() {
     try {
       await api.salvarPrecoAtacado(detalhe.id, produtoId, preco);
       setMsg('Preço atacado salvo.');
+      await verCliente(detalhe.id);
+    } catch (e) {
+      setErro(e.message);
+    }
+  }
+
+  async function mudarRota(rotaId) {
+    if (!detalhe?.id) return;
+    try {
+      await api.atribuirClienteRota(detalhe.id, rotaId || null);
+      setMsg('Rota atualizada.');
       await verCliente(detalhe.id);
     } catch (e) {
       setErro(e.message);
@@ -148,6 +161,24 @@ export default function ClientesPainel() {
             {detalhe.endereco && (
               <p className="mt-1 text-sm text-stone-500">{detalhe.endereco}</p>
             )}
+
+            <label className="mt-3 block text-sm">
+              <span className="font-medium text-stone-700">Rota de entrega</span>
+              <select
+                className="mt-1 w-full rounded-lg border border-stone-300 px-2 py-1.5 text-sm"
+                value={detalhe.rota_id ?? ''}
+                onChange={(e) =>
+                  mudarRota(e.target.value ? Number(e.target.value) : null)
+                }
+              >
+                <option value="">Sem rota</option>
+                {rotas.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
 
             {isAdmin && produtos.length > 0 && (
               <div className="mt-4">

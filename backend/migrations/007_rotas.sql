@@ -1,0 +1,14 @@
+-- Rotas de entrega
+
+CREATE TABLE IF NOT EXISTS rotas (
+  id SERIAL PRIMARY KEY,
+  nome VARCHAR(80) NOT NULL,
+  ordem INTEGER NOT NULL DEFAULT 0,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE clientes
+  ADD COLUMN IF NOT EXISTS rota_id INTEGER REFERENCES rotas (id) ON DELETE SET NULL;
+
+CREATE INDEX IF NOT EXISTS idx_clientes_rota ON clientes (rota_id);

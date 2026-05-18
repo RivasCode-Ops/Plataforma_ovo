@@ -32,7 +32,7 @@ router.get('/', async (req, res, next) => {
     if (q) {
       const pattern = `%${q}%`;
       ({ rows } = await pool.query(
-        `SELECT c.id, c.nome, c.telefone, c.endereco, c.created_at,
+        `SELECT c.id, c.nome, c.telefone, c.endereco, c.rota_id, c.created_at,
                 COUNT(p.id)::int AS total_pedidos,
                 COALESCE(SUM(CASE WHEN p.status NOT IN ('cancelado') THEN p.total ELSE 0 END), 0)::float AS total_gasto
          FROM clientes c
@@ -45,7 +45,7 @@ router.get('/', async (req, res, next) => {
       ));
     } else {
       ({ rows } = await pool.query(
-        `SELECT c.id, c.nome, c.telefone, c.endereco, c.created_at,
+        `SELECT c.id, c.nome, c.telefone, c.endereco, c.rota_id, c.created_at,
                 COUNT(p.id)::int AS total_pedidos,
                 COALESCE(SUM(CASE WHEN p.status NOT IN ('cancelado') THEN p.total ELSE 0 END), 0)::float AS total_gasto
          FROM clientes c
@@ -98,7 +98,13 @@ router.delete('/:id/precos/:produtoId', requireAdmin, async (req, res, next) => 
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const cliente = await pool.query('SELECT * FROM clientes WHERE id = $1', [req.params.id]);
+    const cliente = await pool.query(
+      `SELECT c.*, r.nome AS rota_nome
+       FROM clientes c
+       LEFT JOIN rotas r ON r.id = c.rota_id
+       WHERE c.id = $1`,
+      [req.params.id]
+    );
     if (cliente.rows.length === 0) {
       return res.status(404).json({ erro: 'Cliente não encontrado' });
     }
