@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import NovoPedidoForm from './components/NovoPedidoForm.jsx';
 import PedidosHojePainel from './components/PedidosHojePainel.jsx';
+import AssinaturasPainel from './components/AssinaturasPainel.jsx';
 import WhatsAppPainel from './components/WhatsAppPainel.jsx';
 import RelatorioPainel from './components/RelatorioPainel.jsx';
 import ProdutosPainel from './components/ProdutosPainel.jsx';
@@ -95,6 +96,8 @@ export default function App() {
         <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />
 
         <PedidosHojePainel />
+
+        <AssinaturasPainel produtos={produtos} onPedidoGerado={carregar} />
 
         <RelatorioPainel />
 

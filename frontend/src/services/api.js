@@ -79,6 +79,18 @@ export const api = {
   },
   pedidosDoDia: (dia) =>
     request(`/relatorios/pedidos-dia${dia ? `?dia=${dia}` : ''}`),
+  listarAssinaturas: (status) =>
+    request(`/assinaturas${status ? `?status=${status}` : ''}`),
+  assinaturasEntregasSemana: () => request('/assinaturas/entregas-semana'),
+  criarAssinatura: (payload) =>
+    request('/assinaturas', { method: 'POST', body: JSON.stringify(payload) }),
+  gerarPedidoAssinatura: (id) =>
+    request(`/assinaturas/${id}/gerar-pedido`, { method: 'POST' }),
+  atualizarAssinaturaStatus: (id, status) =>
+    request(`/assinaturas/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }),
 };
 
 export async function downloadRelatorioCsv(de, ate) {

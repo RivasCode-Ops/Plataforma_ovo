@@ -34,7 +34,8 @@ Acesse: http://localhost:5173
 ### Manhã
 1. Abrir o sistema (`iniciar.ps1`)
 2. Conferir **Pedidos do dia** — imprimir se houver entregas
-3. Ver **Produtos** — estoque baixo (&lt; 10) em amarelo
+3. **Assinaturas** → entregas da semana → **Gerar pedido** em cada uma
+4. Ver **Produtos** — estoque baixo (&lt; 10) em amarelo
 
 ### Pedido novo (WhatsApp, telefone, balcão)
 1. **Novo pedido** → nome, telefone, itens → **Confirmar**

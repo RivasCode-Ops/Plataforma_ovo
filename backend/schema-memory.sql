@@ -43,6 +43,25 @@ CREATE TABLE itens_pedido (
   subtotal real NOT NULL
 );
 
+CREATE TABLE assinaturas (
+  id serial PRIMARY KEY,
+  cliente_id integer NOT NULL REFERENCES clientes (id),
+  frequencia varchar(20) NOT NULL,
+  dia_semana smallint NOT NULL,
+  status varchar(20) NOT NULL DEFAULT 'ativa',
+  proxima_entrega date NOT NULL,
+  observacao text,
+  created_at timestamp NOT NULL DEFAULT now(),
+  updated_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE assinatura_itens (
+  id serial PRIMARY KEY,
+  assinatura_id integer NOT NULL REFERENCES assinaturas (id) ON DELETE CASCADE,
+  produto_id integer NOT NULL REFERENCES produtos (id),
+  quantidade integer NOT NULL
+);
+
 INSERT INTO produtos (nome, unidade, preco, estoque) VALUES
   ('Ovos Brancos', 'dúzia', 12, 100),
   ('Ovos Caipira', 'dúzia', 18, 80),
