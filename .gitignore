@@ -11,3 +11,4 @@ coverage/
 .idea/
 *.sqlite
 postgres-data/
+infra/.env.prod

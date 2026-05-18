@@ -1,4 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import NovoPedidoForm from './components/NovoPedidoForm.jsx';
+import PedidosHojePainel from './components/PedidosHojePainel.jsx';
+import WhatsAppPainel from './components/WhatsAppPainel.jsx';
+import RelatorioPainel from './components/RelatorioPainel.jsx';
+import ProdutosPainel from './components/ProdutosPainel.jsx';
+import ClientesPainel from './components/ClientesPainel.jsx';
+import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
 
 const STATUS_OPCOES = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado'];
@@ -13,6 +20,7 @@ const statusCor = {
 };
 
 export default function App() {
+  const { usuario, logout } = useAuth();
   const [pedidos, setPedidos] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [filtro, setFiltro] = useState('');
@@ -57,13 +65,23 @@ export default function App() {
             <h1 className="text-xl font-semibold tracking-tight">Plataforma Ovo</h1>
             <p className="text-sm text-stone-500">Painel operacional — MVP</p>
           </div>
-          <button
-            type="button"
-            onClick={carregar}
-            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
-          >
-            Atualizar
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="hidden text-sm text-stone-500 sm:inline">Olá, {usuario}</span>
+            <button
+              type="button"
+              onClick={carregar}
+              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+            >
+              Atualizar
+            </button>
+            <button
+              type="button"
+              onClick={logout}
+              className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 
@@ -74,31 +92,17 @@ export default function App() {
           </p>
         )}
 
-        <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-medium">Estoque</h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {produtos.map((p) => (
-              <div
-                key={p.id}
-                className={`rounded-lg border p-4 ${
-                  p.estoque < 10 ? 'border-amber-300 bg-amber-50' : 'border-stone-100'
-                }`}
-              >
-                <p className="font-medium">{p.nome}</p>
-                <p className="text-sm text-stone-500">
-                  R$ {Number(p.preco).toFixed(2)} / {p.unidade}
-                </p>
-                <p className="mt-2 text-2xl font-semibold tabular-nums">{p.estoque}</p>
-                {p.estoque < 10 && (
-                  <p className="mt-1 text-xs font-medium text-amber-700">Estoque baixo</p>
-                )}
-              </div>
-            ))}
-          </div>
-          {!produtos.length && !carregando && (
-            <p className="text-sm text-stone-500">Nenhum produto cadastrado.</p>
-          )}
-        </section>
+        <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />
+
+        <PedidosHojePainel />
+
+        <RelatorioPainel />
+
+        <WhatsAppPainel />
+
+        <ProdutosPainel onAtualizado={carregar} />
+
+        <ClientesPainel />
 
         <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -145,13 +149,20 @@ export default function App() {
                         R$ {Number(p.total).toFixed(2)}
                       </td>
                       <td className="py-3 pr-4">
-                        <span
-                          className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                            statusCor[p.status] || 'bg-stone-100'
-                          }`}
-                        >
-                          {p.status}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1">
+                          <span
+                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                              statusCor[p.status] || 'bg-stone-100'
+                            }`}
+                          >
+                            {p.status}
+                          </span>
+                          {p.observacao?.includes('[Site:') && (
+                            <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">
+                              Site
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3">
                         <select

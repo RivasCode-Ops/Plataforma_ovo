@@ -1,5 +1,5 @@
 import { pool, withTransaction } from '../db.js';
-import { enviarWhatsApp } from '../integrations/merkus.js';
+import { gerarLinkWhatsApp } from '../integrations/whatsapp.js';
 
 const STATUS_VALIDOS = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado'];
 
@@ -145,16 +145,13 @@ export async function criarPedido({ cliente, itens, observacao, confirmar = true
   });
 
   const msg = formatarMensagemPedido(resultado);
-  try {
-    await enviarWhatsApp(cliente.telefone, msg);
-  } catch (err) {
-    console.error('Falha ao enviar WhatsApp:', err.message);
-  }
+  const whatsapp = gerarLinkWhatsApp(cliente.telefone, msg);
 
   return {
     pedido_id: resultado.pedido.id,
     status: resultado.pedido.status,
     total: resultado.total,
+    whatsapp,
   };
 }
 

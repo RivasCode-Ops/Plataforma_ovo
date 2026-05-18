@@ -20,6 +20,15 @@ npm install
 npm run dev
 ```
 
+## Login (painel)
+
+| Campo | Valor padrão (dev) |
+|-------|-------------------|
+| Usuário | `admin` |
+| Senha | `plataforma123` |
+
+Altere em `backend/.env`: `ADMIN_USER` e `ADMIN_PASSWORD`.
+
 ## URLs
 
 | Serviço | URL |

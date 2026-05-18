@@ -1,6 +1,6 @@
 # Plataforma Ovo
 
-Sistema central para gestão operacional de pedidos de ovos em granja: varejo, atacado e assinatura. Controle de estoque, integração WhatsApp (Merkus) e painel administrativo.
+Sistema central para gestão operacional de pedidos de ovos em granja: varejo, atacado e assinatura. Controle de estoque, links WhatsApp e painel administrativo.
 
 ## Objetivo
 
@@ -13,7 +13,7 @@ Gerenciar pedidos de múltiplos canais (WhatsApp, site, presencial), controlar e
 | Backend | Node.js + Express |
 | Banco | PostgreSQL |
 | Admin | React + Vite + TailwindCSS |
-| WhatsApp | Merkus API |
+| WhatsApp | Link wa.me (sem API externa) |
 | Deploy | Docker + Nginx (VPS) |
 
 Detalhes em [docs/DECISOES_TECNICAS.md](docs/DECISOES_TECNICAS.md).
@@ -26,6 +26,16 @@ frontend/    Painel administrativo
 docs/        Manuais operacionais
 infra/       Docker, Nginx, scripts de backup
 ```
+
+## Deploy em produção (VPS)
+
+```bash
+cd infra
+cp env.prod.example .env.prod   # edite senhas e domínio
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+```
+
+Guia completo: [docs/DEPLOY.md](docs/DEPLOY.md)
 
 ## Como rodar (desenvolvimento)
 
@@ -94,6 +104,8 @@ Painel em `http://localhost:5173`.
 - [Manual de operação](docs/MANUAL_OPERACAO.md)
 - [Backup e restore](docs/BACKUP_RESTORE.md)
 - [Plano B (caneta)](docs/PLANO_B_CANETA.md)
+- [WhatsApp (link direto)](docs/WHATSAPP.md)
+- [Site granjauniao.com.br](docs/INTEGRACAO_GRANJAUNIAO.md)
 
 ## Roadmap MVP (7 dias)
 

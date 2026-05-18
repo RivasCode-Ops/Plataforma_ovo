@@ -1,5 +1,7 @@
 # Snippet para o site da granja (MVP)
 
+> Integração completa para **www.granjauniao.com.br**: [INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md)
+
 Cole no site institucional (HTML, WordPress, etc.):
 
 ```html

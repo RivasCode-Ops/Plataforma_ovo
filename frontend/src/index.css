@@ -3,3 +3,19 @@
 body {
   @apply bg-stone-50 text-stone-900 antialiased;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .pedidos-hoje,
+  .pedidos-hoje * {
+    visibility: visible;
+  }
+  .pedidos-hoje {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

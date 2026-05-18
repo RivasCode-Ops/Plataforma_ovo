@@ -13,7 +13,7 @@ Guia para o dono ou operador da granja usar o sistema no dia a dia.
 2. Informe nome e telefone do cliente (ou selecione cliente existente).
 3. Adicione os produtos e quantidades.
 4. Confira o total e clique em **Salvar**.
-5. O sistema envia resumo por WhatsApp (se Merkus estiver configurado).
+5. Abra o link do WhatsApp que o sistema gera para enviar o resumo ao cliente.
 6. O estoque é baixado automaticamente ao **confirmar** o pedido.
 
 ## Status do pedido

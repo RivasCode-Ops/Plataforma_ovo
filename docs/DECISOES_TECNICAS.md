@@ -8,7 +8,7 @@
 | **Banco** | PostgreSQL | Relacional, ACID — crítico para estoque e pedidos em transação |
 | **ORM / queries** | `pg` (driver nativo) na Fase 1 | Menos camadas no MVP; Prisma na Fase 2 se o modelo crescer |
 | **Frontend admin** | React + Vite + TailwindCSS | Produtivo para painel; só o necessário na Fase 1 |
-| **WhatsApp** | Merkus API | Já validada no MEU-OVO; reutilizar padrões de integração |
+| **WhatsApp** | Link wa.me | Sem API externa; operador envia pelo app. Número em `GRANJA_WHATSAPP` |
 | **Deploy** | Docker + Nginx em VPS | Custo baixo (~R$ 30/mês); um `docker compose up` sobe tudo |
 
 ## O que NÃO usamos na Fase 1
@@ -42,4 +42,4 @@
 
 ## Variáveis de ambiente críticas
 
-Ver `backend/.env.example`: `DATABASE_URL`, `MERKUS_API_KEY`, `MERKUS_INSTANCE`, `JWT_SECRET`, `ADMIN_PASSWORD`.
+Ver `backend/.env.example`: `DATABASE_URL`, `GRANJA_WHATSAPP`, `JWT_SECRET`, `ADMIN_PASSWORD`, `WEBHOOK_SECRET`.

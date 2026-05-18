@@ -3,6 +3,30 @@ import { pool } from '../db.js';
 
 const router = Router();
 
+router.get('/cardapio', async (_req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, nome, unidade, preco, estoque
+       FROM produtos WHERE ativo = TRUE ORDER BY id`
+    );
+    res.json({
+      data: {
+        origem: process.env.SITE_ORIGEM || 'granjauniao.com.br',
+        produtos: rows.map((p) => ({
+          id: p.id,
+          nome: p.nome,
+          unidade: p.unidade,
+          preco: Number(p.preco),
+          disponivel: p.estoque > 0,
+          estoque: p.estoque,
+        })),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/cardapio-whatsapp', async (_req, res, next) => {
   try {
     const { rows } = await pool.query(
@@ -13,8 +37,9 @@ router.get('/cardapio-whatsapp', async (_req, res, next) => {
       (p, i) => `${i + 1}. ${p.nome} (${p.unidade}) — R$ ${Number(p.preco).toFixed(2)}`
     );
 
+    const titulo = process.env.SITE_NOME || 'Granja União';
     const texto = [
-      '*Cardápio - Granja*',
+      `*Cardápio - ${titulo}*`,
       '',
       ...linhas,
       '',
