@@ -12,7 +12,9 @@ import relatoriosRouter from './routes/relatorios.js';
 import clientesRouter from './routes/clientes.js';
 import assinaturasRouter from './routes/assinaturas.js';
 import lotesRouter from './routes/lotes.js';
+import operadoresRouter from './routes/operadores.js';
 import webhookRouter from './routes/webhook.js';
+import { seedOperadorAdmin } from './services/operadores.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -75,6 +77,7 @@ app.use('/api/relatorios', relatoriosRouter);
 app.use('/api/clientes', clientesRouter);
 app.use('/api/assinaturas', assinaturasRouter);
 app.use('/api/lotes', lotesRouter);
+app.use('/api/operadores', operadoresRouter);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;
@@ -84,6 +87,11 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-app.listen(port, () => {
+app.listen(port, async () => {
+  try {
+    await seedOperadorAdmin();
+  } catch (err) {
+    console.error('[auth] Falha ao criar operador admin:', err.message);
+  }
   console.log(`API Plataforma Ovo em http://localhost:${port}`);
 });

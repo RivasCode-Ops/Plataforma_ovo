@@ -17,7 +17,7 @@
 
 - [ ] VPS em produção ([CHECKLIST_GO_LIVE.md](CHECKLIST_GO_LIVE.md))
 - [ ] Site granjauniao.com.br ativo ([INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md))
-- [ ] Múltiplos operadores / permissões
+- [x] Múltiplos operadores / permissões ([OPERADORES.md](OPERADORES.md))
 - [ ] Notificações (e-mail ou push)
 - [x] App mobile (PWA — instalar no celular)
 

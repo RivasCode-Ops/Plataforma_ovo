@@ -74,6 +74,16 @@ CREATE TABLE lotes (
   created_at timestamp NOT NULL DEFAULT now()
 );
 
+CREATE TABLE operadores (
+  id serial PRIMARY KEY,
+  nome varchar(100) NOT NULL,
+  login varchar(50) NOT NULL UNIQUE,
+  senha_hash varchar(200) NOT NULL,
+  papel varchar(20) NOT NULL DEFAULT 'operador',
+  ativo boolean NOT NULL DEFAULT true,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
 INSERT INTO produtos (nome, unidade, preco, estoque) VALUES
   ('Ovos Brancos', 'dúzia', 12, 100),
   ('Ovos Caipira', 'dúzia', 18, 80),

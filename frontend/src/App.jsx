@@ -10,6 +10,7 @@ import ClientesPainel from './components/ClientesPainel.jsx';
 import PedidosLista from './components/PedidosLista.jsx';
 import DashboardPainel from './components/DashboardPainel.jsx';
 import InstalarApp from './components/InstalarApp.jsx';
+import OperadoresPainel from './components/OperadoresPainel.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
 
@@ -24,10 +25,29 @@ const MENU = [
   { id: 'clientes', label: 'Clientes' },
   { id: 'relatorio', label: 'Relatório' },
   { id: 'whatsapp', label: 'WhatsApp' },
+  { id: 'operadores', label: 'Operadores', admin: true },
 ];
+
+const SECOES_OPERADOR = new Set([
+  'inicio',
+  'novo',
+  'hoje',
+  'pedidos',
+  'assinaturas',
+  'lotes',
+  'clientes',
+  'whatsapp',
+]);
+
+function menuVisivel(papel) {
+  if (papel === 'admin') return MENU;
+  return MENU.filter((m) => !m.admin && SECOES_OPERADOR.has(m.id));
+}
 
 export default function App() {
   const { usuario, logout } = useAuth();
+  const papel = usuario?.papel || 'admin';
+  const menu = menuVisivel(papel);
   const [secao, setSecao] = useState('inicio');
   const [pedidos, setPedidos] = useState([]);
   const [produtos, setProdutos] = useState([]);
@@ -56,6 +76,12 @@ export default function App() {
     carregar();
   }, [carregar]);
 
+  useEffect(() => {
+    if (!menu.some((m) => m.id === secao)) {
+      setSecao('inicio');
+    }
+  }, [menu, secao]);
+
   async function mudarStatus(id, status) {
     try {
       await api.atualizarStatus(id, status);
@@ -69,7 +95,7 @@ export default function App() {
     switch (secao) {
       case 'inicio':
         return (
-          <DashboardPainel produtos={produtos} onIrPara={setSecao} />
+          <DashboardPainel produtos={produtos} papel={papel} onIrPara={setSecao} />
         );
       case 'novo':
         return <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />;
@@ -97,6 +123,8 @@ export default function App() {
         return <RelatorioPainel />;
       case 'whatsapp':
         return <WhatsAppPainel />;
+      case 'operadores':
+        return papel === 'admin' ? <OperadoresPainel /> : null;
       default:
         return null;
     }
@@ -110,7 +138,7 @@ export default function App() {
           <p className="text-xs text-stone-500">Granja União</p>
         </div>
         <nav className="flex gap-1 overflow-x-auto p-2 lg:flex-col lg:gap-0.5 lg:p-3">
-          {MENU.map((m) => (
+          {menu.map((m) => (
             <button
               key={m.id}
               type="button"
@@ -146,7 +174,15 @@ export default function App() {
 
         <header className="hidden items-center justify-between border-b border-stone-200 bg-white px-6 py-3 lg:flex">
           <p className="text-sm text-stone-500">
-            Olá, <span className="font-medium text-stone-800">{usuario}</span>
+            Olá,{' '}
+            <span className="font-medium text-stone-800">
+              {usuario?.nome || usuario?.login}
+            </span>
+            {usuario?.papel === 'operador' && (
+              <span className="ml-2 rounded bg-stone-100 px-2 py-0.5 text-xs text-stone-600">
+                operador
+              </span>
+            )}
           </p>
           <div className="flex gap-2">
             <button

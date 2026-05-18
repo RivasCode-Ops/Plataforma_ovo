@@ -5,7 +5,7 @@ function hojeISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function DashboardPainel({ produtos, onIrPara }) {
+export default function DashboardPainel({ produtos, papel = 'admin', onIrPara }) {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
@@ -77,7 +77,9 @@ export default function DashboardPainel({ produtos, onIrPara }) {
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((c) => (
+        {cards
+          .filter((c) => papel === 'admin' || c.acao !== 'produtos')
+          .map((c) => (
           <button
             key={c.acao}
             type="button"

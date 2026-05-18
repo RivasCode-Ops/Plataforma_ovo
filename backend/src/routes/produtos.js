@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
+import { requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', requireAdmin, async (req, res, next) => {
   try {
     const { nome, unidade, preco, estoque } = req.body || {};
     if (!nome?.trim() || !unidade?.trim() || preco == null) {
@@ -46,7 +47,7 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-router.patch('/:id', async (req, res, next) => {
+router.patch('/:id', requireAdmin, async (req, res, next) => {
   try {
     const { nome, unidade, preco, estoque, ativo } = req.body || {};
     const campos = [];

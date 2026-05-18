@@ -101,6 +101,16 @@ export const api = {
   lotesAlertas: (dias = 7) => request(`/lotes/alertas?dias=${dias}`),
   registrarLote: (payload) =>
     request('/lotes', { method: 'POST', body: JSON.stringify(payload) }),
+  listarOperadores: () => request('/operadores'),
+  criarOperador: (payload) =>
+    request('/operadores', { method: 'POST', body: JSON.stringify(payload) }),
+  atualizarOperador: (id, payload) =>
+    request(`/operadores/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  redefinirSenhaOperador: (id, senha) =>
+    request(`/operadores/${id}/senha`, {
+      method: 'PATCH',
+      body: JSON.stringify({ senha }),
+    }),
 };
 
 export async function downloadRelatorioCsv(de, ate) {

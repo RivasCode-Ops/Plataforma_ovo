@@ -1,52 +1,49 @@
 import { Router } from 'express';
-import crypto from 'crypto';
 import { criarToken, requireAuth } from '../middleware/auth.js';
+import { autenticar, obterPorLogin } from '../services/operadores.js';
 
 const router = Router();
 
-function credenciaisValidas(usuario, senha) {
-  const adminUser = process.env.ADMIN_USER || 'admin';
-  const adminPass = process.env.ADMIN_PASSWORD || 'plataforma123';
-  const userOk = crypto.timingSafeEqual(
-    Buffer.from(usuario || ''),
-    Buffer.from(adminUser)
-  );
-  const passOk = crypto.timingSafeEqual(
-    Buffer.from(senha || ''),
-    Buffer.from(adminPass)
-  );
-  return userOk && passOk;
-}
+router.post('/login', async (req, res, next) => {
+  try {
+    const { usuario, senha } = req.body || {};
+    if (!usuario || !senha) {
+      return res.status(400).json({ erro: 'Usuário e senha são obrigatórios' });
+    }
 
-router.post('/login', (req, res) => {
-  const { usuario, senha } = req.body || {};
-  if (!usuario || !senha) {
-    return res.status(400).json({ erro: 'Usuário e senha são obrigatórios' });
+    const login = String(usuario).trim().toLowerCase();
+    const op = await autenticar(login, senha);
+    if (!op) {
+      return res.status(401).json({ erro: 'Usuário ou senha incorretos' });
+    }
+
+    const token = criarToken({ login: op.login, papel: op.papel });
+    res.json({
+      data: {
+        token,
+        usuario: { login: op.login, nome: op.nome, papel: op.papel },
+        expira_em_dias: 7,
+      },
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const adminUser = process.env.ADMIN_USER || 'admin';
-  const adminPass = process.env.ADMIN_PASSWORD || 'plataforma123';
-
-  if (usuario.length !== adminUser.length || senha.length !== adminPass.length) {
-    return res.status(401).json({ erro: 'Usuário ou senha incorretos' });
-  }
-
-  if (!credenciaisValidas(usuario, senha)) {
-    return res.status(401).json({ erro: 'Usuário ou senha incorretos' });
-  }
-
-  const token = criarToken(usuario);
-  res.json({
-    data: {
-      token,
-      usuario,
-      expira_em_dias: 7,
-    },
-  });
 });
 
-router.get('/me', requireAuth, (req, res) => {
-  res.json({ data: { usuario: req.usuario } });
+router.get('/me', requireAuth, async (req, res, next) => {
+  try {
+    const op = await obterPorLogin(req.usuario.login);
+    if (!op || !op.ativo) {
+      return res.status(401).json({ erro: 'Conta inativa ou inexistente.' });
+    }
+    res.json({
+      data: {
+        usuario: { login: op.login, nome: op.nome, papel: op.papel },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.post('/logout', (_req, res) => {
