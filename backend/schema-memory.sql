@@ -6,6 +6,7 @@ CREATE TABLE produtos (
   unidade varchar(20) NOT NULL,
   preco real NOT NULL,
   estoque integer NOT NULL DEFAULT 0,
+  meta_diaria integer NOT NULL DEFAULT 0,
   ativo boolean NOT NULL DEFAULT true,
   created_at timestamp NOT NULL DEFAULT now(),
   updated_at timestamp NOT NULL DEFAULT now()

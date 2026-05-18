@@ -11,11 +11,13 @@ import PedidosLista from './components/PedidosLista.jsx';
 import DashboardPainel from './components/DashboardPainel.jsx';
 import InstalarApp from './components/InstalarApp.jsx';
 import OperadoresPainel from './components/OperadoresPainel.jsx';
+import ControleDiaPainel from './components/ControleDiaPainel.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
 
 const MENU = [
   { id: 'inicio', label: 'Início' },
+  { id: 'controle', label: 'Controle do dia' },
   { id: 'novo', label: 'Novo pedido' },
   { id: 'hoje', label: 'Pedidos do dia' },
   { id: 'pedidos', label: 'Pedidos' },
@@ -30,6 +32,7 @@ const MENU = [
 
 const SECOES_OPERADOR = new Set([
   'inicio',
+  'controle',
   'novo',
   'hoje',
   'pedidos',
@@ -97,6 +100,8 @@ export default function App() {
         return (
           <DashboardPainel produtos={produtos} papel={papel} onIrPara={setSecao} />
         );
+      case 'controle':
+        return <ControleDiaPainel />;
       case 'novo':
         return <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />;
       case 'hoje':

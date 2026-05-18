@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import { emOvos } from '../utils/unidades.js';
 
 const inputClass =
   'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none';
@@ -43,6 +44,9 @@ export default function LotesPainel({ produtos, onAtualizado }) {
     carregar();
     if (produtos.length && !produtoId) setProdutoId(String(produtos[0].id));
   }, [carregar, produtos, produtoId]);
+
+  const produtoSel = produtos.find((p) => String(p.id) === produtoId);
+  const qtdNum = Number(quantidade) || 0;
 
   async function registrar(e) {
     e.preventDefault();
@@ -115,6 +119,11 @@ export default function LotesPainel({ produtos, onAtualizado }) {
           <label className="block">
             <span className="mb-1 block text-xs text-stone-500">Quantidade</span>
             <input type="number" min={1} value={quantidade} onChange={(e) => setQuantidade(e.target.value)} className={inputClass} required />
+            {produtoSel && qtdNum > 0 && (
+              <span className="mt-1 block text-xs text-stone-500">
+                = {emOvos(qtdNum, produtoSel.unidade)} ovos no estoque
+              </span>
+            )}
           </label>
           <label className="block">
             <span className="mb-1 block text-xs text-stone-500">Validade</span>
@@ -176,6 +185,9 @@ export default function LotesPainel({ produtos, onAtualizado }) {
                       <td className="py-2 pr-3">{l.codigo || `#${l.id}`}</td>
                       <td className="py-2 pr-3 tabular-nums">
                         {l.quantidade}/{l.quantidade_inicial}
+                        <span className="block text-xs text-stone-400">
+                          restam {emOvos(l.quantidade, l.unidade)} ovos
+                        </span>
                       </td>
                       <td className="py-2 pr-3">{l.data_validade}</td>
                       <td className="py-2">
