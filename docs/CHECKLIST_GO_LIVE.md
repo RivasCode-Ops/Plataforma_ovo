@@ -36,8 +36,9 @@ curl https://app.SEU-DOMINIO/api/health
 ## Opcional (depois)
 
 - [ ] Site granjauniao.com.br — [INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md)
-- [ ] Segundo operador (Fase 2)
-- [ ] Controle por lote / validade (Fase 2)
+- [x] Múltiplos operadores — [OPERADORES.md](OPERADORES.md)
+- [x] Lotes e validade (FIFO) — [LOTES.md](LOTES.md)
+- [x] PWA no celular — [PWA.md](PWA.md)
 
 ## Suporte
 
