@@ -71,7 +71,7 @@ export default function LotesPainel({ produtos, onAtualizado }) {
 
   return (
     <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-      <motion className="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-medium">Lotes e validade</h2>
           <p className="text-sm text-stone-500">Entrada de produção — baixa automática pelo vencimento mais próximo</p>
