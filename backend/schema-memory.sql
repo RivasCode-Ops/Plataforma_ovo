@@ -21,6 +21,16 @@ CREATE TABLE clientes (
 
 CREATE UNIQUE INDEX idx_clientes_telefone ON clientes (telefone);
 
+CREATE TABLE cliente_precos (
+  id serial PRIMARY KEY,
+  cliente_id integer NOT NULL REFERENCES clientes (id) ON DELETE CASCADE,
+  produto_id integer NOT NULL REFERENCES produtos (id) ON DELETE CASCADE,
+  preco real NOT NULL,
+  created_at timestamp NOT NULL DEFAULT now(),
+  updated_at timestamp NOT NULL DEFAULT now(),
+  UNIQUE (cliente_id, produto_id)
+);
+
 CREATE TABLE pedidos (
   id serial PRIMARY KEY,
   cliente_id integer NOT NULL REFERENCES clientes (id),

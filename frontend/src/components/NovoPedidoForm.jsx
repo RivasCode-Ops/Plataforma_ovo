@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api.js';
 
 const inputClass =
@@ -12,9 +12,20 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
   const [produtoId, setProdutoId] = useState('');
   const [quantidade, setQuantidade] = useState(1);
   const [itens, setItens] = useState([]);
+  const [precosAtacado, setPrecosAtacado] = useState({});
+  const [clienteAtacado, setClienteAtacado] = useState(null);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
+
+  const precoUnitario = useCallback(
+    (produto) => {
+      if (!produto) return 0;
+      const atacado = precosAtacado[produto.id];
+      return atacado != null ? Number(atacado) : Number(produto.preco);
+    },
+    [precosAtacado]
+  );
 
   useEffect(() => {
     if (!produtoId && produtos.length > 0) {
@@ -22,13 +33,36 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
     }
   }, [produtos, produtoId]);
 
+  useEffect(() => {
+    const tel = telefone.replace(/\D/g, '');
+    if (tel.length < 8) {
+      setPrecosAtacado({});
+      setClienteAtacado(null);
+      return;
+    }
+    const t = setTimeout(async () => {
+      try {
+        const data = await api.precosPorTelefone(telefone.trim());
+        setPrecosAtacado(data.precos || {});
+        setClienteAtacado(data.cliente);
+        if (data.cliente?.nome && !nome.trim()) {
+          setNome(data.cliente.nome);
+        }
+      } catch {
+        setPrecosAtacado({});
+        setClienteAtacado(null);
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [telefone, nome]);
+
   const total = useMemo(
     () =>
       itens.reduce((acc, item) => {
         const p = produtos.find((x) => x.id === item.produto_id);
-        return acc + (p ? Number(p.preco) * item.quantidade : 0);
+        return acc + precoUnitario(p) * item.quantidade;
       }, 0),
-    [itens, produtos]
+    [itens, produtos, precoUnitario]
   );
 
   function adicionarItem(e) {
@@ -84,6 +118,9 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
         confirmar: true,
       });
       let msgSucesso = `Pedido #${data.pedido_id} criado — R$ ${Number(data.total).toFixed(2)}`;
+      if (clienteAtacado && Object.keys(precosAtacado).length > 0) {
+        msgSucesso += ' (preço atacado aplicado)';
+      }
       if (data.whatsapp?.ok && data.whatsapp.link) {
         window.open(data.whatsapp.link, '_blank', 'noopener');
         msgSucesso += ' · Link WhatsApp aberto';
@@ -96,6 +133,8 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
       setEndereco('');
       setObservacao('');
       setItens([]);
+      setPrecosAtacado({});
+      setClienteAtacado(null);
       setProdutoId(produtos[0]?.id?.toString() ?? '');
       onCriado?.(data);
     } catch (err) {
@@ -105,12 +144,21 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
     }
   }
 
+  const temAtacado = Object.keys(precosAtacado).length > 0;
+
   return (
     <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <h2 className="mb-1 text-lg font-medium">Novo pedido</h2>
       <p className="mb-4 text-sm text-stone-500">
         Lance pedidos recebidos por WhatsApp, telefone ou presencial.
       </p>
+
+      {temAtacado && (
+        <p className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-800">
+          Cliente com <strong>preço atacado</strong>
+          {clienteAtacado ? ` — ${clienteAtacado.nome}` : ''}
+        </p>
+      )}
 
       {sucesso && (
         <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
@@ -171,11 +219,16 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
                 className={inputClass}
               >
                 <option value="">Selecione…</option>
-                {produtos.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.nome} — R$ {Number(p.preco).toFixed(2)} (est: {p.estoque})
-                  </option>
-                ))}
+                {produtos.map((p) => {
+                  const preco = precoUnitario(p);
+                  const atacado = precosAtacado[p.id] != null;
+                  return (
+                    <option key={p.id} value={p.id}>
+                      {p.nome} — R$ {preco.toFixed(2)}
+                      {atacado ? ' (atacado)' : ''} · est: {p.estoque}
+                    </option>
+                  );
+                })}
               </select>
             </label>
             <label className="w-24">
@@ -201,7 +254,9 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
             <ul className="mt-4 space-y-2">
               {itens.map((item) => {
                 const p = produtos.find((x) => x.id === item.produto_id);
-                const sub = p ? Number(p.preco) * item.quantidade : 0;
+                const unit = precoUnitario(p);
+                const sub = unit * item.quantidade;
+                const atacado = p && precosAtacado[p.id] != null;
                 return (
                   <li
                     key={item.produto_id}
@@ -209,6 +264,9 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
                   >
                     <span>
                       {item.quantidade}× {p?.nome ?? 'Produto'} — R$ {sub.toFixed(2)}
+                      {atacado && (
+                        <span className="ml-1 text-xs text-blue-600">atacado</span>
+                      )}
                     </span>
                     <button
                       type="button"

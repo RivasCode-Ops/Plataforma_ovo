@@ -1,7 +1,27 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
+import { requireAdmin } from '../middleware/auth.js';
+import {
+  listarPrecosCliente,
+  precosPorTelefone,
+  removerPrecoCliente,
+  salvarPrecoCliente,
+} from '../services/clientePrecos.js';
 
 const router = Router();
+
+router.get('/precos', async (req, res, next) => {
+  try {
+    const telefone = String(req.query.telefone || '').trim();
+    if (!telefone) {
+      return res.status(400).json({ erro: 'telefone é obrigatório' });
+    }
+    const data = await precosPorTelefone(telefone);
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/', async (req, res, next) => {
   try {
@@ -43,6 +63,39 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+router.get('/:id/precos', async (req, res, next) => {
+  try {
+    const data = await listarPrecosCliente(Number(req.params.id));
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/:id/precos/:produtoId', requireAdmin, async (req, res, next) => {
+  try {
+    const { preco } = req.body || {};
+    const row = await salvarPrecoCliente(
+      Number(req.params.id),
+      Number(req.params.produtoId),
+      preco
+    );
+    res.json({ data: row });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/:id/precos/:produtoId', requireAdmin, async (req, res, next) => {
+  try {
+    const ok = await removerPrecoCliente(Number(req.params.id), Number(req.params.produtoId));
+    if (!ok) return res.status(404).json({ erro: 'Preço não encontrado' });
+    res.json({ data: { ok: true } });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/:id', async (req, res, next) => {
   try {
     const cliente = await pool.query('SELECT * FROM clientes WHERE id = $1', [req.params.id]);
@@ -50,15 +103,22 @@ router.get('/:id', async (req, res, next) => {
       return res.status(404).json({ erro: 'Cliente não encontrado' });
     }
 
-    const pedidos = await pool.query(
-      `SELECT id, status, total, data_pedido, observacao
-       FROM pedidos WHERE cliente_id = $1
-       ORDER BY data_pedido DESC LIMIT 20`,
-      [req.params.id]
-    );
+    const [pedidos, precos_atacado] = await Promise.all([
+      pool.query(
+        `SELECT id, status, total, data_pedido, observacao
+         FROM pedidos WHERE cliente_id = $1
+         ORDER BY data_pedido DESC LIMIT 20`,
+        [req.params.id]
+      ),
+      listarPrecosCliente(Number(req.params.id)),
+    ]);
 
     res.json({
-      data: { ...cliente.rows[0], pedidos: pedidos.rows },
+      data: {
+        ...cliente.rows[0],
+        pedidos: pedidos.rows,
+        precos_atacado,
+      },
     });
   } catch (err) {
     next(err);

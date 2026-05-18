@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import { useAuth } from '../context/AuthContext.jsx';
+
+const inputClass =
+  'w-20 rounded border border-stone-300 px-2 py-1 text-sm tabular-nums focus:border-amber-500 focus:outline-none';
 
 export default function ClientesPainel() {
+  const { usuario } = useAuth();
+  const isAdmin = usuario?.papel === 'admin';
   const [lista, setLista] = useState([]);
   const [busca, setBusca] = useState('');
   const [detalhe, setDetalhe] = useState(null);
+  const [produtos, setProdutos] = useState([]);
+  const [precosForm, setPrecosForm] = useState({});
   const [erro, setErro] = useState('');
+  const [msg, setMsg] = useState('');
   const [carregando, setCarregando] = useState(true);
 
   const carregar = useCallback(async () => {
@@ -25,19 +34,64 @@ export default function ClientesPainel() {
     return () => clearTimeout(t);
   }, [carregar]);
 
+  useEffect(() => {
+    if (isAdmin) {
+      api.listarProdutosGerenciar().then(setProdutos).catch(() => {});
+    }
+  }, [isAdmin]);
+
   async function verCliente(id) {
     setErro('');
+    setMsg('');
     try {
-      setDetalhe(await api.obterCliente(id));
+      const d = await api.obterCliente(id);
+      setDetalhe(d);
+      const map = {};
+      for (const pr of d.precos_atacado || []) {
+        map[pr.produto_id] = String(pr.preco);
+      }
+      setPrecosForm(map);
     } catch (e) {
       setErro(e.message);
     }
   }
 
+  async function salvarPreco(produtoId) {
+    if (!detalhe?.id) return;
+    const preco = Number(precosForm[produtoId]);
+    if (!Number.isFinite(preco) || preco < 0) {
+      setErro('Informe um preço válido');
+      return;
+    }
+    setErro('');
+    try {
+      await api.salvarPrecoAtacado(detalhe.id, produtoId, preco);
+      setMsg('Preço atacado salvo.');
+      await verCliente(detalhe.id);
+    } catch (e) {
+      setErro(e.message);
+    }
+  }
+
+  async function removerPreco(produtoId) {
+    if (!detalhe?.id) return;
+    try {
+      await api.removerPrecoAtacado(detalhe.id, produtoId);
+      setMsg('Preço atacado removido.');
+      await verCliente(detalhe.id);
+    } catch (e) {
+      setErro(e.message);
+    }
+  }
+
+  const precosCadastrados = detalhe?.precos_atacado ?? [];
+
   return (
     <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <h2 className="mb-1 text-lg font-medium">Clientes</h2>
-      <p className="mb-4 text-sm text-stone-500">Cadastro automático ao criar pedidos</p>
+      <p className="mb-4 text-sm text-stone-500">
+        Cadastro automático ao criar pedidos. Admin pode definir preço atacado por produto.
+      </p>
 
       <input
         type="search"
@@ -50,6 +104,11 @@ export default function ClientesPainel() {
       {erro && (
         <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {erro}
+        </p>
+      )}
+      {msg && (
+        <p className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          {msg}
         </p>
       )}
 
@@ -66,7 +125,9 @@ export default function ClientesPainel() {
                   <button
                     type="button"
                     onClick={() => verCliente(c.id)}
-                    className="w-full px-1 py-3 text-left hover:bg-stone-50"
+                    className={`w-full px-1 py-3 text-left hover:bg-stone-50 ${
+                      detalhe?.id === c.id ? 'bg-amber-50' : ''
+                    }`}
                   >
                     <p className="font-medium">{c.nome}</p>
                     <p className="text-xs text-stone-500">{c.telefone}</p>
@@ -87,6 +148,63 @@ export default function ClientesPainel() {
             {detalhe.endereco && (
               <p className="mt-1 text-sm text-stone-500">{detalhe.endereco}</p>
             )}
+
+            {isAdmin && produtos.length > 0 && (
+              <div className="mt-4">
+                <h4 className="mb-2 text-sm font-medium text-stone-700">Preços atacado</h4>
+                <div className="max-h-48 space-y-2 overflow-y-auto text-sm">
+                  {produtos
+                    .filter((p) => p.ativo)
+                    .map((p) => {
+                      const cadastrado = precosCadastrados.find((x) => x.produto_id === p.id);
+                      return (
+                        <div
+                          key={p.id}
+                          className="flex flex-wrap items-center justify-between gap-2 rounded bg-white px-2 py-1.5"
+                        >
+                          <span className="min-w-0 flex-1 truncate">
+                            {p.nome}{' '}
+                            <span className="text-stone-400">
+                              (varejo R$ {Number(p.preco).toFixed(2)})
+                            </span>
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-stone-500">R$</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              placeholder="—"
+                              value={precosForm[p.id] ?? ''}
+                              onChange={(e) =>
+                                setPrecosForm({ ...precosForm, [p.id]: e.target.value })
+                              }
+                              className={inputClass}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => salvarPreco(p.id)}
+                              className="rounded bg-amber-600 px-2 py-1 text-xs text-white"
+                            >
+                              OK
+                            </button>
+                            {cadastrado && (
+                              <button
+                                type="button"
+                                onClick={() => removerPreco(p.id)}
+                                className="text-xs text-red-600 underline"
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
             <h4 className="mb-2 mt-4 text-sm font-medium text-stone-700">Últimos pedidos</h4>
             {detalhe.pedidos?.length ? (
               <ul className="space-y-2 text-sm">
@@ -104,7 +222,10 @@ export default function ClientesPainel() {
             )}
             <button
               type="button"
-              onClick={() => setDetalhe(null)}
+              onClick={() => {
+                setDetalhe(null);
+                setPrecosForm({});
+              }}
               className="mt-3 text-xs text-stone-500 underline"
             >
               Fechar

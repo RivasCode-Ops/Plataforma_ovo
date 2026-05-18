@@ -55,6 +55,15 @@ export const api = {
   listarClientes: (q) =>
     request(`/clientes${q ? `?q=${encodeURIComponent(q)}` : ''}`),
   obterCliente: (id) => request(`/clientes/${id}`),
+  precosPorTelefone: (telefone) =>
+    request(`/clientes/precos?telefone=${encodeURIComponent(telefone)}`),
+  salvarPrecoAtacado: (clienteId, produtoId, preco) =>
+    request(`/clientes/${clienteId}/precos/${produtoId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ preco }),
+    }),
+  removerPrecoAtacado: (clienteId, produtoId) =>
+    request(`/clientes/${clienteId}/precos/${produtoId}`, { method: 'DELETE' }),
   listarPedidos: (status) =>
     request(`/pedidos${status ? `?status=${encodeURIComponent(status)}` : ''}`),
   criarPedido: (payload) =>

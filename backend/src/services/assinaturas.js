@@ -152,7 +152,6 @@ export async function gerarPedidoDaAssinatura(id) {
   const itens = ass.itens.map((i) => ({
     produto_id: i.produto_id,
     quantidade: i.quantidade,
-    preco_unitario: i.preco,
   }));
 
   const pedido = await pedidosService.criarPedido({
