@@ -7,22 +7,27 @@ import WhatsAppPainel from './components/WhatsAppPainel.jsx';
 import RelatorioPainel from './components/RelatorioPainel.jsx';
 import ProdutosPainel from './components/ProdutosPainel.jsx';
 import ClientesPainel from './components/ClientesPainel.jsx';
+import PedidosLista from './components/PedidosLista.jsx';
+import DashboardPainel from './components/DashboardPainel.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
 
-const STATUS_OPCOES = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado'];
-
-const statusCor = {
-  novo: 'bg-amber-100 text-amber-800',
-  confirmado: 'bg-blue-100 text-blue-800',
-  pago: 'bg-emerald-100 text-emerald-800',
-  enviado: 'bg-violet-100 text-violet-800',
-  entregue: 'bg-stone-200 text-stone-700',
-  cancelado: 'bg-red-100 text-red-800',
-};
+const MENU = [
+  { id: 'inicio', label: 'Início' },
+  { id: 'novo', label: 'Novo pedido' },
+  { id: 'hoje', label: 'Pedidos do dia' },
+  { id: 'pedidos', label: 'Pedidos' },
+  { id: 'assinaturas', label: 'Assinaturas' },
+  { id: 'lotes', label: 'Lotes' },
+  { id: 'produtos', label: 'Produtos' },
+  { id: 'clientes', label: 'Clientes' },
+  { id: 'relatorio', label: 'Relatório' },
+  { id: 'whatsapp', label: 'WhatsApp' },
+];
 
 export default function App() {
   const { usuario, logout } = useAuth();
+  const [secao, setSecao] = useState('inicio');
   const [pedidos, setPedidos] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [filtro, setFiltro] = useState('');
@@ -59,16 +64,90 @@ export default function App() {
     }
   }
 
+  function renderSecao() {
+    switch (secao) {
+      case 'inicio':
+        return (
+          <DashboardPainel produtos={produtos} onIrPara={setSecao} />
+        );
+      case 'novo':
+        return <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />;
+      case 'hoje':
+        return <PedidosHojePainel />;
+      case 'pedidos':
+        return (
+          <PedidosLista
+            pedidos={pedidos}
+            filtro={filtro}
+            onFiltroChange={setFiltro}
+            carregando={carregando}
+            onMudarStatus={mudarStatus}
+          />
+        );
+      case 'assinaturas':
+        return <AssinaturasPainel produtos={produtos} onPedidoGerado={carregar} />;
+      case 'lotes':
+        return <LotesPainel produtos={produtos} onAtualizado={carregar} />;
+      case 'produtos':
+        return <ProdutosPainel onAtualizado={carregar} />;
+      case 'clientes':
+        return <ClientesPainel />;
+      case 'relatorio':
+        return <RelatorioPainel />;
+      case 'whatsapp':
+        return <WhatsAppPainel />;
+      default:
+        return null;
+    }
+  }
+
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-stone-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div>
-            <h1 className="text-xl font-semibold tracking-tight">Plataforma Ovo</h1>
-            <p className="text-sm text-stone-500">Painel operacional — MVP</p>
+    <div className="flex min-h-screen flex-col bg-stone-50 lg:flex-row">
+      <aside className="border-b border-stone-200 bg-white lg:w-56 lg:flex-shrink-0 lg:border-b-0 lg:border-r">
+        <div className="hidden border-b border-stone-100 p-4 lg:block">
+          <h1 className="font-semibold tracking-tight">Plataforma Ovo</h1>
+          <p className="text-xs text-stone-500">Granja União</p>
+        </div>
+        <nav className="flex gap-1 overflow-x-auto p-2 lg:flex-col lg:gap-0.5 lg:p-3">
+          {MENU.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => setSecao(m.id)}
+              className={`whitespace-nowrap rounded-lg px-3 py-2 text-left text-sm font-medium transition lg:w-full ${
+                secao === m.id
+                  ? 'bg-amber-100 text-amber-900'
+                  : 'text-stone-600 hover:bg-stone-100'
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3 lg:hidden">
+          <span className="font-semibold">Plataforma Ovo</span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={carregar}
+              className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm text-white"
+            >
+              Atualizar
+            </button>
+            <button type="button" onClick={logout} className="text-sm text-stone-600">
+              Sair
+            </button>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden text-sm text-stone-500 sm:inline">Olá, {usuario}</span>
+        </header>
+
+        <header className="hidden items-center justify-between border-b border-stone-200 bg-white px-6 py-3 lg:flex">
+          <p className="text-sm text-stone-500">
+            Olá, <span className="font-medium text-stone-800">{usuario}</span>
+          </p>
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={carregar}
@@ -79,118 +158,22 @@ export default function App() {
             <button
               type="button"
               onClick={logout}
-              className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50"
+              className="rounded-lg border border-stone-300 px-4 py-2 text-sm hover:bg-stone-50"
             >
               Sair
             </button>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="mx-auto max-w-6xl space-y-8 px-4 py-8">
-        {erro && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {erro}
-          </p>
-        )}
-
-        <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />
-
-        <PedidosHojePainel />
-
-        <AssinaturasPainel produtos={produtos} onPedidoGerado={carregar} />
-
-        <RelatorioPainel />
-
-        <WhatsAppPainel />
-
-        <LotesPainel produtos={produtos} onAtualizado={carregar} />
-
-        <ProdutosPainel onAtualizado={carregar} />
-
-        <ClientesPainel />
-
-        <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-lg font-medium">Pedidos</h2>
-            <select
-              value={filtro}
-              onChange={(e) => setFiltro(e.target.value)}
-              className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
-            >
-              <option value="">Todos os status</option>
-              {STATUS_OPCOES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {carregando ? (
-            <p className="text-sm text-stone-500">Carregando…</p>
-          ) : pedidos.length === 0 ? (
-            <p className="text-sm text-stone-500">Nenhum pedido encontrado.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b text-stone-500">
-                    <th className="py-2 pr-4">#</th>
-                    <th className="py-2 pr-4">Cliente</th>
-                    <th className="py-2 pr-4">Total</th>
-                    <th className="py-2 pr-4">Status</th>
-                    <th className="py-2">Ação</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pedidos.map((p) => (
-                    <tr key={p.id} className="border-b border-stone-100">
-                      <td className="py-3 pr-4 font-medium">{p.id}</td>
-                      <td className="py-3 pr-4">
-                        <div>{p.cliente_nome}</div>
-                        <div className="text-xs text-stone-500">{p.cliente_telefone}</div>
-                      </td>
-                      <td className="py-3 pr-4 tabular-nums">
-                        R$ {Number(p.total).toFixed(2)}
-                      </td>
-                      <td className="py-3 pr-4">
-                        <div className="flex flex-wrap items-center gap-1">
-                          <span
-                            className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                              statusCor[p.status] || 'bg-stone-100'
-                            }`}
-                          >
-                            {p.status}
-                          </span>
-                          {p.observacao?.includes('[Site:') && (
-                            <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">
-                              Site
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3">
-                        <select
-                          defaultValue={p.status}
-                          onChange={(e) => mudarStatus(p.id, e.target.value)}
-                          className="rounded border border-stone-300 px-2 py-1 text-xs"
-                        >
-                          {STATUS_OPCOES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        <main className="flex-1 p-4 lg:p-6">
+          {erro && (
+            <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {erro}
+            </p>
           )}
-        </section>
-      </main>
+          {renderSecao()}
+        </main>
+      </div>
     </div>
   );
 }

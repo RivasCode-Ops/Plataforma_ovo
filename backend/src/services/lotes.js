@@ -37,7 +37,7 @@ export async function listarAlertasValidade(dias = 7) {
      FROM lotes l
      JOIN produtos p ON p.id = l.produto_id
      WHERE l.quantidade > 0
-       AND l.data_validade <= CURRENT_DATE + make_interval(days => $1)
+       AND l.data_validade <= CURRENT_DATE + $1::integer
      ORDER BY l.data_validade`,
     [dias]
   );
