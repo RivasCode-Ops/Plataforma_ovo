@@ -1,0 +1,21 @@
+{
+  "name": "plataforma-ovo-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "dev:local": "cross-env USE_MEMORY_DB=1 node --watch src/index.js",
+    "start": "node src/index.js",
+    "start:local": "cross-env USE_MEMORY_DB=1 node src/index.js",
+    "db:schema": "node scripts/apply-schema.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.13.3",
+    "pg-mem": "^3.0.5"
+  }
+}

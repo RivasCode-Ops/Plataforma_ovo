@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: plataforma_ovo_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: plataforma
+      POSTGRES_PASSWORD: plataforma_dev
+      POSTGRES_DB: plataforma_ovo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../backend/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plataforma -d plataforma_ovo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Descomente quando o backend tiver Dockerfile
+  # backend:
+  #   build: ../backend
+  #   ports:
+  #     - "3000:3000"
+  #   env_file: ../backend/.env
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+
+volumes:
+  postgres-data:

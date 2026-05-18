@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: plataforma
+          POSTGRES_PASSWORD: plataforma_dev
+          POSTGRES_DB: plataforma_ovo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U plataforma -d plataforma_ovo"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npm run db:schema
+        env:
+          DATABASE_URL: postgresql://plataforma:plataforma_dev@localhost:5432/plataforma_ovo
+      - run: node src/index.js &
+        env:
+          DATABASE_URL: postgresql://plataforma:plataforma_dev@localhost:5432/plataforma_ovo
+          PORT: "3000"
+      - run: sleep 3 && curl -sf http://localhost:3000/api/health
