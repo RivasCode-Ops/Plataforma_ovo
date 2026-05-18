@@ -11,14 +11,12 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
   useEffect(() => {
     async function load() {
       try {
-        const [hoje, alertas, assinaturas, resumo, controle] = await Promise.all([
+        const [hoje, alertas, assinaturas, resumo] = await Promise.all([
           api.pedidosDoDia(hojeISO()),
           api.lotesAlertas(7),
           api.assinaturasEntregasSemana(),
           api.relatorioResumo(hojeISO(), hojeISO()),
-          api.controleDia(hojeISO()).catch(() => null),
         ]);
-        const faltaOvos = controle?.totais?.ovos?.falta_vender ?? 0;
         const estoqueBaixo = produtos.filter((p) => p.estoque < 10).length;
         setStats({
           pedidosHoje: hoje.qtd,
@@ -46,13 +44,6 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
       sub: `R$ ${stats.totalHoje.toFixed(2)}`,
       acao: 'hoje',
       cor: 'bg-amber-50 border-amber-200',
-    },
-    {
-      label: 'Falta vender (ovos)',
-      valor: stats.faltaOvos,
-      sub: 'para bater a meta do dia',
-      acao: 'controle',
-      cor: stats.faltaOvos > 0 ? 'bg-orange-50 border-orange-300' : 'bg-emerald-50 border-emerald-200',
     },
     {
       label: 'Assinaturas (7 dias)',

@@ -35,7 +35,6 @@ export default function ProdutosPainel({ onAtualizado }) {
         unidade: form.unidade,
         preco: Number(form.preco),
         estoque: Number(form.estoque),
-        meta_diaria: Number(form.meta_diaria) || 0,
         ativo: form.ativo,
       });
       setForm(null);
@@ -55,7 +54,6 @@ export default function ProdutosPainel({ onAtualizado }) {
         unidade: form.unidade,
         preco: Number(form.preco),
         estoque: Number(form.estoque) || 0,
-        meta_diaria: Number(form.meta_diaria) || 0,
       });
       setForm(null);
       await carregar();
@@ -74,14 +72,7 @@ export default function ProdutosPainel({ onAtualizado }) {
         <button
           type="button"
           onClick={() =>
-            setForm({
-              nome: '',
-              unidade: 'dúzia',
-              preco: '',
-              estoque: 0,
-              meta_diaria: 0,
-              ativo: true,
-            })
+            setForm({ nome: '', unidade: 'dúzia', preco: '', estoque: 0, ativo: true })
           }
           className="rounded-lg bg-stone-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-stone-900"
         >
@@ -130,15 +121,6 @@ export default function ProdutosPainel({ onAtualizado }) {
             onChange={(e) => setForm({ ...form, estoque: e.target.value })}
             className={inputClass}
           />
-          <input
-            type="number"
-            min={0}
-            placeholder="Meta do dia"
-            title="Meta diária em unidades do produto (ex.: dúzias)"
-            value={form.meta_diaria ?? 0}
-            onChange={(e) => setForm({ ...form, meta_diaria: e.target.value })}
-            className={inputClass}
-          />
           {!isNovo && (
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -174,7 +156,6 @@ export default function ProdutosPainel({ onAtualizado }) {
                 <th className="py-2 pr-3">Produto</th>
                 <th className="py-2 pr-3">Preço</th>
                 <th className="py-2 pr-3">Estoque</th>
-                <th className="py-2 pr-3">Meta/dia</th>
                 <th className="py-2 pr-3">Ativo</th>
                 <th className="py-2">Ações</th>
               </tr>
@@ -194,7 +175,6 @@ export default function ProdutosPainel({ onAtualizado }) {
                   >
                     {p.estoque}
                   </td>
-                  <td className="py-2 pr-3 tabular-nums">{p.meta_diaria || '—'}</td>
                   <td className="py-2 pr-3">{p.ativo ? 'Sim' : 'Não'}</td>
                   <td className="py-2">
                     <button
@@ -206,7 +186,6 @@ export default function ProdutosPainel({ onAtualizado }) {
                           unidade: p.unidade,
                           preco: p.preco,
                           estoque: p.estoque,
-                          meta_diaria: p.meta_diaria ?? 0,
                           ativo: p.ativo,
                         })
                       }

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api.js';
-import { emOvos, fmtUnidade } from '../utils/unidades.js';
 
 const inputClass =
   'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
@@ -31,13 +30,6 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
       }, 0),
     [itens, produtos]
   );
-
-  const produtoSel = produtos.find((p) => String(p.id) === produtoId);
-  const qtdNoCarrinho = itens
-    .filter((i) => String(i.produto_id) === produtoId)
-    .reduce((s, i) => s + i.quantidade, 0);
-  const disponivel = produtoSel ? Number(produtoSel.estoque) - qtdNoCarrinho : 0;
-  const aposAdd = disponivel - Number(quantidade);
 
   function adicionarItem(e) {
     e.preventDefault();
@@ -181,7 +173,7 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
                 <option value="">Selecione…</option>
                 {produtos.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.nome} — R$ {Number(p.preco).toFixed(2)} ({emOvos(p.estoque, p.unidade)} ovos)
+                    {p.nome} — R$ {Number(p.preco).toFixed(2)} (est: {p.estoque})
                   </option>
                 ))}
               </select>
@@ -196,17 +188,6 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
                 className={inputClass}
               />
             </label>
-            {produtoSel && (
-              <p
-                className={`w-full text-xs ${aposAdd < 0 ? 'text-red-700 font-medium' : 'text-stone-500'}`}
-              >
-                Disponível: {fmtUnidade(disponivel, produtoSel.unidade)}
-                {aposAdd < 0 && ` · faltam ${emOvos(-aposAdd, produtoSel.unidade)} ovos no estoque`}
-                {aposAdd >= 0 && quantidade > 0 && (
-                  <span> · após adicionar: {emOvos(aposAdd, produtoSel.unidade)} ovos livres</span>
-                )}
-              </p>
-            )}
             <button
               type="button"
               onClick={adicionarItem}
@@ -228,12 +209,6 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
                   >
                     <span>
                       {item.quantidade}× {p?.nome ?? 'Produto'} — R$ {sub.toFixed(2)}
-                      {p && (
-                        <span className="text-stone-400">
-                          {' '}
-                          ({emOvos(item.quantidade, p.unidade)} ovos)
-                        </span>
-                      )}
                     </span>
                     <button
                       type="button"

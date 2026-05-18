@@ -9,9 +9,9 @@ router.get('/', async (req, res, next) => {
     const gerenciar = req.query.gerenciar === '1';
     const { rows } = await pool.query(
       gerenciar
-        ? `SELECT id, nome, unidade, preco, estoque, meta_diaria, ativo, created_at, updated_at
+        ? `SELECT id, nome, unidade, preco, estoque, ativo, created_at, updated_at
            FROM produtos ORDER BY ativo DESC, nome`
-        : `SELECT id, nome, unidade, preco, estoque, meta_diaria, ativo
+        : `SELECT id, nome, unidade, preco, estoque, ativo
            FROM produtos WHERE ativo = TRUE ORDER BY nome`
     );
     res.json({ data: rows });
@@ -49,7 +49,7 @@ router.get('/:id', async (req, res, next) => {
 
 router.patch('/:id', requireAdmin, async (req, res, next) => {
   try {
-    const { nome, unidade, preco, estoque, meta_diaria, ativo } = req.body || {};
+    const { nome, unidade, preco, estoque, ativo } = req.body || {};
     const campos = [];
     const vals = [];
     let i = 1;
@@ -69,10 +69,6 @@ router.patch('/:id', requireAdmin, async (req, res, next) => {
     if (estoque !== undefined) {
       campos.push(`estoque = $${i++}`);
       vals.push(Number(estoque));
-    }
-    if (meta_diaria !== undefined) {
-      campos.push(`meta_diaria = $${i++}`);
-      vals.push(Math.max(0, Number(meta_diaria) || 0));
     }
     if (ativo !== undefined) {
       campos.push(`ativo = $${i++}`);

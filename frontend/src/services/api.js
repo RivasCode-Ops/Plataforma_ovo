@@ -106,8 +106,6 @@ export const api = {
     request('/operadores', { method: 'POST', body: JSON.stringify(payload) }),
   atualizarOperador: (id, payload) =>
     request(`/operadores/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
-  controleDia: (dia) =>
-    request(`/estoque/controle-dia${dia ? `?dia=${dia}` : ''}`),
   redefinirSenhaOperador: (id, senha) =>
     request(`/operadores/${id}/senha`, {
       method: 'PATCH',
