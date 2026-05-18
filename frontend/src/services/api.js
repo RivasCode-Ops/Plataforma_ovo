@@ -101,6 +101,7 @@ export const api = {
   lotesAlertas: (dias = 7) => request(`/lotes/alertas?dias=${dias}`),
   registrarLote: (payload) =>
     request('/lotes', { method: 'POST', body: JSON.stringify(payload) }),
+  listarNotificacoes: () => request('/notificacoes'),
   listarOperadores: () => request('/operadores'),
   criarOperador: (payload) =>
     request('/operadores', { method: 'POST', body: JSON.stringify(payload) }),

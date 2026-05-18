@@ -11,11 +11,14 @@ import PedidosLista from './components/PedidosLista.jsx';
 import DashboardPainel from './components/DashboardPainel.jsx';
 import InstalarApp from './components/InstalarApp.jsx';
 import OperadoresPainel from './components/OperadoresPainel.jsx';
+import NotificacoesPainel from './components/NotificacoesPainel.jsx';
+import { useNotificacoes } from './hooks/useNotificacoes.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
 
 const MENU = [
   { id: 'inicio', label: 'Início' },
+  { id: 'alertas', label: 'Alertas', badge: true },
   { id: 'novo', label: 'Novo pedido' },
   { id: 'hoje', label: 'Pedidos do dia' },
   { id: 'pedidos', label: 'Pedidos' },
@@ -30,6 +33,7 @@ const MENU = [
 
 const SECOES_OPERADOR = new Set([
   'inicio',
+  'alertas',
   'novo',
   'hoje',
   'pedidos',
@@ -48,6 +52,7 @@ export default function App() {
   const { usuario, logout } = useAuth();
   const papel = usuario?.papel || 'admin';
   const menu = menuVisivel(papel);
+  const { resumo: alertasResumo, pushAtivo, ativarPush } = useNotificacoes();
   const [secao, setSecao] = useState('inicio');
   const [pedidos, setPedidos] = useState([]);
   const [produtos, setProdutos] = useState([]);
@@ -96,6 +101,14 @@ export default function App() {
       case 'inicio':
         return (
           <DashboardPainel produtos={produtos} papel={papel} onIrPara={setSecao} />
+        );
+      case 'alertas':
+        return (
+          <NotificacoesPainel
+            onIrPara={setSecao}
+            pushAtivo={pushAtivo}
+            onAtivarPush={ativarPush}
+          />
         );
       case 'novo':
         return <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />;
@@ -149,7 +162,20 @@ export default function App() {
                   : 'text-stone-600 hover:bg-stone-100'
               }`}
             >
-              {m.label}
+              <span className="flex items-center gap-2">
+                {m.label}
+                {m.badge && alertasResumo.total > 0 && (
+                  <span
+                    className={`rounded-full px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
+                      alertasResumo.alta > 0
+                        ? 'bg-red-600 text-white'
+                        : 'bg-amber-500 text-white'
+                    }`}
+                  >
+                    {alertasResumo.total}
+                  </span>
+                )}
+              </span>
             </button>
           ))}
         </nav>

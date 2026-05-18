@@ -29,6 +29,8 @@ Acesse: http://localhost:5173
 
 **Celular:** instale como app — veja [PWA.md](PWA.md)
 
+**Alertas:** menu Alertas → ative push no celular — [NOTIFICACOES.md](NOTIFICACOES.md)
+
 ---
 
 ## Fluxo do dia

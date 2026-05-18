@@ -13,6 +13,7 @@ import clientesRouter from './routes/clientes.js';
 import assinaturasRouter from './routes/assinaturas.js';
 import lotesRouter from './routes/lotes.js';
 import operadoresRouter from './routes/operadores.js';
+import notificacoesRouter from './routes/notificacoes.js';
 import webhookRouter from './routes/webhook.js';
 import { seedOperadorAdmin } from './services/operadores.js';
 import path from 'path';
@@ -78,6 +79,7 @@ app.use('/api/clientes', clientesRouter);
 app.use('/api/assinaturas', assinaturasRouter);
 app.use('/api/lotes', lotesRouter);
 app.use('/api/operadores', operadoresRouter);
+app.use('/api/notificacoes', notificacoesRouter);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;

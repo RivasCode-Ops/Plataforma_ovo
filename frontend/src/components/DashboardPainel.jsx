@@ -11,11 +11,12 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
   useEffect(() => {
     async function load() {
       try {
-        const [hoje, alertas, assinaturas, resumo] = await Promise.all([
+        const [hoje, alertas, assinaturas, resumo, notif] = await Promise.all([
           api.pedidosDoDia(hojeISO()),
           api.lotesAlertas(7),
           api.assinaturasEntregasSemana(),
           api.relatorioResumo(hojeISO(), hojeISO()),
+          api.listarNotificacoes().catch(() => ({ resumo: { total: 0, alta: 0 } })),
         ]);
         const estoqueBaixo = produtos.filter((p) => p.estoque < 10).length;
         setStats({
@@ -25,6 +26,8 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
           assinaturasSemana: assinaturas.length,
           estoqueBaixo,
           vendasHoje: resumo.resumo.total_vendas,
+          alertasTotal: notif.resumo?.total ?? 0,
+          alertasAlta: notif.resumo?.alta ?? 0,
         });
       } catch {
         setStats(null);
@@ -38,6 +41,18 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
   }
 
   const cards = [
+    {
+      label: 'Alertas',
+      valor: stats.alertasTotal,
+      sub: stats.alertasAlta > 0 ? `${stats.alertasAlta} urgente` : 'ver detalhes',
+      acao: 'alertas',
+      cor:
+        stats.alertasAlta > 0
+          ? 'bg-red-50 border-red-200'
+          : stats.alertasTotal > 0
+            ? 'bg-amber-50 border-amber-200'
+            : 'bg-emerald-50 border-emerald-200',
+    },
     {
       label: 'Pedidos hoje',
       valor: stats.pedidosHoje,
