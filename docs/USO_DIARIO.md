@@ -31,6 +31,8 @@ Acesse: http://localhost:5173
 
 **Alertas:** menu Alertas → ative push no celular — [NOTIFICACOES.md](NOTIFICACOES.md)
 
+**PIX:** configure `GRANJA_PIX_CHAVE` no `.env` — [PIX.md](PIX.md)
+
 ---
 
 ## Fluxo do dia

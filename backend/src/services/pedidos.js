@@ -1,5 +1,6 @@
 import { pool, withTransaction } from '../db.js';
 import { gerarLinkWhatsApp } from '../integrations/whatsapp.js';
+import { gerarPixCobranca, pixConfigurado } from '../integrations/pix.js';
 import { baixarEstoqueFifo } from './lotes.js';
 import { mapaPrecosCliente, resolverPrecoUnitario } from './clientePrecos.js';
 
@@ -153,11 +154,28 @@ export async function criarPedido({ cliente, itens, observacao, confirmar = true
   const msg = formatarMensagemPedido(resultado);
   const whatsapp = gerarLinkWhatsApp(cliente.telefone, msg);
 
+  let pix = null;
+  if (pixConfigurado() && resultado.pedido.status !== 'cancelado') {
+    const gerado = await gerarPixCobranca({
+      valor: resultado.total,
+      pedidoId: resultado.pedido.id,
+      clienteNome: cliente.nome,
+    });
+    if (gerado.ok) {
+      pix = {
+        copia_cola: gerado.copia_cola,
+        qr_data_url: gerado.qr_data_url,
+        valor: gerado.valor,
+      };
+    }
+  }
+
   return {
     pedido_id: resultado.pedido.id,
     status: resultado.pedido.status,
     total: resultado.total,
     whatsapp,
+    pix,
   };
 }
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api.js';
+import PixPedidoModal from './PixPedidoModal.jsx';
 
 const inputClass =
   'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
@@ -17,6 +18,7 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
+  const [pixModal, setPixModal] = useState(null);
 
   const precoUnitario = useCallback(
     (produto) => {
@@ -128,6 +130,9 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
         msgSucesso += ` · ${data.whatsapp.erro}`;
       }
       setSucesso(msgSucesso);
+      if (data.pix?.copia_cola) {
+        setPixModal({ pedidoId: data.pedido_id, pix: data.pix });
+      }
       setNome('');
       setTelefone('');
       setEndereco('');
@@ -304,6 +309,14 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
           {enviando ? 'Salvando…' : 'Confirmar pedido'}
         </button>
       </form>
+
+      {pixModal && (
+        <PixPedidoModal
+          pedidoId={pixModal.pedidoId}
+          pix={pixModal.pix}
+          onFechar={() => setPixModal(null)}
+        />
+      )}
     </section>
   );
 }

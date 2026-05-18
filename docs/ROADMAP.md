@@ -25,5 +25,5 @@
 
 - [x] Preço atacado por cliente — [PRECO_ATACADO.md](PRECO_ATACADO.md)
 - [x] Rotas de entrega — [ROTAS_ENTREGA.md](ROTAS_ENTREGA.md)
-- [ ] Integração financeira (PIX automático)
+- [x] Integração financeira (PIX QR + copia e cola) — [PIX.md](PIX.md)
 - [ ] Previsão de demanda

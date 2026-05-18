@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as pedidosService from '../services/pedidos.js';
+import { gerarPixCobranca } from '../integrations/pix.js';
 
 const router = Router();
 
@@ -15,16 +16,6 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.get('/:id', async (req, res, next) => {
-  try {
-    const pedido = await pedidosService.obterPedido(req.params.id);
-    if (!pedido) return res.status(404).json({ erro: 'Pedido não encontrado' });
-    res.json({ data: pedido });
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.post('/', async (req, res, next) => {
   try {
     const { cliente, itens, observacao, confirmar } = req.body;
@@ -35,6 +26,35 @@ router.post('/', async (req, res, next) => {
       confirmar: confirmar !== false,
     });
     res.status(201).json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id/pix', async (req, res, next) => {
+  try {
+    const pedido = await pedidosService.obterPedido(req.params.id);
+    if (!pedido) return res.status(404).json({ erro: 'Pedido não encontrado' });
+    if (pedido.status === 'cancelado') {
+      return res.status(400).json({ erro: 'Pedido cancelado não gera PIX' });
+    }
+    const pix = await gerarPixCobranca({
+      valor: pedido.total,
+      pedidoId: pedido.id,
+      clienteNome: pedido.cliente_nome,
+    });
+    if (!pix.ok) return res.status(503).json({ erro: pix.erro });
+    res.json({ data: pix });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id', async (req, res, next) => {
+  try {
+    const pedido = await pedidosService.obterPedido(req.params.id);
+    if (!pedido) return res.status(404).json({ erro: 'Pedido não encontrado' });
+    res.json({ data: pedido });
   } catch (err) {
     next(err);
   }
