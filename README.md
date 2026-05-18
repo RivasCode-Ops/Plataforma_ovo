@@ -27,6 +27,17 @@ docs/        Manuais operacionais
 infra/       Docker, Nginx, scripts de backup
 ```
 
+## Uso diário (local na granja)
+
+```powershell
+cd C:\_PROJETOS\Plataforma_ovo
+npm run iniciar
+```
+
+Ou: `powershell -File scripts\iniciar.ps1` — abre API + painel no navegador.
+
+Guia: [docs/USO_DIARIO.md](docs/USO_DIARIO.md) · Produção: [docs/CHECKLIST_GO_LIVE.md](docs/CHECKLIST_GO_LIVE.md)
+
 ## Deploy em produção (VPS)
 
 ```bash

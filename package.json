@@ -1,0 +1,12 @@
+{
+  "name": "plataforma-ovo",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Gestão operacional de pedidos de ovos — Granja",
+  "scripts": {
+    "iniciar": "powershell -ExecutionPolicy Bypass -File scripts/iniciar.ps1",
+    "dev:api": "npm run dev:local --prefix backend",
+    "dev:painel": "npm run dev --prefix frontend",
+    "deploy:prod": "docker compose --env-file infra/.env.prod -f infra/docker-compose.prod.yml up -d --build"
+  }
+}
