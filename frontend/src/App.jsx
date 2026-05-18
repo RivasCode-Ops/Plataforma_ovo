@@ -9,6 +9,7 @@ import ProdutosPainel from './components/ProdutosPainel.jsx';
 import ClientesPainel from './components/ClientesPainel.jsx';
 import PedidosLista from './components/PedidosLista.jsx';
 import DashboardPainel from './components/DashboardPainel.jsx';
+import InstalarApp from './components/InstalarApp.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
 
@@ -166,6 +167,7 @@ export default function App() {
         </header>
 
         <main className="flex-1 p-4 lg:p-6">
+          <InstalarApp />
           {erro && (
             <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {erro}

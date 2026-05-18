@@ -27,6 +27,8 @@ npm run dev
 
 Acesse: http://localhost:5173
 
+**Celular:** instale como app — veja [PWA.md](PWA.md)
+
 ---
 
 ## Fluxo do dia

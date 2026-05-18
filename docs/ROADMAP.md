@@ -19,7 +19,7 @@
 - [ ] Site granjauniao.com.br ativo ([INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md))
 - [ ] Múltiplos operadores / permissões
 - [ ] Notificações (e-mail ou push)
-- [ ] App mobile (PWA)
+- [x] App mobile (PWA — instalar no celular)
 
 ## Fase 3 — Evolução
 
