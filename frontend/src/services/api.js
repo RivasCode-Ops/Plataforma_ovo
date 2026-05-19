@@ -68,6 +68,8 @@ export const api = {
     request(`/pedidos${status ? `?status=${encodeURIComponent(status)}` : ''}`),
   criarPedido: (payload) =>
     request('/pedidos', { method: 'POST', body: JSON.stringify(payload) }),
+  vendaBalcao: (payload) =>
+    request('/balcao', { method: 'POST', body: JSON.stringify(payload) }),
   atualizarStatus: (id, status) =>
     request(`/pedidos/${id}/status`, {
       method: 'PATCH',

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import NovoPedidoForm from './components/NovoPedidoForm.jsx';
+import VendaBalcaoForm from './components/VendaBalcaoForm.jsx';
 import PedidosHojePainel from './components/PedidosHojePainel.jsx';
 import AssinaturasPainel from './components/AssinaturasPainel.jsx';
 import LotesPainel from './components/LotesPainel.jsx';
@@ -22,6 +23,7 @@ const MENU = [
   { id: 'inicio', label: 'Início' },
   { id: 'alertas', label: 'Alertas', badge: true },
   { id: 'novo', label: 'Novo pedido' },
+  { id: 'balcao', label: 'Venda balcão' },
   { id: 'hoje', label: 'Pedidos do dia' },
   { id: 'rotas', label: 'Rotas' },
   { id: 'pedidos', label: 'Pedidos' },
@@ -39,6 +41,7 @@ const SECOES_OPERADOR = new Set([
   'inicio',
   'alertas',
   'novo',
+  'balcao',
   'hoje',
   'rotas',
   'pedidos',
@@ -118,6 +121,10 @@ export default function App() {
       case 'novo':
         return (
           <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} onIrPara={setSecao} />
+        );
+      case 'balcao':
+        return (
+          <VendaBalcaoForm produtos={produtos} onVenda={() => carregar()} />
         );
       case 'hoje':
         return <PedidosHojePainel />;

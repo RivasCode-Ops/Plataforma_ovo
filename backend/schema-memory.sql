@@ -47,8 +47,19 @@ CREATE TABLE pedidos (
   status varchar(20) NOT NULL DEFAULT 'novo',
   total real NOT NULL,
   observacao text,
+  tipo varchar(20) NOT NULL DEFAULT 'entrega',
+  forma_pagamento varchar(20),
   created_at timestamp NOT NULL DEFAULT now(),
   updated_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE fiado (
+  id serial PRIMARY KEY,
+  cliente_id integer NOT NULL REFERENCES clientes (id) ON DELETE CASCADE,
+  pedido_id integer NOT NULL REFERENCES pedidos (id) ON DELETE CASCADE,
+  valor real NOT NULL,
+  pago boolean NOT NULL DEFAULT false,
+  criado_em timestamp NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_pedidos_status ON pedidos (status);

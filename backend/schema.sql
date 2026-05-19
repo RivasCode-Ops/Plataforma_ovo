@@ -51,12 +51,26 @@ CREATE TABLE IF NOT EXISTS pedidos (
   status VARCHAR(20) NOT NULL DEFAULT 'novo',
   total DECIMAL(10, 2) NOT NULL,
   observacao TEXT,
+  tipo VARCHAR(20) NOT NULL DEFAULT 'entrega',
+  forma_pagamento VARCHAR(20),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
   CONSTRAINT chk_pedidos_status CHECK (
     status IN ('novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado')
   )
 );
+
+CREATE TABLE IF NOT EXISTS fiado (
+  id SERIAL PRIMARY KEY,
+  cliente_id INTEGER NOT NULL REFERENCES clientes (id) ON DELETE CASCADE,
+  pedido_id INTEGER NOT NULL REFERENCES pedidos (id) ON DELETE CASCADE,
+  valor DECIMAL(10, 2) NOT NULL,
+  pago BOOLEAN NOT NULL DEFAULT FALSE,
+  criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_fiado_cliente ON fiado (cliente_id);
+CREATE INDEX IF NOT EXISTS idx_fiado_pago ON fiado (pago) WHERE pago = FALSE;
 
 CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos (status);
 CREATE INDEX IF NOT EXISTS idx_pedidos_data ON pedidos (data_pedido DESC);
