@@ -1,4 +1,6 @@
-/** Mapeia paths usados nos passos para ids de seção do App */
+import BotaoWhatsApp from './BotaoWhatsApp.jsx';
+
+/** Mapeia paths usados nos passos para ids de se??o do App */
 export const PATH_TO_SECAO = {
   '/inicio': 'inicio',
   '/hoje': 'hoje',
@@ -39,12 +41,12 @@ function buildSteps(context, data) {
         {
           path: '/novo',
           title: 'Novo pedido',
-          description: d.nome ? `Pedido para ${d.nome}` : 'Lançar pedido deste cliente',
+          description: d.nome ? `Pedido para ${d.nome}` : 'Lan?ar pedido deste cliente',
         },
         {
           path: '/clientes',
           title: 'Clientes',
-          description: 'Preços atacado e rota de entrega',
+          description: 'Pre?os atacado e rota de entrega',
         },
         {
           path: '/hoje',
@@ -58,7 +60,7 @@ function buildSteps(context, data) {
           path: '/lotes',
           title: 'Lotes',
           description: d.produto
-            ? `${d.quantidade ?? ''} un. · ${d.lote || 'lote registrado'}`
+            ? `${d.quantidade ?? ''} un. ? ${d.lote || 'lote registrado'}`
             : 'Conferir estoque por validade',
         },
         {
@@ -69,7 +71,7 @@ function buildSteps(context, data) {
         {
           path: '/novo',
           title: 'Novo pedido',
-          description: 'Baixa automática pelo FIFO',
+          description: 'Baixa autom?tica pelo FIFO',
         },
       ];
     case 'rota':
@@ -79,17 +81,17 @@ function buildSteps(context, data) {
           title: 'Pedidos do dia',
           description: d.totalPedidos
             ? `${d.totalPedidos} pedido(s) nesta rota`
-            : 'Impressão agrupada por rota',
+            : 'Impress?o agrupada por rota',
         },
         {
           path: '/rotas',
           title: 'Rotas',
-          description: d.nome ? `Gerenciar “${d.nome}”` : 'Atribuir clientes às rotas',
+          description: d.nome ? `Gerenciar ?${d.nome}?` : 'Atribuir clientes ?s rotas',
         },
         {
           path: '/clientes',
           title: 'Clientes',
-          description: 'Vincular clientes à rota',
+          description: 'Vincular clientes ? rota',
         },
       ];
     default:
@@ -101,14 +103,14 @@ function tituloContexto(context, data) {
   switch (context) {
     case 'pedido':
       return data?.id
-        ? `Pedido #${data.id} salvo${data.total != null ? ` · R$ ${Number(data.total).toFixed(2)}` : ''}`
+        ? `Pedido #${data.id} salvo${data.total != null ? ` ? R$ ${Number(data.total).toFixed(2)}` : ''}`
         : 'Pedido salvo';
     case 'cliente':
       return data?.nome ? `${data.nome} atualizado` : 'Cliente atualizado';
     case 'estoque':
       return data?.produto ? `Lote de ${data.produto} registrado` : 'Estoque atualizado';
     case 'rota':
-      return data?.nome ? `Rota “${data.nome}” criada` : 'Rota salva';
+      return data?.nome ? `Rota ?${data.nome}? criada` : 'Rota salva';
     default:
       return 'Salvo com sucesso';
   }
@@ -119,7 +121,11 @@ function tituloContexto(context, data) {
  */
 export default function NextStepsCard({ context, data, onNavigate, onIrPara }) {
   const steps = buildSteps(context, data);
-  if (steps.length === 0) return null;
+  if (steps.length === 0 && !data?.whatsapp) return null;
+
+  const wa = data?.whatsapp;
+  const tipoWhatsapp =
+    context === 'pedido' ? 'pedido' : context === 'assinatura' ? 'assinatura' : null;
 
   function go(path) {
     if (onNavigate) {
@@ -135,21 +141,30 @@ export default function NextStepsCard({ context, data, onNavigate, onIrPara }) {
   return (
     <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4">
       <p className="mb-1 text-sm font-semibold text-amber-900">{tituloContexto(context, data)}</p>
-      <p className="mb-3 text-xs text-amber-800/90">Próximos passos sugeridos:</p>
-      <ul className="grid gap-2 sm:grid-cols-3">
-        {steps.map((step) => (
-          <li key={step.path}>
-            <button
-              type="button"
-              onClick={() => go(step.path)}
-              className="flex h-full w-full flex-col rounded-lg border border-amber-200/80 bg-white px-3 py-2.5 text-left text-sm transition hover:border-amber-400 hover:shadow-sm"
-            >
-              <span className="font-medium text-stone-800">{step.title}</span>
-              <span className="mt-0.5 text-xs text-stone-500">{step.description}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
+      {steps.length > 0 && (
+        <p className="mb-3 text-xs text-amber-800/90">Pr?ximos passos sugeridos:</p>
+      )}
+      {steps.length > 0 && (
+        <ul className="grid gap-2 sm:grid-cols-3">
+          {steps.map((step) => (
+            <li key={step.path}>
+              <button
+                type="button"
+                onClick={() => go(step.path)}
+                className="flex h-full w-full flex-col rounded-lg border border-amber-200/80 bg-white px-3 py-2.5 text-left text-sm transition hover:border-amber-400 hover:shadow-sm"
+              >
+                <span className="font-medium text-stone-800">{step.title}</span>
+                <span className="mt-0.5 text-xs text-stone-500">{step.description}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {tipoWhatsapp && wa?.telefone && (
+        <div className={steps.length > 0 ? 'mt-3' : ''}>
+          <BotaoWhatsApp tipo={tipoWhatsapp} telefone={wa.telefone} dados={wa} />
+        </div>
+      )}
     </div>
   );
 }

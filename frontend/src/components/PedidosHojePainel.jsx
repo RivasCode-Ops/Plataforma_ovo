@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import BotaoWhatsApp from './BotaoWhatsApp.jsx';
 
 function hojeISO() {
   return new Date().toISOString().slice(0, 10);
@@ -27,6 +28,22 @@ function CardPedido({ p }) {
       </ul>
       <p className="mt-2 font-semibold">Total: R$ {Number(p.total).toFixed(2)}</p>
       {p.observacao && <p className="mt-1 text-xs text-stone-600">Obs: {p.observacao}</p>}
+      <div className="mt-3 print:hidden">
+        <BotaoWhatsApp
+          tipo="entrega"
+          telefone={p.cliente_telefone}
+          compacto
+          dados={{
+            nome: p.cliente_nome,
+            itens: p.itens?.map((i) => ({
+              nome: i.nome,
+              quantidade: i.quantidade,
+              subtotal: i.subtotal,
+            })),
+            endereco: p.cliente_endereco,
+          }}
+        />
+      </div>
     </article>
   );
 }

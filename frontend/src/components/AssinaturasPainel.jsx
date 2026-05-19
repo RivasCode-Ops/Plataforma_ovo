@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import BotaoWhatsApp from './BotaoWhatsApp.jsx';
 
 const DIAS = [
   { v: 0, l: 'Domingo' },
@@ -28,6 +29,7 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
   const [itens, setItens] = useState([]);
   const [erro, setErro] = useState('');
   const [msg, setMsg] = useState('');
+  const [whatsappAcao, setWhatsappAcao] = useState(null);
   const [carregando, setCarregando] = useState(true);
 
   const carregar = useCallback(async () => {
@@ -70,6 +72,7 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
     e.preventDefault();
     setErro('');
     setMsg('');
+    setWhatsappAcao(null);
     if (!nome.trim() || !telefone.trim() || !itens.length) {
       setErro('Preencha cliente e itens.');
       return;
@@ -80,6 +83,21 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
         frequencia,
         dia_semana: diaSemana,
         itens,
+      });
+      const itensWhatsapp = itens.map((i) => {
+        const p = produtos.find((x) => x.id === i.produto_id);
+        return { nome: p?.nome ?? 'Produto', quantidade: i.quantidade };
+      });
+      setWhatsappAcao({
+        tipo: 'assinatura',
+        telefone: telefone.trim(),
+        dados: {
+          nome: nome.trim(),
+          itens: itensWhatsapp,
+          frequencia,
+          diaSemana,
+          proximaEntrega: data.proxima_entrega,
+        },
       });
       setMsg(`Assinatura #${data.assinatura_id} criada. Próxima entrega: ${data.proxima_entrega}`);
       setMostrarForm(false);
@@ -96,13 +114,29 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
   async function gerarPedido(id) {
     setErro('');
     setMsg('');
+    setWhatsappAcao(null);
     try {
       const data = await api.gerarPedidoAssinatura(id);
-      let texto = `Pedido #${data.pedido.pedido_id} gerado. Próxima entrega: ${data.proxima_entrega}`;
-      if (data.pedido.whatsapp?.link) {
-        texto += ' — abra o WhatsApp pelo menu WhatsApp ou pelo pedido criado.';
-      }
-      setMsg(texto);
+      const ass = todas.find((x) => x.id === id) || semana.find((x) => x.id === id);
+      const itensWhatsapp =
+        ass?.itens?.map((i) => ({
+          nome: i.nome,
+          quantidade: i.quantidade,
+          subtotal: i.subtotal,
+        })) ?? [];
+      setWhatsappAcao({
+        tipo: 'pedido',
+        telefone: ass?.cliente_telefone,
+        dados: {
+          nome: ass?.cliente_nome,
+          itens: itensWhatsapp,
+          total: data.pedido.total,
+          pedidoId: data.pedido.pedido_id,
+        },
+      });
+      setMsg(
+        `Pedido #${data.pedido.pedido_id} gerado. Próxima entrega: ${data.proxima_entrega} — use o botão abaixo para avisar no WhatsApp`
+      );
       await carregar();
       onPedidoGerado?.();
     } catch (err) {
@@ -194,9 +228,16 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
       </div>
 
       {msg && (
-        <p className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          {msg}
-        </p>
+        <div className="mb-3 space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+          <p>{msg}</p>
+          {whatsappAcao && (
+            <BotaoWhatsApp
+              tipo={whatsappAcao.tipo}
+              telefone={whatsappAcao.telefone}
+              dados={whatsappAcao.dados}
+            />
+          )}
+        </div>
       )}
       {erro && (
         <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

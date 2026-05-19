@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api.js';
 import PixPedidoModal from './PixPedidoModal.jsx';
 import NextStepsCard from './NextStepsCard.jsx';
+import BotaoWhatsApp from './BotaoWhatsApp.jsx';
 import { montarEndereco, parseEndereco } from '../utils/endereco.js';
 
 const inputClass =
@@ -37,7 +38,7 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
   const [sucesso, setSucesso] = useState('');
   const [pixModal, setPixModal] = useState(null);
   const [pedidoSalvo, setPedidoSalvo] = useState(null);
-  const [whatsappLink, setWhatsappLink] = useState(null);
+  const [whatsappPedido, setWhatsappPedido] = useState(null);
   const [criarAssinatura, setCriarAssinatura] = useState(false);
   const [freqAssinatura, setFreqAssinatura] = useState('semanal');
   const [diaAssinatura, setDiaAssinatura] = useState(3);
@@ -144,7 +145,7 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
     }
 
     setEnviando(true);
-    setWhatsappLink(null);
+    setWhatsappPedido(null);
     const enderecoTexto = montarEndereco({ rua, numero, bairro, cep });
     const clientePayload = {
       nome: nome.trim(),
@@ -163,12 +164,23 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
       if (clienteAtacado && Object.keys(precosAtacado).length > 0) {
         msgSucesso += ' (preço atacado aplicado)';
       }
-      if (data.whatsapp?.ok && data.whatsapp.link) {
-        setWhatsappLink(data.whatsapp.link);
-        msgSucesso += ' · Use o botão abaixo para abrir o WhatsApp';
-      } else if (data.whatsapp?.erro) {
-        msgSucesso += ` · ${data.whatsapp.erro}`;
-      }
+      const itensWhatsapp = itens.map((item) => {
+        const p = produtos.find((x) => x.id === item.produto_id);
+        const unit = precoUnitario(p);
+        return {
+          nome: p?.nome ?? 'Produto',
+          quantidade: item.quantidade,
+          subtotal: unit * item.quantidade,
+        };
+      });
+      setWhatsappPedido({
+        telefone: telefone.trim(),
+        nome: nome.trim(),
+        itens: itensWhatsapp,
+        total: data.total,
+        pedidoId: data.pedido_id,
+      });
+      msgSucesso += ' · Use o botão abaixo para avisar no WhatsApp';
       if (criarAssinatura) {
         try {
           const ass = await api.criarAssinatura({
@@ -189,6 +201,13 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
         id: data.pedido_id,
         produto: produtoNome,
         total: data.total,
+        whatsapp: {
+          telefone: telefone.trim(),
+          nome: nome.trim(),
+          itens: itensWhatsapp,
+          total: data.total,
+          pedidoId: data.pedido_id,
+        },
       });
       if (data.pix?.copia_cola) {
         setPixModal({ pedidoId: data.pedido_id, pix: data.pix });
@@ -233,15 +252,8 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
       {sucesso && (
         <div className="mb-4 space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           <p>{sucesso}</p>
-          {whatsappLink && (
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex rounded-lg bg-[#25D366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1da851]"
-            >
-              Abrir WhatsApp
-            </a>
+          {whatsappPedido && (
+            <BotaoWhatsApp tipo="pedido" telefone={whatsappPedido.telefone} dados={whatsappPedido} />
           )}
         </div>
       )}

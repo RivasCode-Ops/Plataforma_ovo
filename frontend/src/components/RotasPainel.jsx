@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import NextStepsCard from './NextStepsCard.jsx';
+import BotaoWhatsApp from './BotaoWhatsApp.jsx';
 
 const inputClass =
   'rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none';
@@ -146,6 +147,16 @@ export default function RotasPainel({ onIrPara }) {
               {clientes.map((c) => (
                 <li key={c.id} className="flex flex-wrap items-center gap-2 rounded bg-stone-50 px-2 py-1.5">
                   <span className="min-w-0 flex-1 truncate font-medium">{c.nome}</span>
+                  <BotaoWhatsApp
+                    tipo="entrega"
+                    telefone={c.telefone}
+                    compacto
+                    dados={{
+                      nome: c.nome,
+                      itens: [],
+                      endereco: c.endereco,
+                    }}
+                  />
                   <select
                     className="rounded border border-stone-300 px-2 py-1 text-xs"
                     value={c.rota_id ?? ''}
