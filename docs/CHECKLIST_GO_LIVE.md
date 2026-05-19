@@ -38,7 +38,7 @@ curl https://app.SEU-DOMINIO/api/health
 - [ ] Cadastrar produtos e preços reais
 - [ ] Pedido de teste completo
 - [ ] Backup: cron com `infra/scripts/backup.sh`
-- [ ] HTTPS (Certbot ou proxy)
+- [ ] HTTPS (Certbot ou proxy) — ver [DEPLOY_APP_GRANJAUNIAO.md](DEPLOY_APP_GRANJAUNIAO.md) · script `infra/scripts/vps-https.sh`
 
 ## Opcional (depois)
 

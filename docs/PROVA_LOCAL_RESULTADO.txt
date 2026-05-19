@@ -1,16 +1,6 @@
-Prova local executada em: 2026-05-18
-Ambiente: Windows, Node v22, sem Docker
-
+﻿Prova local: 2026-05-18 18:37:57
 API: http://localhost:3000
 Painel: http://localhost:5173
-Modo: USE_MEMORY_DB=1 (pg-mem)
-
-Resultados:
-- GET /api/health → ok: true, service: plataforma-ovo-api
-- GET /api/produtos → 3 produtos (Ovos Brancos, Caipira, Vermelhos)
-- POST /api/pedidos → pedido #1, status confirmado, total R$ 24,00
-- Estoque baixado: Ovos Brancos 100 → 98
-
-Comandos para repetir:
-  cd backend && npm run dev:local
-  cd frontend && npm run dev
+Health: OK
+Produtos: 3
+Pedido teste: #2 - R$ 24

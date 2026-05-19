@@ -29,11 +29,16 @@ echo "==> Certificado Let's Encrypt"
 certbot certonly --standalone -d "$DOMAIN" \
   --non-interactive --agree-tos -m "$EMAIL"
 
-echo "==> App na porta 8080"
+echo "==> App na porta 8080 + CORS HTTPS"
 if grep -q '^HTTP_PORT=80' "$INFRA/.env.prod"; then
   sed -i 's/^HTTP_PORT=80/HTTP_PORT=8080/' "$INFRA/.env.prod"
+elif ! grep -q '^HTTP_PORT=' "$INFRA/.env.prod"; then
+  echo 'HTTP_PORT=8080' >> "$INFRA/.env.prod"
 fi
-docker compose --env-file .env.prod -f docker-compose.prod.yml up -d web
+if grep -q '^CORS_ORIGIN=http://' "$INFRA/.env.prod"; then
+  sed -i "s|^CORS_ORIGIN=http://|CORS_ORIGIN=https://|" "$INFRA/.env.prod"
+fi
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d web backend
 
 echo "==> Nginx host"
 cp "$INFRA/nginx-host/app.granjauniao.com.br.conf" \
@@ -42,6 +47,7 @@ ln -sf "/etc/nginx/sites-available/$DOMAIN" "/etc/nginx/sites-enabled/"
 rm -f /etc/nginx/sites-enabled/default
 nginx -t
 systemctl enable nginx
+systemctl start nginx 2>/dev/null || true
 systemctl reload nginx
 
 echo ""

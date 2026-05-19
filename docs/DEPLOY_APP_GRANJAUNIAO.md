@@ -87,6 +87,8 @@ No navegador: **http://app.granjauniao.com.br** → login com `admin` e a senha 
 
 ## Parte 3 — HTTPS (Let's Encrypt)
 
+Runbook detalhado e plano B: [RUNBOOK_HTTPS_VPS.md](RUNBOOK_HTTPS_VPS.md)
+
 ### 3.1 Liberar a porta 80 para o Certbot
 
 ```bash
@@ -121,6 +123,21 @@ nginx -t && systemctl reload nginx
 ```
 
 Teste: **https://app.granjauniao.com.br/api/health**
+
+**Atalho (script):** na VPS, após `git pull`:
+
+```bash
+bash /opt/Plataforma_ovo/infra/scripts/vps-https.sh rivaldo@granjauniao.com.br
+```
+
+Se o certificado já existir e só o Nginx falhar (`options-ssl-nginx.conf` ausente), atualize o config e recarregue:
+
+```bash
+cd /opt/Plataforma_ovo && git pull
+cp infra/nginx-host/app.granjauniao.com.br.conf /etc/nginx/sites-available/app.granjauniao.com.br
+nginx -t && systemctl start nginx && systemctl reload nginx
+curl -s https://app.granjauniao.com.br/api/health
+```
 
 Renovação automática do certificado:
 

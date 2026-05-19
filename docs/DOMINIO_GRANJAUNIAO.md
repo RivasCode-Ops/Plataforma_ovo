@@ -51,6 +51,8 @@ IPs e detalhes atualizados: [GitHub Docs — Managing a custom domain](https://d
 - https://granjauniao.com.br/ — home com imagens e botões WhatsApp
 - https://wa.me/5589999754044 — abre conversa no celular
 
+**HTTPS com erro de certificado?** Se o navegador mostrar certificado `*.github.io`, o passo 2 (Custom domain em Pages) ainda não foi concluído ou o certificado está propagando. Até lá use **http://granjauniao.com.br**. Ver [TROUBLESHOOT_DOMINIOS.md](TROUBLESHOOT_DOMINIOS.md).
+
 ### 5. Preview github.io
 
 Com `CNAME` ativo, o build usa `BASE_PATH=/`. O endereço  
