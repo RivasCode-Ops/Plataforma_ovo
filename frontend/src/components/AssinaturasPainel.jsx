@@ -13,7 +13,7 @@ const DIAS = [
 ];
 
 const inputClass =
-  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none';
+  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none';
 
 export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
   const [semana, setSemana] = useState([]);
@@ -158,7 +158,7 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
     return (
       <article
         className={`rounded-lg border p-4 ${
-          destacar ? (atrasada ? 'border-red-300 bg-red-50' : 'border-amber-300 bg-amber-50') : 'border-stone-200'
+          destacar ? (atrasada ? 'border-red-300 bg-red-50' : 'border-brand-300 bg-brand-50') : 'border-stone-200'
         }`}
       >
         <div className="flex flex-wrap justify-between gap-2">
@@ -185,7 +185,7 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
             <button
               type="button"
               onClick={() => gerarPedido(a.id)}
-              className="rounded bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700"
+              className="rounded bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
             >
               Gerar pedido desta entrega
             </button>
@@ -286,7 +286,7 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
               }).join(', ')}
             </p>
           )}
-          <button type="submit" className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white">
+          <button type="submit" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white">
             Salvar assinatura
           </button>
         </form>

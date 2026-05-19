@@ -1,4 +1,4 @@
-# WhatsApp — Plataforma Ovo
+# WhatsApp — meuzovo
 
 **Sem API externa** (sem Merkus, sem MEU-OVO). O sistema gera **links wa.me** para você enviar manualmente pelo app WhatsApp.
 

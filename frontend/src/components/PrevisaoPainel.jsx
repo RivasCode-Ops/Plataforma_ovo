@@ -68,7 +68,7 @@ export default function PrevisaoPainel() {
         <button
           type="button"
           onClick={carregar}
-          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white"
+          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
         >
           Atualizar
         </button>
@@ -92,12 +92,12 @@ export default function PrevisaoPainel() {
               </p>
               <p className="text-xs text-blue-700">unidades no período</p>
             </div>
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-xs font-medium uppercase text-amber-800">Sugerido produzir</p>
+            <div className="rounded-xl border border-brand-200 bg-brand-50 p-4">
+              <p className="text-xs font-medium uppercase text-brand-800">Sugerido produzir</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums">
                 {dados.totais.sugerido_produzir}
               </p>
-              <p className="text-xs text-amber-700">além do estoque atual</p>
+              <p className="text-xs text-brand-700">além do estoque atual</p>
             </div>
             <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
               <p className="text-xs font-medium uppercase text-violet-800">Assinaturas</p>
@@ -140,7 +140,7 @@ export default function PrevisaoPainel() {
                       <td className="px-4 py-3 tabular-nums">{i.estoque}</td>
                       <td
                         className={`px-4 py-3 tabular-nums font-semibold ${
-                          i.sugerido_produzir > 0 ? 'text-amber-800' : 'text-stone-400'
+                          i.sugerido_produzir > 0 ? 'text-brand-800' : 'text-stone-400'
                         }`}
                       >
                         {i.sugerido_produzir > 0 ? i.sugerido_produzir : '—'}

@@ -3,7 +3,7 @@ import { api } from '../services/api.js';
 
 const NIVEL_STYLE = {
   alta: 'border-red-200 bg-red-50 text-red-900',
-  media: 'border-amber-200 bg-amber-50 text-amber-900',
+  media: 'border-brand-200 bg-brand-50 text-brand-900',
   baixa: 'border-stone-200 bg-stone-50 text-stone-700',
 };
 
@@ -59,7 +59,7 @@ export default function NotificacoesPainel({ onIrPara, pushAtivo, onAtivarPush }
               className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                 pushAtivo
                   ? 'bg-emerald-100 text-emerald-800'
-                  : 'bg-amber-600 text-white hover:bg-amber-700'
+                  : 'bg-brand-600 text-white hover:bg-brand-700'
               }`}
             >
               {pushAtivo ? 'Push ativo' : 'Ativar no celular'}
@@ -83,7 +83,7 @@ export default function NotificacoesPainel({ onIrPara, pushAtivo, onAtivarPush }
             </span>
           )}
           {resumo.media > 0 && (
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-amber-800">
+            <span className="rounded-full bg-brand-100 px-3 py-1 text-brand-800">
               {resumo.media} atenção
             </span>
           )}

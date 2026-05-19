@@ -103,5 +103,5 @@ app.listen(port, async () => {
   } catch (err) {
     console.error('[auth] Falha ao criar operador admin:', err.message);
   }
-  console.log(`API Plataforma Ovo em http://localhost:${port}`);
+  console.log(`API meuzovo em http://localhost:${port}`);
 });

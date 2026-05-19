@@ -1,4 +1,4 @@
-# Plataforma Ovo
+# meuzovo
 
 Sistema central para gestão operacional de pedidos de ovos em granja: varejo, atacado e assinatura. Controle de estoque, links WhatsApp e painel administrativo.
 

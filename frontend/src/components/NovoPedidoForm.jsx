@@ -6,7 +6,7 @@ import BotaoWhatsApp from './BotaoWhatsApp.jsx';
 import { montarEndereco, parseEndereco } from '../utils/endereco.js';
 
 const inputClass =
-  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
+  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
 
 const DIAS_SEMANA = [
   { v: 0, l: 'Domingo' },
@@ -478,7 +478,7 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
                 <button
                   type="button"
                   onClick={() => onIrPara('assinaturas')}
-                  className="self-end text-xs font-medium text-amber-700 underline"
+                  className="self-end text-xs font-medium text-brand-700 underline"
                 >
                   Ver todas as assinaturas
                 </button>
@@ -501,7 +501,7 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
         <button
           type="submit"
           disabled={enviando || itens.length === 0}
-          className="rounded-lg bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {enviando ? 'Salvando…' : 'Confirmar pedido'}
         </button>

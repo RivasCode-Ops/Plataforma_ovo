@@ -1,4 +1,4 @@
-# Roadmap — Plataforma Ovo
+# Roadmap — meuzovo
 
 ## Fase 1 — Concluída (MVP operacional)
 

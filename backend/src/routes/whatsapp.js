@@ -12,7 +12,7 @@ router.post('/link', (req, res, next) => {
     const { telefone, mensagem } = req.body || {};
     const texto =
       mensagem ||
-      `*Teste Plataforma Ovo*\n\nGranja União — ${new Date().toLocaleString('pt-BR')}`;
+      `*Teste meuzovo*\n\nGranja União — ${new Date().toLocaleString('pt-BR')}`;
     const data = gerarLinkWhatsApp(telefone, texto);
     if (!data.ok) return res.status(400).json({ erro: data.erro });
     res.json({ data });

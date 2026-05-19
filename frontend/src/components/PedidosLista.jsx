@@ -5,7 +5,7 @@ import PixPedidoModal from './PixPedidoModal.jsx';
 const STATUS_OPCOES = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado'];
 
 const statusCor = {
-  novo: 'bg-amber-100 text-amber-800',
+  novo: 'bg-brand-100 text-brand-800',
   confirmado: 'bg-blue-100 text-blue-800',
   pago: 'bg-emerald-100 text-emerald-800',
   enviado: 'bg-violet-100 text-violet-800',

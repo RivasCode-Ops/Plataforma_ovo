@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 const inputClass =
-  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
+  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
 
 export default function Login({ onLogin }) {
   const [usuario, setUsuario] = useState('admin');
@@ -23,10 +23,10 @@ export default function Login({ onLogin }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-amber-50 to-stone-100 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-brand-50 to-stone-100 px-4">
       <div className="w-full max-w-sm rounded-2xl border border-stone-200 bg-white p-8 shadow-lg">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-stone-900">Plataforma Ovo</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-brand-900">meuzovo</h1>
           <p className="mt-1 text-sm text-stone-500">Painel da granja</p>
         </div>
 
@@ -62,7 +62,7 @@ export default function Login({ onLogin }) {
           <button
             type="submit"
             disabled={enviando}
-            className="w-full rounded-lg bg-amber-600 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-brand-600 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
           >
             {enviando ? 'Entrando…' : 'Entrar'}
           </button>

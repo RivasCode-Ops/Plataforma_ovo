@@ -5,7 +5,7 @@ import NextStepsCard from './NextStepsCard.jsx';
 import BotaoWhatsApp from './BotaoWhatsApp.jsx';
 
 const inputClass =
-  'rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none';
+  'rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none';
 
 export default function RotasPainel({ onIrPara }) {
   const { usuario } = useAuth();
@@ -109,7 +109,7 @@ export default function RotasPainel({ onIrPara }) {
               onChange={(e) => setOrdem(e.target.value)}
             />
           </label>
-          <button type="submit" className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white">
+          <button type="submit" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white">
             Adicionar
           </button>
         </form>

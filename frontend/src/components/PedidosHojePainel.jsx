@@ -135,7 +135,7 @@ export default function PedidosHojePainel() {
       </div>
 
       <div className="hidden print:block print:mb-4">
-        <h1 className="text-xl font-bold">Plataforma Ovo — Entregas</h1>
+        <h1 className="text-xl font-bold">meuzovo — Entregas</h1>
         <p className="text-sm">{dataFormatada}</p>
       </div>
 

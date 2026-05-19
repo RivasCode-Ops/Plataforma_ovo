@@ -1,4 +1,4 @@
-# Uso diário — Plataforma Ovo
+# Uso diário — meuzovo
 
 Guia rápido para o operador da granja (computador local).
 

@@ -3,7 +3,7 @@ import { api } from '../services/api.js';
 import PixPedidoModal from './PixPedidoModal.jsx';
 
 const inputClass =
-  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
+  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
 
 const PAGAMENTOS = [
   { id: 'dinheiro', label: 'Dinheiro' },
@@ -247,7 +247,7 @@ export default function VendaBalcaoForm({ produtos, onVenda }) {
                       <button
                         type="button"
                         onClick={() => selecionarCliente(c)}
-                        className="w-full px-3 py-2 text-left text-sm hover:bg-amber-50"
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-brand-50"
                       >
                         <span className="font-medium">{c.nome}</span>
                         <span className="ml-2 text-stone-500">{c.telefone}</span>
@@ -281,7 +281,7 @@ export default function VendaBalcaoForm({ produtos, onVenda }) {
                 type="button"
                 onClick={() => adicionarRapido(p.id)}
                 disabled={p.estoque < 1}
-                className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-left text-sm hover:border-amber-400 hover:bg-amber-50 disabled:opacity-40"
+                className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-left text-sm hover:border-brand-400 hover:bg-brand-50 disabled:opacity-40"
               >
                 <span className="font-medium">{p.nome}</span>
                 <span className="ml-1 text-stone-500">
@@ -367,7 +367,7 @@ export default function VendaBalcaoForm({ produtos, onVenda }) {
                 key={p.id}
                 className={`cursor-pointer rounded-lg border px-3 py-2.5 text-center text-sm font-medium transition ${
                   pagamento === p.id
-                    ? 'border-amber-500 bg-amber-50 text-amber-900'
+                    ? 'border-brand-500 bg-brand-50 text-brand-900'
                     : 'border-stone-200 hover:border-stone-300'
                 } ${p.id === 'fiado' && !cliente ? 'opacity-50' : ''}`}
               >
@@ -399,7 +399,7 @@ export default function VendaBalcaoForm({ produtos, onVenda }) {
             </label>
           )}
           {pagamento === 'fiado' && cliente && (
-            <p className="text-xs text-amber-800">
+            <p className="text-xs text-brand-800">
               A dívida será registrada em fiado para <strong>{cliente.nome}</strong>.
             </p>
           )}
@@ -408,7 +408,7 @@ export default function VendaBalcaoForm({ produtos, onVenda }) {
         <button
           type="submit"
           disabled={enviando || itens.length === 0}
-          className="w-full rounded-lg bg-amber-600 py-3 text-sm font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-8"
+          className="w-full rounded-lg bg-brand-600 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-8"
         >
           {enviando ? 'Registrando…' : `Finalizar venda · R$ ${total.toFixed(2)}`}
         </button>

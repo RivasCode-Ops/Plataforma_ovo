@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
 
 const inputClass =
-  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
+  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
 
 export default function OperadoresPainel() {
   const [lista, setLista] = useState([]);
@@ -130,7 +130,7 @@ export default function OperadoresPainel() {
         </div>
         <button
           type="submit"
-          className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
           Cadastrar
         </button>
@@ -139,7 +139,7 @@ export default function OperadoresPainel() {
       {senhaId && (
         <form
           onSubmit={salvarSenha}
-          className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex flex-wrap gap-2 items-end"
+          className="rounded-xl border border-brand-200 bg-brand-50 p-4 flex flex-wrap gap-2 items-end"
         >
           <label className="flex-1 min-w-[200px]">
             <span className="mb-1 block text-xs text-stone-600">Nova senha</span>
@@ -152,7 +152,7 @@ export default function OperadoresPainel() {
               required
             />
           </label>
-          <button type="submit" className="rounded-lg bg-amber-600 px-3 py-2 text-sm text-white">
+          <button type="submit" className="rounded-lg bg-brand-600 px-3 py-2 text-sm text-white">
             Salvar
           </button>
           <button
@@ -201,7 +201,7 @@ export default function OperadoresPainel() {
                     <button
                       type="button"
                       onClick={() => setSenhaId(op.id)}
-                      className="text-xs text-amber-700 underline"
+                      className="text-xs text-brand-700 underline"
                     >
                       Nova senha
                     </button>

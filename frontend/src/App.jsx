@@ -179,11 +179,18 @@ export default function App() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-stone-50 lg:flex-row">
+    <div className="flex min-h-screen flex-col bg-brand-50 lg:flex-row">
       <aside className="border-b border-stone-200 bg-white lg:w-56 lg:flex-shrink-0 lg:border-b-0 lg:border-r">
-        <div className="hidden border-b border-stone-100 p-4 lg:block">
-          <h1 className="font-semibold tracking-tight">Plataforma Ovo</h1>
-          <p className="text-xs text-stone-500">Granja União</p>
+        <div
+          className="hidden lg:block"
+          style={{ padding: '1rem 1.25rem', borderBottom: '0.5px solid var(--color-border-tertiary)' }}
+        >
+          <img
+            src="/icons/meuzovo-logo-horizontal.png"
+            alt="meuzovo"
+            className="h-9 w-auto"
+          />
+          <p className="mt-1 text-xs text-stone-500">Granja União</p>
         </div>
         <nav className="flex gap-1 overflow-x-auto p-2 lg:flex-col lg:gap-0.5 lg:p-3">
           {menu.map((m) => (
@@ -193,7 +200,7 @@ export default function App() {
               onClick={() => setSecao(m.id)}
               className={`whitespace-nowrap rounded-lg px-3 py-2 text-left text-sm font-medium transition lg:w-full ${
                 secao === m.id
-                  ? 'bg-amber-100 text-amber-900'
+                  ? 'bg-brand-100 text-brand-900'
                   : 'text-stone-600 hover:bg-stone-100'
               }`}
             >
@@ -204,7 +211,7 @@ export default function App() {
                     className={`rounded-full px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
                       alertasResumo.alta > 0
                         ? 'bg-red-600 text-white'
-                        : 'bg-amber-500 text-white'
+                        : 'bg-brand-500 text-white'
                     }`}
                   >
                     {alertasResumo.total}
@@ -218,12 +225,12 @@ export default function App() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3 lg:hidden">
-          <span className="font-semibold">Plataforma Ovo</span>
+          <span className="font-semibold">meuzovo</span>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={carregar}
-              className="rounded-lg bg-amber-600 px-3 py-1.5 text-sm text-white"
+              className="rounded-lg bg-brand-600 px-3 py-1.5 text-sm text-white"
             >
               Atualizar
             </button>
@@ -239,6 +246,7 @@ export default function App() {
             <span className="font-medium text-stone-800">
               {usuario?.nome || usuario?.login}
             </span>
+            <span className="text-stone-500"> — meuzovo</span>
             {usuario?.papel === 'operador' && (
               <span className="ml-2 rounded bg-stone-100 px-2 py-0.5 text-xs text-stone-600">
                 operador
@@ -249,7 +257,7 @@ export default function App() {
             <button
               type="button"
               onClick={carregar}
-              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
             >
               Atualizar
             </button>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
 
 const inputClass =
-  'w-full rounded border border-stone-300 px-2 py-1 text-sm focus:border-amber-500 focus:outline-none';
+  'w-full rounded border border-stone-300 px-2 py-1 text-sm focus:border-brand-500 focus:outline-none';
 
 export default function ProdutosPainel({ onAtualizado }) {
   const [lista, setLista] = useState([]);
@@ -89,7 +89,7 @@ export default function ProdutosPainel({ onAtualizado }) {
       {form && (
         <form
           onSubmit={isNovo ? criar : (e) => { e.preventDefault(); salvar(); }}
-          className="mb-4 grid gap-2 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:grid-cols-2 lg:grid-cols-6"
+          className="mb-4 grid gap-2 rounded-lg border border-brand-200 bg-brand-50 p-4 sm:grid-cols-2 lg:grid-cols-6"
         >
           <input
             placeholder="Nome"
@@ -132,7 +132,7 @@ export default function ProdutosPainel({ onAtualizado }) {
             </label>
           )}
           <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
-            <button type="submit" className="flex-1 rounded bg-amber-600 py-1.5 text-sm text-white">
+            <button type="submit" className="flex-1 rounded bg-brand-600 py-1.5 text-sm text-white">
               Salvar
             </button>
             <button
@@ -171,7 +171,7 @@ export default function ProdutosPainel({ onAtualizado }) {
                   </td>
                   <td className="py-2 pr-3 tabular-nums">R$ {Number(p.preco).toFixed(2)}</td>
                   <td
-                    className={`py-2 pr-3 tabular-nums ${p.estoque < 10 ? 'font-semibold text-amber-700' : ''}`}
+                    className={`py-2 pr-3 tabular-nums ${p.estoque < 10 ? 'font-semibold text-brand-700' : ''}`}
                   >
                     {p.estoque}
                   </td>
@@ -189,7 +189,7 @@ export default function ProdutosPainel({ onAtualizado }) {
                           ativo: p.ativo,
                         })
                       }
-                      className="text-xs font-medium text-amber-700 hover:text-amber-900"
+                      className="text-xs font-medium text-brand-700 hover:text-brand-900"
                     >
                       Editar
                     </button>

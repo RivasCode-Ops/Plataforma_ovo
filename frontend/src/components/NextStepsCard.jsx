@@ -139,10 +139,10 @@ export default function NextStepsCard({ context, data, onNavigate, onIrPara }) {
   }
 
   return (
-    <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50/80 p-4">
-      <p className="mb-1 text-sm font-semibold text-amber-900">{tituloContexto(context, data)}</p>
+    <div className="mt-4 rounded-xl border border-brand-200 bg-brand-50/80 p-4">
+      <p className="mb-1 text-sm font-semibold text-brand-900">{tituloContexto(context, data)}</p>
       {steps.length > 0 && (
-        <p className="mb-3 text-xs text-amber-800/90">Pr?ximos passos sugeridos:</p>
+        <p className="mb-3 text-xs text-brand-800/90">Pr?ximos passos sugeridos:</p>
       )}
       {steps.length > 0 && (
         <ul className="grid gap-2 sm:grid-cols-3">
@@ -151,7 +151,7 @@ export default function NextStepsCard({ context, data, onNavigate, onIrPara }) {
               <button
                 type="button"
                 onClick={() => go(step.path)}
-                className="flex h-full w-full flex-col rounded-lg border border-amber-200/80 bg-white px-3 py-2.5 text-left text-sm transition hover:border-amber-400 hover:shadow-sm"
+                className="flex h-full w-full flex-col rounded-lg border border-brand-200/80 bg-white px-3 py-2.5 text-left text-sm transition hover:border-brand-400 hover:shadow-sm"
               >
                 <span className="font-medium text-stone-800">{step.title}</span>
                 <span className="mt-0.5 text-xs text-stone-500">{step.description}</span>

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import NextStepsCard from './NextStepsCard.jsx';
 
 const inputClass =
-  'w-20 rounded border border-stone-300 px-2 py-1 text-sm tabular-nums focus:border-amber-500 focus:outline-none';
+  'w-20 rounded border border-stone-300 px-2 py-1 text-sm tabular-nums focus:border-brand-500 focus:outline-none';
 
 export default function ClientesPainel({ onIrPara }) {
   const { usuario } = useAuth();
@@ -147,7 +147,7 @@ export default function ClientesPainel({ onIrPara }) {
                     type="button"
                     onClick={() => verCliente(c.id)}
                     className={`w-full px-1 py-3 text-left hover:bg-stone-50 ${
-                      detalhe?.id === c.id ? 'bg-amber-50' : ''
+                      detalhe?.id === c.id ? 'bg-brand-50' : ''
                     }`}
                   >
                     <p className="font-medium">{c.nome}</p>
@@ -223,7 +223,7 @@ export default function ClientesPainel({ onIrPara }) {
                             <button
                               type="button"
                               onClick={() => salvarPreco(p.id)}
-                              className="rounded bg-amber-600 px-2 py-1 text-xs text-white"
+                              className="rounded bg-brand-600 px-2 py-1 text-xs text-white"
                             >
                               OK
                             </button>

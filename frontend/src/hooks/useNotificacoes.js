@@ -25,7 +25,7 @@ export function useNotificacoes() {
         const urgentes = data.itens?.filter((n) => n.nivel === 'alta').slice(0, 3) ?? [];
         const corpo =
           urgentes.map((n) => n.titulo).join(' · ') || `${data.resumo.alta} alertas urgentes`;
-        new Notification('Plataforma Ovo', { body: corpo, icon: '/icon.svg', tag: 'alertas-ovo' });
+        new Notification('meuzovo', { body: corpo, icon: '/icons/icon-192.png', tag: 'alertas-meuzovo' });
       }
       ultimaAlta.current = data.resumo?.alta ?? 0;
     } catch {
@@ -45,7 +45,7 @@ export function useNotificacoes() {
     if (perm === 'granted') {
       localStorage.setItem(PUSH_KEY, '1');
       setPushAtivo(true);
-      new Notification('Plataforma Ovo', {
+      new Notification('meuzovo', {
         body: 'Alertas urgentes serão avisados aqui.',
         icon: '/icon.svg',
       });

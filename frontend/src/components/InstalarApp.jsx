@@ -46,11 +46,11 @@ export default function InstalarApp() {
 
   return (
     <div
-      className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3"
+      className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand-300 bg-brand-50 px-4 py-3"
       role="region"
       aria-label="Instalar aplicativo"
     >
-      <p className="text-sm text-amber-900">
+      <p className="text-sm text-brand-900">
         {ios ? (
           <>
             <strong>Instale no iPhone/iPad:</strong> Safari → compartilhar →{' '}
@@ -67,7 +67,7 @@ export default function InstalarApp() {
           <button
             type="button"
             onClick={instalar}
-            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
           >
             Instalar agora
           </button>
@@ -75,7 +75,7 @@ export default function InstalarApp() {
         <button
           type="button"
           onClick={dispensar}
-          className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm text-amber-800 hover:bg-amber-100"
+          className="rounded-lg border border-brand-300 bg-white px-3 py-2 text-sm text-brand-800 hover:bg-brand-100"
         >
           Depois
         </button>

@@ -3,11 +3,11 @@ import { api } from '../services/api.js';
 import NextStepsCard from './NextStepsCard.jsx';
 
 const inputClass =
-  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none';
+  'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none';
 
 function badgeValidade(dias) {
   if (dias < 0) return 'bg-red-100 text-red-800';
-  if (dias <= 3) return 'bg-amber-100 text-amber-800';
+  if (dias <= 3) return 'bg-brand-100 text-brand-800';
   if (dias <= 7) return 'bg-yellow-100 text-yellow-800';
   return 'bg-stone-100 text-stone-600';
 }
@@ -136,7 +136,7 @@ export default function LotesPainel({ produtos, onAtualizado, onIrPara }) {
             <span className="mb-1 block text-xs text-stone-500">Observação</span>
             <input value={obs} onChange={(e) => setObs(e.target.value)} className={inputClass} />
           </label>
-          <button type="submit" className="rounded-lg bg-amber-600 py-2 text-sm font-semibold text-white sm:col-span-2 lg:col-span-1">
+          <button type="submit" className="rounded-lg bg-brand-600 py-2 text-sm font-semibold text-white sm:col-span-2 lg:col-span-1">
             Salvar lote
           </button>
         </form>

@@ -1,4 +1,4 @@
-# Decisões Técnicas - Plataforma Ovo
+# Decisões Técnicas - meuzovo
 
 ## Stack escolhida (e por quê)
 

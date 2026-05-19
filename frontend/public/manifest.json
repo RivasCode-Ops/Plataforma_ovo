@@ -1,11 +1,11 @@
 {
-  "name": "Plataforma Ovo — Granja União",
-  "short_name": "Granja União",
+  "name": "meuzovo — Granja União",
+  "short_name": "meuzovo",
   "description": "Sistema de gestão de pedidos e estoque",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#d97706",
+  "background_color": "#FDF6EC",
+  "theme_color": "#C45E1A",
   "orientation": "portrait-primary",
   "lang": "pt-BR",
   "icons": [

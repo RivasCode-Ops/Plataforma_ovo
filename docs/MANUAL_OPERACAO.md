@@ -1,4 +1,4 @@
-# Manual de Operação - Plataforma Ovo
+# Manual de Operação - meuzovo
 
 Guia para o dono ou operador da granja usar o sistema no dia a dia.
 

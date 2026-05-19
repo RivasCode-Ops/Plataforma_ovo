@@ -79,7 +79,7 @@ export default function RelatorioPainel() {
           <button
             type="button"
             onClick={carregar}
-            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700"
+            className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
             Atualizar
           </button>
@@ -105,9 +105,9 @@ export default function RelatorioPainel() {
       ) : r ? (
         <>
           <div className="mb-6 grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-stone-100 bg-amber-50 p-4">
-              <p className="text-xs font-medium uppercase text-amber-800">Total vendido</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums text-amber-950">
+            <div className="rounded-lg border border-stone-100 bg-brand-50 p-4">
+              <p className="text-xs font-medium uppercase text-brand-800">Total vendido</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-brand-950">
                 R$ {r.total_vendas.toFixed(2)}
               </p>
             </div>
@@ -183,7 +183,7 @@ export default function RelatorioPainel() {
                       R$ {d.total.toFixed(0)}
                     </span>
                     <div
-                      className="w-full rounded-t bg-amber-500"
+                      className="w-full rounded-t bg-brand-500"
                       style={{ height: `${h}%` }}
                       title={`${d.qtd_pedidos} pedidos`}
                     />

@@ -50,7 +50,7 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
         stats.alertasAlta > 0
           ? 'bg-red-50 border-red-200'
           : stats.alertasTotal > 0
-            ? 'bg-amber-50 border-amber-200'
+            ? 'bg-brand-50 border-brand-200'
             : 'bg-emerald-50 border-emerald-200',
     },
     {
@@ -58,7 +58,7 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
       valor: stats.pedidosHoje,
       sub: `R$ ${stats.totalHoje.toFixed(2)}`,
       acao: 'hoje',
-      cor: 'bg-amber-50 border-amber-200',
+      cor: 'bg-brand-50 border-brand-200',
     },
     {
       label: 'Assinaturas (7 dias)',
@@ -79,7 +79,7 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
       valor: stats.estoqueBaixo,
       sub: 'produtos < 10 un.',
       acao: 'produtos',
-      cor: stats.estoqueBaixo > 0 ? 'bg-amber-50 border-amber-300' : 'bg-stone-50 border-stone-200',
+      cor: stats.estoqueBaixo > 0 ? 'bg-brand-50 border-brand-300' : 'bg-stone-50 border-stone-200',
     },
   ];
 
