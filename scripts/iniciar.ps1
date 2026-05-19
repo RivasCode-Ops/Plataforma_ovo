@@ -1,12 +1,11 @@
-# Inicia Plataforma Ovo (API + painel) — uso diário na granja
+# Inicia Plataforma Ovo (API + painel) - uso diario na granja
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 
 Write-Host ""
-Write-Host "  Plataforma Ovo — iniciando..." -ForegroundColor Cyan
+Write-Host "  Plataforma Ovo - iniciando..." -ForegroundColor Cyan
 Write-Host ""
 
-# Backend
 $backendPath = Join-Path $root "backend"
 if (-not (Test-Path (Join-Path $backendPath "node_modules"))) {
     Write-Host "Instalando dependencias do backend..." -ForegroundColor Yellow
@@ -15,7 +14,6 @@ if (-not (Test-Path (Join-Path $backendPath "node_modules"))) {
     Pop-Location
 }
 
-# Frontend
 $frontendPath = Join-Path $root "frontend"
 if (-not (Test-Path (Join-Path $frontendPath "node_modules"))) {
     Write-Host "Instalando dependencias do frontend..." -ForegroundColor Yellow
@@ -27,7 +25,7 @@ if (-not (Test-Path (Join-Path $frontendPath "node_modules"))) {
 Write-Host "Abrindo API (porta 3000) e painel (porta 5173)..." -ForegroundColor Green
 Write-Host ""
 Write-Host "  Painel:  http://localhost:5173" -ForegroundColor White
-Write-Host "  Login:   admin / plataforma123  (altere em backend\.env)" -ForegroundColor DarkGray
+Write-Host "  Login:   admin / plataforma123" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "Feche as janelas do terminal para encerrar." -ForegroundColor DarkGray
 Write-Host ""
@@ -47,4 +45,4 @@ Start-Process powershell -ArgumentList @(
 )
 
 Start-Sleep -Seconds 4
-Start-Process "http://localhost:5173"
+Start-Process -FilePath "http://localhost:5173"

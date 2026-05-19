@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import NextStepsCard from './NextStepsCard.jsx';
 
 const inputClass =
   'w-20 rounded border border-stone-300 px-2 py-1 text-sm tabular-nums focus:border-amber-500 focus:outline-none';
 
-export default function ClientesPainel() {
+export default function ClientesPainel({ onIrPara }) {
   const { usuario } = useAuth();
   const isAdmin = usuario?.papel === 'admin';
   const [lista, setLista] = useState([]);
@@ -17,6 +18,7 @@ export default function ClientesPainel() {
   const [erro, setErro] = useState('');
   const [msg, setMsg] = useState('');
   const [carregando, setCarregando] = useState(true);
+  const [clienteSalvo, setClienteSalvo] = useState(null);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -69,6 +71,7 @@ export default function ClientesPainel() {
     try {
       await api.salvarPrecoAtacado(detalhe.id, produtoId, preco);
       setMsg('Preço atacado salvo.');
+      setClienteSalvo({ id: detalhe.id, nome: detalhe.nome });
       await verCliente(detalhe.id);
     } catch (e) {
       setErro(e.message);
@@ -80,6 +83,7 @@ export default function ClientesPainel() {
     try {
       await api.atribuirClienteRota(detalhe.id, rotaId || null);
       setMsg('Rota atualizada.');
+      setClienteSalvo({ id: detalhe.id, nome: detalhe.nome });
       await verCliente(detalhe.id);
     } catch (e) {
       setErro(e.message);
@@ -123,6 +127,10 @@ export default function ClientesPainel() {
         <p className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
           {msg}
         </p>
+      )}
+
+      {clienteSalvo && (
+        <NextStepsCard context="cliente" data={clienteSalvo} onIrPara={onIrPara} />
       )}
 
       <div className="grid gap-6 lg:grid-cols-2">

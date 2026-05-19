@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import NextStepsCard from './NextStepsCard.jsx';
 
 const inputClass =
   'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none';
@@ -11,7 +12,7 @@ function badgeValidade(dias) {
   return 'bg-stone-100 text-stone-600';
 }
 
-export default function LotesPainel({ produtos, onAtualizado }) {
+export default function LotesPainel({ produtos, onAtualizado, onIrPara }) {
   const [alertas, setAlertas] = useState([]);
   const [lotes, setLotes] = useState([]);
   const [form, setForm] = useState(false);
@@ -24,6 +25,7 @@ export default function LotesPainel({ produtos, onAtualizado }) {
   const [quantidade, setQuantidade] = useState('');
   const [validade, setValidade] = useState('');
   const [obs, setObs] = useState('');
+  const [loteSalvo, setLoteSalvo] = useState(null);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -49,12 +51,19 @@ export default function LotesPainel({ produtos, onAtualizado }) {
     setErro('');
     setMsg('');
     try {
-      await api.registrarLote({
+      const res = await api.registrarLote({
         produto_id: Number(produtoId),
         codigo: codigo.trim() || undefined,
         quantidade: Number(quantidade),
         data_validade: validade,
         observacao: obs.trim() || undefined,
+      });
+      const produtoNome = produtos.find((p) => p.id === Number(produtoId))?.nome;
+      setLoteSalvo({
+        id: res?.id,
+        produto: produtoNome,
+        quantidade: Number(quantidade),
+        lote: codigo.trim() || (res?.id ? `#L-${res.id}` : undefined),
       });
       setMsg('Lote registrado e estoque atualizado.');
       setForm(false);
@@ -89,6 +98,9 @@ export default function LotesPainel({ produtos, onAtualizado }) {
         <p className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
           {msg}
         </p>
+      )}
+      {loteSalvo && (
+        <NextStepsCard context="estoque" data={loteSalvo} onIrPara={onIrPara} />
       )}
       {erro && (
         <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

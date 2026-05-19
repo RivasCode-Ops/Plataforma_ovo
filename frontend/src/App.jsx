@@ -116,11 +116,13 @@ export default function App() {
           />
         );
       case 'novo':
-        return <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} />;
+        return (
+          <NovoPedidoForm produtos={produtos} onCriado={() => carregar()} onIrPara={setSecao} />
+        );
       case 'hoje':
         return <PedidosHojePainel />;
       case 'rotas':
-        return <RotasPainel />;
+        return <RotasPainel onIrPara={setSecao} />;
       case 'pedidos':
         return (
           <PedidosLista
@@ -134,11 +136,13 @@ export default function App() {
       case 'assinaturas':
         return <AssinaturasPainel produtos={produtos} onPedidoGerado={carregar} />;
       case 'lotes':
-        return <LotesPainel produtos={produtos} onAtualizado={carregar} />;
+        return (
+          <LotesPainel produtos={produtos} onAtualizado={carregar} onIrPara={setSecao} />
+        );
       case 'produtos':
         return <ProdutosPainel onAtualizado={carregar} />;
       case 'clientes':
-        return <ClientesPainel />;
+        return <ClientesPainel onIrPara={setSecao} />;
       case 'relatorio':
         return <RelatorioPainel />;
       case 'previsao':

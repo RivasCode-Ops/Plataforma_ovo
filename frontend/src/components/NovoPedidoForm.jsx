@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api.js';
 import PixPedidoModal from './PixPedidoModal.jsx';
+import NextStepsCard from './NextStepsCard.jsx';
 
 const inputClass =
   'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
 
-export default function NovoPedidoForm({ produtos, onCriado }) {
+export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
@@ -19,6 +20,7 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [pixModal, setPixModal] = useState(null);
+  const [pedidoSalvo, setPedidoSalvo] = useState(null);
 
   const precoUnitario = useCallback(
     (produto) => {
@@ -130,6 +132,13 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
         msgSucesso += ` · ${data.whatsapp.erro}`;
       }
       setSucesso(msgSucesso);
+      const produtoNome =
+        produtos.find((p) => p.id === itens[0]?.produto_id)?.nome || 'Pedido';
+      setPedidoSalvo({
+        id: data.pedido_id,
+        produto: produtoNome,
+        total: data.total,
+      });
       if (data.pix?.copia_cola) {
         setPixModal({ pedidoId: data.pedido_id, pix: data.pix });
       }
@@ -315,6 +324,14 @@ export default function NovoPedidoForm({ produtos, onCriado }) {
           pedidoId={pixModal.pedidoId}
           pix={pixModal.pix}
           onFechar={() => setPixModal(null)}
+        />
+      )}
+
+      {pedidoSalvo && (
+        <NextStepsCard
+          context="pedido"
+          data={pedidoSalvo}
+          onIrPara={onIrPara}
         />
       )}
     </section>

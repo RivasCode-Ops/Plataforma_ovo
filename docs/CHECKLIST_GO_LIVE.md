@@ -1,11 +1,18 @@
 # Checklist — colocar em produção (VPS)
 
-Use quando tiver servidor e domínio (ex.: `app.suagranja.com.br`).
+Use quando tiver servidor e domínio (sugestão Granja União: `app.granjauniao.com.br` → IP da VPS).
+
+Gerar `.env.prod` com senhas fortes no Windows:
+
+```powershell
+.\scripts\gerar-env-prod.ps1
+```
 
 ## Antes do deploy
 
-- [ ] VPS Linux com Docker instalado
-- [ ] Domínio com registro **A** apontando para o IP da VPS
+- [x] VPS Linux — `147.93.185.146` (Cloud VPS 10)
+- [x] DNS `app.granjauniao.com.br` → `147.93.185.146`
+- [ ] Docker instalado na VPS — ver [DEPLOY_APP_GRANJAUNIAO.md](DEPLOY_APP_GRANJAUNIAO.md)
 - [ ] Senhas definidas (não use as de desenvolvimento)
 
 ## Configuração

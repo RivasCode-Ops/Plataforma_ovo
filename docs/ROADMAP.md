@@ -16,7 +16,7 @@
 ## Fase 2 — Próxima
 
 - [ ] VPS em produção ([CHECKLIST_GO_LIVE.md](CHECKLIST_GO_LIVE.md))
-- [ ] Site granjauniao.com.br ativo ([INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md))
+- [ ] Site granjauniao.com.br em produção — repo GitHub Pages: [SITE_GITHUB.md](SITE_GITHUB.md) · integração API: [INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md)
 - [x] Múltiplos operadores / permissões ([OPERADORES.md](OPERADORES.md))
 - [x] Notificações (alertas no painel + push no celular) — [NOTIFICACOES.md](NOTIFICACOES.md)
 - [x] App mobile (PWA — instalar no celular)

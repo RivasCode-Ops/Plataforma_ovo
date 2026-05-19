@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import NextStepsCard from './NextStepsCard.jsx';
 
 const inputClass =
   'rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none';
 
-export default function RotasPainel() {
+export default function RotasPainel({ onIrPara }) {
   const { usuario } = useAuth();
   const isAdmin = usuario?.papel === 'admin';
   const [rotas, setRotas] = useState([]);
@@ -14,6 +15,7 @@ export default function RotasPainel() {
   const [ordem, setOrdem] = useState('0');
   const [erro, setErro] = useState('');
   const [msg, setMsg] = useState('');
+  const [rotaSalva, setRotaSalva] = useState(null);
 
   const carregar = useCallback(async () => {
     setErro('');
@@ -35,7 +37,12 @@ export default function RotasPainel() {
     if (!isAdmin) return;
     setErro('');
     try {
-      await api.criarRota({ nome, ordem: Number(ordem) });
+      const criada = await api.criarRota({ nome, ordem: Number(ordem) });
+      setRotaSalva({
+        id: criada?.id,
+        nome: criada?.nome || nome,
+        totalPedidos: 0,
+      });
       setNome('');
       setOrdem('0');
       setMsg('Rota criada.');
@@ -74,6 +81,10 @@ export default function RotasPainel() {
         <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           {msg}
         </p>
+      )}
+
+      {rotaSalva && (
+        <NextStepsCard context="rota" data={rotaSalva} onIrPara={onIrPara} />
       )}
 
       {isAdmin && (
