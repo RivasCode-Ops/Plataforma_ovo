@@ -98,8 +98,11 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
     setMsg('');
     try {
       const data = await api.gerarPedidoAssinatura(id);
-      setMsg(`Pedido #${data.pedido.pedido_id} gerado. Próxima entrega: ${data.proxima_entrega}`);
-      if (data.pedido.whatsapp?.link) window.open(data.pedido.whatsapp.link, '_blank', 'noopener');
+      let texto = `Pedido #${data.pedido.pedido_id} gerado. Próxima entrega: ${data.proxima_entrega}`;
+      if (data.pedido.whatsapp?.link) {
+        texto += ' — abra o WhatsApp pelo menu WhatsApp ou pelo pedido criado.';
+      }
+      setMsg(texto);
       await carregar();
       onPedidoGerado?.();
     } catch (err) {

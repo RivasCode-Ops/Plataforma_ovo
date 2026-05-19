@@ -6,6 +6,16 @@ import NextStepsCard from './NextStepsCard.jsx';
 const inputClass =
   'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
 
+const DIAS_SEMANA = [
+  { v: 0, l: 'Domingo' },
+  { v: 1, l: 'Segunda' },
+  { v: 2, l: 'Terça' },
+  { v: 3, l: 'Quarta' },
+  { v: 4, l: 'Quinta' },
+  { v: 5, l: 'Sexta' },
+  { v: 6, l: 'Sábado' },
+];
+
 export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -21,6 +31,10 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
   const [sucesso, setSucesso] = useState('');
   const [pixModal, setPixModal] = useState(null);
   const [pedidoSalvo, setPedidoSalvo] = useState(null);
+  const [whatsappLink, setWhatsappLink] = useState(null);
+  const [criarAssinatura, setCriarAssinatura] = useState(false);
+  const [freqAssinatura, setFreqAssinatura] = useState('semanal');
+  const [diaAssinatura, setDiaAssinatura] = useState(3);
 
   const precoUnitario = useCallback(
     (produto) => {
@@ -110,13 +124,15 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
     }
 
     setEnviando(true);
+    setWhatsappLink(null);
+    const clientePayload = {
+      nome: nome.trim(),
+      telefone: telefone.trim(),
+      endereco: endereco.trim() || undefined,
+    };
     try {
       const data = await api.criarPedido({
-        cliente: {
-          nome: nome.trim(),
-          telefone: telefone.trim(),
-          endereco: endereco.trim() || undefined,
-        },
+        cliente: clientePayload,
         itens,
         observacao: observacao.trim() || undefined,
         confirmar: true,
@@ -126,10 +142,23 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
         msgSucesso += ' (preço atacado aplicado)';
       }
       if (data.whatsapp?.ok && data.whatsapp.link) {
-        window.open(data.whatsapp.link, '_blank', 'noopener');
-        msgSucesso += ' · Link WhatsApp aberto';
+        setWhatsappLink(data.whatsapp.link);
+        msgSucesso += ' · Use o botão abaixo para abrir o WhatsApp';
       } else if (data.whatsapp?.erro) {
         msgSucesso += ` · ${data.whatsapp.erro}`;
+      }
+      if (criarAssinatura) {
+        try {
+          const ass = await api.criarAssinatura({
+            cliente: clientePayload,
+            frequencia: freqAssinatura,
+            dia_semana: diaAssinatura,
+            itens,
+          });
+          msgSucesso += ` · Assinatura #${ass.assinatura_id} criada (próxima: ${ass.proxima_entrega})`;
+        } catch (assErr) {
+          msgSucesso += ` · Assinatura não criada: ${assErr.message}`;
+        }
       }
       setSucesso(msgSucesso);
       const produtoNome =
@@ -149,6 +178,7 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
       setItens([]);
       setPrecosAtacado({});
       setClienteAtacado(null);
+      setCriarAssinatura(false);
       setProdutoId(produtos[0]?.id?.toString() ?? '');
       onCriado?.(data);
     } catch (err) {
@@ -175,9 +205,19 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
       )}
 
       {sucesso && (
-        <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          {sucesso}
-        </p>
+        <div className="mb-4 space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <p>{sucesso}</p>
+          {whatsappLink && (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex rounded-lg bg-[#25D366] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1da851]"
+            >
+              Abrir WhatsApp
+            </a>
+          )}
+        </div>
       )}
       {erro && (
         <p className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -296,6 +336,63 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
                 Total: R$ {total.toFixed(2)}
               </li>
             </ul>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-stone-200 bg-stone-50/80 p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={criarAssinatura}
+              onChange={(e) => setCriarAssinatura(e.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              <span className="block text-sm font-medium text-stone-800">
+                Criar assinatura recorrente
+              </span>
+              <span className="block text-xs text-stone-500">
+                Mesmos itens do pedido, entregas semanais ou quinzenais
+              </span>
+            </span>
+          </label>
+          {criarAssinatura && (
+            <div className="mt-3 flex flex-wrap gap-3 pl-7">
+              <label className="min-w-[140px]">
+                <span className="mb-1 block text-xs text-stone-500">Frequência</span>
+                <select
+                  value={freqAssinatura}
+                  onChange={(e) => setFreqAssinatura(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="semanal">Semanal</option>
+                  <option value="quinzenal">Quinzenal</option>
+                </select>
+              </label>
+              <label className="min-w-[140px]">
+                <span className="mb-1 block text-xs text-stone-500">Dia da entrega</span>
+                <select
+                  value={diaAssinatura}
+                  onChange={(e) => setDiaAssinatura(Number(e.target.value))}
+                  className={inputClass}
+                >
+                  {DIAS_SEMANA.map((d) => (
+                    <option key={d.v} value={d.v}>
+                      {d.l}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {onIrPara && (
+                <button
+                  type="button"
+                  onClick={() => onIrPara('assinaturas')}
+                  className="self-end text-xs font-medium text-amber-700 underline"
+                >
+                  Ver todas as assinaturas
+                </button>
+              )}
+            </div>
           )}
         </div>
 
