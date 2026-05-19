@@ -1,7 +1,15 @@
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pwaManifest = JSON.parse(
+  readFileSync(join(__dirname, 'public/manifest.json'), 'utf8')
+);
 
 export default defineConfig({
   plugins: [
@@ -9,28 +17,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
-      manifest: {
-        name: 'Plataforma Ovo',
-        short_name: 'Ovo',
-        description: 'Gestão de pedidos da granja',
-        theme_color: '#d97706',
-        background_color: '#fafaf9',
-        display: 'standalone',
-        orientation: 'portrait',
-        lang: 'pt-BR',
-        start_url: '/',
-        icons: [
-          {
-            src: 'icon.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
-          },
-        ],
-      },
+      includeAssets: ['icon.svg', 'icons/*.png', 'manifest.json'],
+      manifest: pwaManifest,
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json}'],
         runtimeCaching: [
           {
             urlPattern: /^\/api\//,

@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="96" fill="#d97706"/>
-  <ellipse cx="256" cy="280" rx="120" ry="150" fill="#fef3c7"/>
-  <ellipse cx="256" cy="300" rx="90" ry="110" fill="#fffbeb"/>
+  <ellipse cx="256" cy="268" rx="118" ry="148" fill="#ffffff"/>
+  <text x="256" y="290" text-anchor="middle" dominant-baseline="middle"
+    font-family="system-ui, sans-serif" font-size="92" font-weight="700" fill="#92400e">GU</text>
 </svg>

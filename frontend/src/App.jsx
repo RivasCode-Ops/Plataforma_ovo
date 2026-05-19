@@ -56,12 +56,27 @@ function menuVisivel(papel) {
   return MENU.filter((m) => !m.admin && SECOES_OPERADOR.has(m.id));
 }
 
+/** Atalhos PWA (?secao=...) → id da seção no painel */
+const SECAO_QUERY = {
+  'novo-pedido': 'novo',
+  novo: 'novo',
+  balcao: 'balcao',
+  'pedidos-dia': 'hoje',
+  hoje: 'hoje',
+};
+
+function secaoInicial() {
+  const q = new URLSearchParams(window.location.search).get('secao');
+  if (!q) return 'inicio';
+  return SECAO_QUERY[q] || q;
+}
+
 export default function App() {
   const { usuario, logout } = useAuth();
   const papel = usuario?.papel || 'admin';
   const menu = menuVisivel(papel);
   const { resumo: alertasResumo, pushAtivo, ativarPush } = useNotificacoes();
-  const [secao, setSecao] = useState('inicio');
+  const [secao, setSecao] = useState(secaoInicial);
   const [pedidos, setPedidos] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [filtro, setFiltro] = useState('');
