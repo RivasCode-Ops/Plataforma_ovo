@@ -33,14 +33,24 @@ export async function listarPrecosCliente(clienteId) {
 }
 
 export async function precosPorTelefone(telefone) {
-  const { rows } = await pool.query('SELECT id, nome FROM clientes WHERE telefone = $1', [
-    telefone,
-  ]);
+  const { rows } = await pool.query(
+    `SELECT c.id, c.nome, c.endereco, c.rota_id, r.nome AS rota_nome
+     FROM clientes c
+     LEFT JOIN rotas r ON r.id = c.rota_id
+     WHERE c.telefone = $1`,
+    [telefone]
+  );
   if (!rows.length) return { cliente: null, precos: {} };
   const cliente = rows[0];
   const precos = await mapaPrecosCliente(cliente.id);
   return {
-    cliente: { id: cliente.id, nome: cliente.nome },
+    cliente: {
+      id: cliente.id,
+      nome: cliente.nome,
+      endereco: cliente.endereco,
+      rota_id: cliente.rota_id,
+      rota_nome: cliente.rota_nome,
+    },
     precos,
   };
 }

@@ -73,13 +73,17 @@ export async function criarPedido({ cliente, itens, observacao, confirmar = true
       if (existente.rows.length > 0) {
         clienteId = existente.rows[0].id;
         await client.query(
-          'UPDATE clientes SET nome = $1, endereco = COALESCE($2, endereco) WHERE id = $3',
-          [cliente.nome, cliente.endereco ?? null, clienteId]
+          `UPDATE clientes SET nome = $1,
+            endereco = COALESCE($2, endereco),
+            rota_id = COALESCE($3, rota_id)
+           WHERE id = $4`,
+          [cliente.nome, cliente.endereco ?? null, cliente.rota_id ?? null, clienteId]
         );
       } else {
         const novo = await client.query(
-          'INSERT INTO clientes (nome, telefone, endereco) VALUES ($1, $2, $3) RETURNING id',
-          [cliente.nome, cliente.telefone, cliente.endereco ?? null]
+          `INSERT INTO clientes (nome, telefone, endereco, rota_id)
+           VALUES ($1, $2, $3, $4) RETURNING id`,
+          [cliente.nome, cliente.telefone, cliente.endereco ?? null, cliente.rota_id ?? null]
         );
         clienteId = novo.rows[0].id;
       }

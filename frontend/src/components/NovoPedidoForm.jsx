@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../services/api.js';
 import PixPedidoModal from './PixPedidoModal.jsx';
 import NextStepsCard from './NextStepsCard.jsx';
+import { montarEndereco, parseEndereco } from '../utils/endereco.js';
 
 const inputClass =
   'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500';
@@ -19,7 +20,12 @@ const DIAS_SEMANA = [
 export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
-  const [endereco, setEndereco] = useState('');
+  const [rua, setRua] = useState('');
+  const [numero, setNumero] = useState('');
+  const [bairro, setBairro] = useState('');
+  const [cep, setCep] = useState('');
+  const [rotaId, setRotaId] = useState('');
+  const [rotas, setRotas] = useState([]);
   const [observacao, setObservacao] = useState('');
   const [produtoId, setProdutoId] = useState('');
   const [quantidade, setQuantidade] = useState(1);
@@ -52,6 +58,10 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
   }, [produtos, produtoId]);
 
   useEffect(() => {
+    api.listarRotas(true).then(setRotas).catch(() => setRotas([]));
+  }, []);
+
+  useEffect(() => {
     const tel = telefone.replace(/\D/g, '');
     if (tel.length < 8) {
       setPrecosAtacado({});
@@ -65,6 +75,16 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
         setClienteAtacado(data.cliente);
         if (data.cliente?.nome && !nome.trim()) {
           setNome(data.cliente.nome);
+        }
+        if (data.cliente?.endereco) {
+          const parsed = parseEndereco(data.cliente.endereco);
+          setRua(parsed.rua);
+          setNumero(parsed.numero);
+          setBairro(parsed.bairro);
+          setCep(parsed.cep);
+        }
+        if (data.cliente?.rota_id != null) {
+          setRotaId(String(data.cliente.rota_id));
         }
       } catch {
         setPrecosAtacado({});
@@ -125,10 +145,12 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
 
     setEnviando(true);
     setWhatsappLink(null);
+    const enderecoTexto = montarEndereco({ rua, numero, bairro, cep });
     const clientePayload = {
       nome: nome.trim(),
       telefone: telefone.trim(),
-      endereco: endereco.trim() || undefined,
+      endereco: enderecoTexto || undefined,
+      rota_id: rotaId ? Number(rotaId) : undefined,
     };
     try {
       const data = await api.criarPedido({
@@ -173,7 +195,11 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
       }
       setNome('');
       setTelefone('');
-      setEndereco('');
+      setRua('');
+      setNumero('');
+      setBairro('');
+      setCep('');
+      setRotaId('');
       setObservacao('');
       setItens([]);
       setPrecosAtacado({});
@@ -226,40 +252,93 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
       )}
 
       <form onSubmit={enviarPedido} className="space-y-6">
-        <fieldset className="grid gap-4 sm:grid-cols-3">
+        <fieldset className="space-y-4">
           <legend className="sr-only">Cliente</legend>
-          <label className="block sm:col-span-1">
-            <span className="mb-1 block text-sm font-medium text-stone-700">Nome *</span>
-            <input
-              type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              className={inputClass}
-              placeholder="Maria Silva"
-              required
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-sm font-medium text-stone-700">Telefone *</span>
-            <input
-              type="tel"
-              value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
-              className={inputClass}
-              placeholder="11999990000"
-              required
-            />
-          </label>
-          <label className="block sm:col-span-1">
-            <span className="mb-1 block text-sm font-medium text-stone-700">Endereço</span>
-            <input
-              type="text"
-              value={endereco}
-              onChange={(e) => setEndereco(e.target.value)}
-              className={inputClass}
-              placeholder="Rua, número, bairro"
-            />
-          </label>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-stone-700">Nome *</span>
+              <input
+                type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className={inputClass}
+                placeholder="Maria Silva"
+                required
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-stone-700">Telefone *</span>
+              <input
+                type="tel"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                className={inputClass}
+                placeholder="89999990000"
+                required
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-stone-700">
+                Zona (rota de entrega)
+              </span>
+              <select
+                value={rotaId}
+                onChange={(e) => setRotaId(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Selecione a zona…</option>
+                {rotas.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.nome}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label className="block sm:col-span-2">
+              <span className="mb-1 block text-sm font-medium text-stone-700">Rua</span>
+              <input
+                type="text"
+                value={rua}
+                onChange={(e) => setRua(e.target.value)}
+                className={inputClass}
+                placeholder="Rua São Vicente"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-stone-700">Número</span>
+              <input
+                type="text"
+                value={numero}
+                onChange={(e) => setNumero(e.target.value)}
+                className={inputClass}
+                placeholder="174"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-stone-700">Bairro</span>
+              <input
+                type="text"
+                value={bairro}
+                onChange={(e) => setBairro(e.target.value)}
+                className={inputClass}
+                placeholder="Centro"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-sm font-medium text-stone-700">CEP</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={cep}
+                onChange={(e) => setCep(e.target.value)}
+                className={inputClass}
+                placeholder="64600-000"
+                maxLength={9}
+              />
+            </label>
+          </div>
         </fieldset>
 
         <div className="rounded-lg border border-stone-100 bg-stone-50 p-4">
