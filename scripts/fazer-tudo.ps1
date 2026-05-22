@@ -14,7 +14,7 @@ $status = git status --porcelain 2>$null
 if ($status) {
   Write-Host "Aviso: ha alteracoes locais nao commitadas. Commit manual se precisar." -ForegroundColor Yellow
 }
-git push origin main 2>$null
+git push origin main 2>&1 | Out-Null
 if ($LASTEXITCODE -eq 0) { Write-Host "Git: main atualizado no GitHub." -ForegroundColor Green }
 Pop-Location
 
