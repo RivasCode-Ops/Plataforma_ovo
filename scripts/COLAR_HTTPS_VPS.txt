@@ -1,0 +1,1 @@
+cd /opt/Plataforma_ovo && git pull --ff-only && bash infra/scripts/vps-ativar-https.sh
