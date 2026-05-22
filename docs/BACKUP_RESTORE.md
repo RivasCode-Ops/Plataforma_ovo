@@ -2,46 +2,54 @@
 
 ## Backup automático (produção)
 
-O script `infra/scripts/backup.sh` gera dump diário do PostgreSQL.
+O script `infra/scripts/backup.sh` gera dump diário do PostgreSQL (`.sql.gz`).
 
-### Configuração
+### Instalação rápida (VPS)
 
-1. No servidor, defina cron (ex.: 3h da manhã):
+**Windows:**
 
-```bash
-0 3 * * * /opt/plataforma_ovo/infra/scripts/backup.sh >> /var/log/plataforma_backup.log 2>&1
+```powershell
+cd C:\_PROJETOS\Plataforma_ovo
+.\scripts\setup-backup-vps.ps1
 ```
 
-2. Backups ficam em `infra/backups/` (ou caminho definido em `BACKUP_DIR`).
+**Na VPS:**
 
-3. Copie backups para outro local (Google Drive, outro servidor) semanalmente.
+```bash
+cd /opt/Plataforma_ovo && git pull
+bash infra/scripts/vps-setup-backup.sh
+```
+
+### O que faz
+
+| Item | Valor |
+|------|--------|
+| Horário | Todo dia às **3h** (cron) |
+| Pasta | `/var/backups/plataforma_ovo/` |
+| Retenção | **14 dias** |
+| Log | `/var/log/plataforma_backup.log` |
+
+### Cópia externa
+
+Copie `/var/backups/plataforma_ovo/` para Google Drive ou outro servidor **semanalmente**.
 
 ## Backup manual
 
-Com Docker:
+Com Docker na VPS:
 
-```powershell
-cd infra
-docker compose exec postgres pg_dump -U plataforma plataforma_ovo > backups/manual_$(Get-Date -Format yyyyMMdd_HHmm).sql
+```bash
+docker exec plataforma_ovo_db pg_dump -U plataforma plataforma_ovo | gzip > /var/backups/plataforma_ovo/manual_$(date +%F).sql.gz
 ```
 
 ## Restore
 
 **Atenção:** restore substitui todos os dados atuais. Pare o backend antes.
 
-```powershell
-cd infra
-docker compose exec -T postgres psql -U plataforma -d plataforma_ovo < backups/SEU_ARQUIVO.sql
-```
-
-Ou, para banco vazio:
-
-```powershell
-docker compose down
-# Remova volume postgres-data se necessário (CUIDADO)
-docker compose up -d postgres
-# Aguarde subir, então:
-docker compose exec -T postgres psql -U plataforma -d plataforma_ovo < backups/SEU_ARQUIVO.sql
+```bash
+cd /opt/Plataforma_ovo/infra
+docker compose --env-file .env.prod -f docker-compose.prod.yml stop backend web
+gunzip -c /var/backups/plataforma_ovo/SEU_ARQUIVO.sql.gz | docker exec -i plataforma_ovo_db psql -U plataforma -d plataforma_ovo
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d backend web
 ```
 
 ## Teste de restore
@@ -50,6 +58,6 @@ Faça restore em ambiente de teste pelo menos uma vez por trimestre.
 
 ## O que incluir no backup
 
-- Dump PostgreSQL (obrigatório)
-- Arquivo `.env` do servidor (guardado em local seguro, **não** no Git)
-- Configuração Nginx (`infra/nginx.conf`)
+- Dump PostgreSQL (obrigatório — cron acima)
+- Arquivo `.env.prod` do servidor (local seguro, **não** no Git)
+- Configuração Nginx em `/etc/nginx/sites-available/`
