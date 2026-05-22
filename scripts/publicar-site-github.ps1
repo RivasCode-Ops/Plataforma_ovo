@@ -41,9 +41,18 @@ if ($siteToken) {
 VITE_API_URL=https://app.granjauniao.com.br
 VITE_SITE_PEDIDO_TOKEN=$siteToken
 "@ | Set-Content (Join-Path $TempDir ".env.production") -Encoding UTF8
-  Write-Host "Gerado .env.production com token do site (nao commitar no repo principal)." -ForegroundColor Cyan
+  Write-Host "Gerado .env.production local (nao vai para o Git)." -ForegroundColor Cyan
 } else {
-  Write-Host "AVISO: infra/.env.prod sem SITE_PEDIDO_TOKEN — configure secret VITE_SITE_PEDIDO_TOKEN no GitHub." -ForegroundColor Yellow
+  Write-Host "AVISO: infra/.env.prod sem SITE_PEDIDO_TOKEN - configure secret VITE_SITE_PEDIDO_TOKEN no GitHub." -ForegroundColor Yellow
+}
+
+$gitignore = Join-Path $TempDir ".gitignore"
+if (Test-Path $gitignore) {
+  if (-not (Select-String -Path $gitignore -Pattern '\.env\.production' -Quiet)) {
+    Add-Content -Path $gitignore -Value ".env.production"
+  }
+} else {
+  Set-Content -Path $gitignore -Value ".env.production`n" -Encoding UTF8
 }
 
 Push-Location $TempDir
