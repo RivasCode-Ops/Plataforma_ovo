@@ -64,8 +64,18 @@ export const api = {
     }),
   removerPrecoAtacado: (clienteId, produtoId) =>
     request(`/clientes/${clienteId}/precos/${produtoId}`, { method: 'DELETE' }),
-  listarPedidos: (status) =>
-    request(`/pedidos${status ? `?status=${encodeURIComponent(status)}` : ''}`),
+  listarPedidos: ({ status, aguardandoPagamento } = {}) => {
+    const q = new URLSearchParams();
+    if (status) q.set('status', status);
+    if (aguardandoPagamento) q.set('aguardando_pagamento', '1');
+    const s = q.toString();
+    return request(`/pedidos${s ? `?${s}` : ''}`);
+  },
+  marcarPedidoPago: (id, forma_pagamento = 'pix') =>
+    request(`/pedidos/${id}/pagar`, {
+      method: 'PATCH',
+      body: JSON.stringify({ forma_pagamento }),
+    }),
   criarPedido: (payload) =>
     request('/pedidos', { method: 'POST', body: JSON.stringify(payload) }),
   vendaBalcao: (payload) =>

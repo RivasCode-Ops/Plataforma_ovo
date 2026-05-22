@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import {
+  STATUS_COR,
+  STATUS_LABEL,
+  STATUS_PEDIDO,
+  aguardaPagamento,
+} from '../utils/statusPedido.js';
 import PixPedidoModal from './PixPedidoModal.jsx';
-
-const STATUS_OPCOES = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado'];
-
-const statusCor = {
-  novo: 'bg-brand-100 text-brand-800',
-  confirmado: 'bg-blue-100 text-blue-800',
-  pago: 'bg-emerald-100 text-emerald-800',
-  enviado: 'bg-violet-100 text-violet-800',
-  entregue: 'bg-stone-200 text-stone-700',
-  cancelado: 'bg-red-100 text-red-800',
-};
 
 export default function PedidosLista({
   pedidos,
@@ -19,10 +14,14 @@ export default function PedidosLista({
   onFiltroChange,
   carregando,
   onMudarStatus,
+  onMarcarPago,
 }) {
   const [pixAtivo, setPixAtivo] = useState(false);
   const [pixModal, setPixModal] = useState(null);
   const [pixErro, setPixErro] = useState('');
+  const [marcandoId, setMarcandoId] = useState(null);
+
+  const aguardando = pedidos.filter((p) => aguardaPagamento(p.status)).length;
 
   useEffect(() => {
     api.pixStatus().then((s) => setPixAtivo(s.configurado)).catch(() => setPixAtivo(false));
@@ -38,19 +37,40 @@ export default function PedidosLista({
     }
   }
 
+  async function confirmarPagamento(id, forma = 'pix') {
+    setMarcandoId(id);
+    setPixErro('');
+    try {
+      await onMarcarPago(id, forma);
+      setPixModal(null);
+    } catch (e) {
+      setPixErro(e.message);
+    } finally {
+      setMarcandoId(null);
+    }
+  }
+
   return (
     <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-medium">Todos os pedidos</h2>
+        <div>
+          <h2 className="text-lg font-medium">Todos os pedidos</h2>
+          {aguardando > 0 && (
+            <p className="mt-1 text-sm text-amber-800">
+              {aguardando} pedido(s) aguardando confirmação de pagamento
+            </p>
+          )}
+        </div>
         <select
           value={filtro}
           onChange={(e) => onFiltroChange(e.target.value)}
           className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
         >
           <option value="">Todos os status</option>
-          {STATUS_OPCOES.map((s) => (
+          <option value="__aguardando__">Aguardando pagamento</option>
+          {STATUS_PEDIDO.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {STATUS_LABEL[s]}
             </option>
           ))}
         </select>
@@ -80,7 +100,12 @@ export default function PedidosLista({
             </thead>
             <tbody>
               {pedidos.map((p) => (
-                <tr key={p.id} className="border-b border-stone-100">
+                <tr
+                  key={p.id}
+                  className={`border-b border-stone-100 ${
+                    aguardaPagamento(p.status) ? 'bg-amber-50/60' : ''
+                  }`}
+                >
                   <td className="py-3 pr-4 font-medium">{p.id}</td>
                   <td className="py-3 pr-4">
                     <div>{p.cliente_nome}</div>
@@ -91,10 +116,10 @@ export default function PedidosLista({
                     <div className="flex flex-wrap items-center gap-1">
                       <span
                         className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                          statusCor[p.status] || 'bg-stone-100'
+                          STATUS_COR[p.status] || 'bg-stone-100'
                         }`}
                       >
-                        {p.status}
+                        {STATUS_LABEL[p.status] || p.status}
                       </span>
                       {p.observacao?.includes('[Site:') && (
                         <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">
@@ -105,26 +130,37 @@ export default function PedidosLista({
                   </td>
                   <td className="py-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <select
-                        defaultValue={p.status}
-                        onChange={(e) => onMudarStatus(p.id, e.target.value)}
-                        className="rounded border border-stone-300 px-2 py-1 text-xs"
-                      >
-                        {STATUS_OPCOES.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                      {pixAtivo && p.status !== 'cancelado' && (
+                      {aguardaPagamento(p.status) && (
+                        <button
+                          type="button"
+                          disabled={marcandoId === p.id}
+                          onClick={() => confirmarPagamento(p.id, 'pix')}
+                          className="rounded bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        >
+                          {marcandoId === p.id ? '…' : 'Pagamento recebido'}
+                        </button>
+                      )}
+                      {pixAtivo && p.status !== 'cancelado' && p.status !== 'pago' && (
                         <button
                           type="button"
                           onClick={() => abrirPix(p.id)}
-                          className="rounded bg-emerald-600 px-2 py-1 text-xs font-medium text-white hover:bg-emerald-700"
+                          className="rounded border border-emerald-600 px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
                         >
                           PIX
                         </button>
                       )}
+                      <select
+                        defaultValue={p.status}
+                        onChange={(e) => onMudarStatus(p.id, e.target.value)}
+                        className="rounded border border-stone-300 px-2 py-1 text-xs"
+                        title="Alterar status manualmente"
+                      >
+                        {STATUS_PEDIDO.map((s) => (
+                          <option key={s} value={s}>
+                            {STATUS_LABEL[s]}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </td>
                 </tr>
@@ -139,6 +175,8 @@ export default function PedidosLista({
           pedidoId={pixModal.pedidoId}
           pix={pixModal.pix}
           onFechar={() => setPixModal(null)}
+          onPagamentoRecebido={() => confirmarPagamento(pixModal.pedidoId, 'pix')}
+          marcando={marcandoId === pixModal.pedidoId}
         />
       )}
     </section>

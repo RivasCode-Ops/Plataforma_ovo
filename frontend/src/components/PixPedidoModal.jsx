@@ -1,6 +1,12 @@
 import { useState } from 'react';
 
-export default function PixPedidoModal({ pix, pedidoId, onFechar }) {
+export default function PixPedidoModal({
+  pix,
+  pedidoId,
+  onFechar,
+  onPagamentoRecebido,
+  marcando = false,
+}) {
   const [copiado, setCopiado] = useState(false);
 
   if (!pix?.copia_cola) return null;
@@ -26,6 +32,9 @@ export default function PixPedidoModal({ pix, pedidoId, onFechar }) {
         <p className="mt-1 text-sm text-stone-500">
           Valor: <strong className="text-stone-800">R$ {Number(pix.valor).toFixed(2)}</strong>
         </p>
+        <p className="mt-2 text-xs text-amber-800">
+          Envie o QR ou o código ao cliente. Quando o PIX cair na conta, confirme abaixo.
+        </p>
 
         {pix.qr_data_url && (
           <img
@@ -43,21 +52,33 @@ export default function PixPedidoModal({ pix, pedidoId, onFechar }) {
           className="mt-1 w-full rounded-lg border border-stone-200 bg-stone-50 p-2 font-mono text-xs"
         />
 
-        <div className="mt-4 flex gap-2">
-          <button
-            type="button"
-            onClick={copiar}
-            className="flex-1 rounded-lg bg-emerald-600 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-          >
-            {copiado ? 'Copiado!' : 'Copiar código'}
-          </button>
-          <button
-            type="button"
-            onClick={onFechar}
-            className="rounded-lg border border-stone-300 px-4 py-2 text-sm"
-          >
-            Fechar
-          </button>
+        <div className="mt-4 flex flex-col gap-2">
+          {onPagamentoRecebido && (
+            <button
+              type="button"
+              disabled={marcando}
+              onClick={onPagamentoRecebido}
+              className="w-full rounded-lg bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {marcando ? 'Salvando…' : 'Pagamento recebido — marcar como pago'}
+            </button>
+          )}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={copiar}
+              className="flex-1 rounded-lg border border-emerald-600 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
+            >
+              {copiado ? 'Copiado!' : 'Copiar código'}
+            </button>
+            <button
+              type="button"
+              onClick={onFechar}
+              className="rounded-lg border border-stone-300 px-4 py-2 text-sm"
+            >
+              Fechar
+            </button>
+          </div>
         </div>
       </div>
     </div>

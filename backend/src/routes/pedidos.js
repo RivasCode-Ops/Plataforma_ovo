@@ -8,6 +8,7 @@ router.get('/', async (req, res, next) => {
   try {
     const data = await pedidosService.listarPedidos({
       status: req.query.status,
+      aguardando_pagamento: req.query.aguardando_pagamento === '1',
       limite: Number(req.query.limite) || 50,
     });
     res.json({ data });
@@ -65,6 +66,16 @@ router.patch('/:id/status', async (req, res, next) => {
     const { status } = req.body;
     if (!status) return res.status(400).json({ erro: 'Campo status é obrigatório' });
     const data = await pedidosService.atualizarStatusPedido(req.params.id, status);
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/:id/pagar', async (req, res, next) => {
+  try {
+    const { forma_pagamento } = req.body || {};
+    const data = await pedidosService.marcarPedidoPago(req.params.id, { forma_pagamento });
     res.json({ data });
   } catch (err) {
     next(err);

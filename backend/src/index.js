@@ -19,7 +19,7 @@ import pixRouter from './routes/pix.js';
 import previsaoRouter from './routes/previsao.js';
 import balcaoRouter from './routes/balcao.js';
 import webhookRouter from './routes/webhook.js';
-import { seedOperadorAdmin } from './services/operadores.js';
+import { ensureOperadorDemo, seedOperadorAdmin } from './services/operadores.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -100,8 +100,9 @@ app.use((err, _req, res, _next) => {
 app.listen(port, async () => {
   try {
     await seedOperadorAdmin();
+    await ensureOperadorDemo();
   } catch (err) {
-    console.error('[auth] Falha ao criar operador admin:', err.message);
+    console.error('[auth] Falha ao criar operadores iniciais:', err.message);
   }
   console.log(`API meuzovo em http://localhost:${port}`);
 });

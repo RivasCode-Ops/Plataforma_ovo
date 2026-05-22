@@ -17,6 +17,20 @@ export async function seedOperadorAdmin() {
   console.log('[auth] Operador admin inicial criado');
 }
 
+/** Usuario demo para testes (login demo / senha demo123) */
+export async function ensureOperadorDemo() {
+  const login = 'demo';
+  const senha_hash = await hashSenha('demo123');
+  await pool.query(
+    `INSERT INTO operadores (nome, login, senha_hash, papel, ativo)
+     VALUES ('Usuario Demo', $1, $2, 'operador', true)
+     ON CONFLICT (login) DO UPDATE SET
+       senha_hash = EXCLUDED.senha_hash,
+       ativo = true`,
+    [login, senha_hash]
+  );
+}
+
 export async function autenticar(login, senha) {
   const { rows } = await pool.query(
     `SELECT id, nome, login, senha_hash, papel, ativo

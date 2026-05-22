@@ -87,8 +87,14 @@ export default function App() {
     setCarregando(true);
     setErro('');
     try {
+      const pedidosQuery =
+        filtro === '__aguardando__'
+          ? { aguardandoPagamento: true }
+          : filtro
+            ? { status: filtro }
+            : {};
       const [peds, prods] = await Promise.all([
-        api.listarPedidos(filtro || undefined),
+        api.listarPedidos(pedidosQuery),
         api.listarProdutos(),
       ]);
       setPedidos(peds);
@@ -119,6 +125,16 @@ export default function App() {
     }
   }
 
+  async function marcarPedidoPago(id, forma_pagamento = 'pix') {
+    try {
+      await api.marcarPedidoPago(id, forma_pagamento);
+      await carregar();
+    } catch (e) {
+      setErro(e.message);
+      throw e;
+    }
+  }
+
   function renderSecao() {
     switch (secao) {
       case 'inicio':
@@ -142,7 +158,7 @@ export default function App() {
           <VendaBalcaoForm produtos={produtos} onVenda={() => carregar()} />
         );
       case 'hoje':
-        return <PedidosHojePainel />;
+        return <PedidosHojePainel onMarcarPago={marcarPedidoPago} />;
       case 'rotas':
         return <RotasPainel onIrPara={setSecao} />;
       case 'pedidos':
@@ -153,6 +169,7 @@ export default function App() {
             onFiltroChange={setFiltro}
             carregando={carregando}
             onMudarStatus={mudarStatus}
+            onMarcarPago={marcarPedidoPago}
           />
         );
       case 'assinaturas':

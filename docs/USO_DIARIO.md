@@ -59,7 +59,7 @@ Acesse: http://localhost:5173
 
 | Campo | Valor |
 |-------|--------|
-| Usuário | `admin` |
+| Usuário | `admin` ou `demo` (teste) |
 | Senha | `plataforma123` |
 
 Altere em `backend\.env` → `ADMIN_PASSWORD`.

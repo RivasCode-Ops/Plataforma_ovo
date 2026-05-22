@@ -25,7 +25,16 @@ O operador envia o QR ou o código ao cliente (WhatsApp, presencial).
 
 ## Confirmação de pagamento
 
-O sistema **não confirma** pagamento automaticamente (sem integração bancária). Após receber, marque o pedido como **pago** manualmente.
+O sistema **não confirma** pagamento automaticamente (sem integração bancária).
+
+No painel:
+
+1. **Pedidos** → filtro **Aguardando pagamento** (status novo ou confirmado)
+2. Botão verde **Pagamento recebido** na linha do pedido
+3. No modal **PIX**, botão **Pagamento recebido — marcar como pago**
+4. **Pedidos do dia** — mesmo botão em cada card
+
+API: `PATCH /api/pedidos/:id/pagar` com `{ "forma_pagamento": "pix" }` (opcional).
 
 ## Teste local
 

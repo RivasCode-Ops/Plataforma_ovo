@@ -6,11 +6,16 @@ import { mapaPrecosCliente, resolverPrecoUnitario } from './clientePrecos.js';
 
 const STATUS_VALIDOS = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado'];
 
-export async function listarPedidos({ status, limite = 50 } = {}) {
+const AGUARDANDO_PAGAMENTO = ['novo', 'confirmado'];
+
+export async function listarPedidos({ status, aguardando_pagamento, limite = 50 } = {}) {
   const params = [];
   let where = '';
 
-  if (status) {
+  if (aguardando_pagamento) {
+    where = `WHERE p.status = ANY($1::text[])`;
+    params.push(AGUARDANDO_PAGAMENTO);
+  } else if (status) {
     params.push(status);
     where = `WHERE p.status = $${params.length}`;
   }
@@ -197,6 +202,37 @@ export async function atualizarStatusPedido(id, status) {
     throw Object.assign(new Error('Pedido não encontrado'), { status: 404 });
   }
 
+  return rows[0];
+}
+
+/** Confirma pagamento manual (PIX, dinheiro, etc.) */
+export async function marcarPedidoPago(id, { forma_pagamento = 'pix' } = {}) {
+  const pedido = await obterPedido(id);
+  if (!pedido) {
+    throw Object.assign(new Error('Pedido não encontrado'), { status: 404 });
+  }
+  if (pedido.status === 'cancelado') {
+    throw Object.assign(new Error('Pedido cancelado não pode ser pago'), { status: 400 });
+  }
+  if (pedido.status === 'pago') {
+    return pedido;
+  }
+  if (!AGUARDANDO_PAGAMENTO.includes(pedido.status)) {
+    throw Object.assign(
+      new Error(`Pedido em status "${pedido.status}" — use o seletor de status se necessário`),
+      { status: 400 }
+    );
+  }
+
+  const { rows } = await pool.query(
+    `UPDATE pedidos
+     SET status = 'pago',
+         forma_pagamento = COALESCE($1, forma_pagamento),
+         updated_at = NOW()
+     WHERE id = $2
+     RETURNING *`,
+    [forma_pagamento, id]
+  );
   return rows[0];
 }
 

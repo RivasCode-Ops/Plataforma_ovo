@@ -1,19 +1,24 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import { STATUS_LABEL, aguardaPagamento } from '../utils/statusPedido.js';
 import BotaoWhatsApp from './BotaoWhatsApp.jsx';
 
 function hojeISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function CardPedido({ p }) {
+function CardPedido({ p, onMarcarPago, marcando }) {
   return (
-    <article className="break-inside-avoid rounded-lg border border-stone-200 p-4 print:border-stone-400">
+    <article
+      className={`break-inside-avoid rounded-lg border p-4 print:border-stone-400 ${
+        aguardaPagamento(p.status) ? 'border-amber-200 bg-amber-50/50' : 'border-stone-200'
+      }`}
+    >
       <div className="flex flex-wrap justify-between gap-2 border-b border-stone-100 pb-2">
         <strong>
           #{p.id} — {p.cliente_nome}
         </strong>
-        <span className="text-sm capitalize">{p.status}</span>
+        <span className="text-sm">{STATUS_LABEL[p.status] || p.status}</span>
       </div>
       <p className="mt-2 text-sm">
         {p.cliente_telefone}
@@ -28,7 +33,17 @@ function CardPedido({ p }) {
       </ul>
       <p className="mt-2 font-semibold">Total: R$ {Number(p.total).toFixed(2)}</p>
       {p.observacao && <p className="mt-1 text-xs text-stone-600">Obs: {p.observacao}</p>}
-      <div className="mt-3 print:hidden">
+      <div className="mt-3 flex flex-wrap gap-2 print:hidden">
+        {aguardaPagamento(p.status) && onMarcarPago && (
+          <button
+            type="button"
+            disabled={marcando}
+            onClick={() => onMarcarPago(p.id)}
+            className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+          >
+            {marcando ? '…' : 'Pagamento recebido'}
+          </button>
+        )}
         <BotaoWhatsApp
           tipo="entrega"
           telefone={p.cliente_telefone}
@@ -48,7 +63,7 @@ function CardPedido({ p }) {
   );
 }
 
-function SecaoRota({ titulo, pedidos, total, qtd }) {
+function SecaoRota({ titulo, pedidos, total, qtd, onMarcarPago, marcandoId }) {
   if (!pedidos?.length) return null;
   return (
     <section className="break-inside-avoid">
@@ -57,17 +72,23 @@ function SecaoRota({ titulo, pedidos, total, qtd }) {
       </h3>
       <div className="space-y-4">
         {pedidos.map((p) => (
-          <CardPedido key={p.id} p={p} />
+          <CardPedido
+            key={p.id}
+            p={p}
+            onMarcarPago={onMarcarPago}
+            marcando={marcandoId === p.id}
+          />
         ))}
       </div>
     </section>
   );
 }
 
-export default function PedidosHojePainel() {
+export default function PedidosHojePainel({ onMarcarPago }) {
   const [dia, setDia] = useState(hojeISO());
   const [dados, setDados] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const [marcandoId, setMarcandoId] = useState(null);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -86,6 +107,17 @@ export default function PedidosHojePainel() {
 
   function imprimir() {
     window.print();
+  }
+
+  async function confirmarPagamento(id) {
+    if (!onMarcarPago) return;
+    setMarcandoId(id);
+    try {
+      await onMarcarPago(id, 'pix');
+      await carregar();
+    } finally {
+      setMarcandoId(null);
+    }
   }
 
   const dataFormatada = new Date(dia + 'T12:00:00').toLocaleDateString('pt-BR', {
@@ -156,6 +188,8 @@ export default function PedidosHojePainel() {
                 pedidos={g.pedidos}
                 total={g.total}
                 qtd={g.qtd}
+                onMarcarPago={confirmarPagamento}
+                marcandoId={marcandoId}
               />
             ))}
             <SecaoRota
@@ -163,6 +197,8 @@ export default function PedidosHojePainel() {
               pedidos={dados.sem_rota?.pedidos}
               total={dados.sem_rota?.total ?? 0}
               qtd={dados.sem_rota?.qtd ?? 0}
+              onMarcarPago={confirmarPagamento}
+              marcandoId={marcandoId}
             />
           </div>
         </>
