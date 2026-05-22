@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
 import { requireAdmin } from '../middleware/auth.js';
+import {
+  enriquecerProdutoComPromoLote,
+  mapaPromocaoLotePorProduto,
+} from '../services/lotes.js';
 
 const router = Router();
 
@@ -14,7 +18,14 @@ router.get('/', async (req, res, next) => {
         : `SELECT id, nome, unidade, preco, estoque, ativo
            FROM produtos WHERE ativo = TRUE ORDER BY nome`
     );
-    res.json({ data: rows });
+    const promoMap = await mapaPromocaoLotePorProduto();
+    const data = rows.map((p) =>
+      enriquecerProdutoComPromoLote(
+        { ...p, preco: Number(p.preco), estoque: Number(p.estoque) },
+        promoMap
+      )
+    );
+    res.json({ data });
   } catch (err) {
     next(err);
   }

@@ -34,4 +34,22 @@ router.post('/', async (req, res, next) => {
   }
 });
 
+router.patch('/:id/desconto', async (req, res, next) => {
+  try {
+    const data = await lotes.definirDescontoLote(Number(req.params.id), req.body);
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/:id/desconto', async (req, res, next) => {
+  try {
+    const data = await lotes.removerDescontoLote(Number(req.params.id));
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

@@ -1,5 +1,9 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
+import {
+  aplicarDescontoPercentual,
+  mapaPromocaoLotePorProduto,
+} from '../services/lotes.js';
 
 const router = Router();
 
@@ -9,17 +13,27 @@ router.get('/cardapio', async (_req, res, next) => {
       `SELECT id, nome, unidade, preco, estoque
        FROM produtos WHERE ativo = TRUE ORDER BY id`
     );
+    const promoMap = await mapaPromocaoLotePorProduto();
     res.json({
       data: {
         origem: process.env.SITE_ORIGEM || 'granjauniao.com.br',
-        produtos: rows.map((p) => ({
-          id: p.id,
-          nome: p.nome,
-          unidade: p.unidade,
-          preco: Number(p.preco),
-          disponivel: p.estoque > 0,
-          estoque: p.estoque,
-        })),
+        produtos: rows.map((p) => {
+          const preco = Number(p.preco);
+          const promo = promoMap[p.id];
+          const preco_promocional = promo
+            ? aplicarDescontoPercentual(preco, promo.desconto_percentual)
+            : null;
+          return {
+            id: p.id,
+            nome: p.nome,
+            unidade: p.unidade,
+            preco,
+            preco_promocional,
+            promocao_ate: promo?.desconto_ate ?? null,
+            disponivel: p.estoque > 0,
+            estoque: p.estoque,
+          };
+        }),
       },
     });
   } catch (err) {

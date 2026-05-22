@@ -26,6 +26,9 @@ export default function LotesPainel({ produtos, onAtualizado, onIrPara }) {
   const [validade, setValidade] = useState('');
   const [obs, setObs] = useState('');
   const [loteSalvo, setLoteSalvo] = useState(null);
+  const [promoLoteId, setPromoLoteId] = useState(null);
+  const [promoPct, setPromoPct] = useState('10');
+  const [promoAte, setPromoAte] = useState('');
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -71,6 +74,45 @@ export default function LotesPainel({ produtos, onAtualizado, onIrPara }) {
       setQuantidade('');
       setValidade('');
       setObs('');
+      await carregar();
+      onAtualizado?.();
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
+
+  function abrirPromo(lote) {
+    setPromoLoteId(lote.id);
+    setPromoPct(lote.desconto_percentual ? String(lote.desconto_percentual) : '10');
+    setPromoAte(lote.desconto_ate || '');
+    setErro('');
+    setMsg('');
+  }
+
+  async function salvarPromo(e) {
+    e.preventDefault();
+    setErro('');
+    setMsg('');
+    try {
+      await api.definirDescontoLote(promoLoteId, {
+        desconto_percentual: Number(promoPct),
+        desconto_ate: promoAte,
+      });
+      setMsg('Desconto do lote ativado.');
+      setPromoLoteId(null);
+      await carregar();
+      onAtualizado?.();
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
+
+  async function removerPromo(loteId) {
+    setErro('');
+    try {
+      await api.removerDescontoLote(loteId);
+      setMsg('Desconto removido.');
+      setPromoLoteId(null);
       await carregar();
       onAtualizado?.();
     } catch (err) {
@@ -178,6 +220,7 @@ export default function LotesPainel({ produtos, onAtualizado, onIrPara }) {
                     <th className="py-2 pr-3">Lote</th>
                     <th className="py-2 pr-3">Qtd</th>
                     <th className="py-2 pr-3">Validade</th>
+                    <th className="py-2 pr-3">Promoção</th>
                     <th className="py-2">Status</th>
                   </tr>
                 </thead>
@@ -190,16 +233,91 @@ export default function LotesPainel({ produtos, onAtualizado, onIrPara }) {
                         {l.quantidade}/{l.quantidade_inicial}
                       </td>
                       <td className="py-2 pr-3">{l.data_validade}</td>
+                      <td className="py-2 pr-3">
+                        {l.desconto_ativo ? (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
+                            −{l.desconto_percentual}% até {l.desconto_ate}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-stone-400">—</span>
+                        )}
+                      </td>
                       <td className="py-2">
-                        <span className={`rounded-full px-2 py-0.5 text-xs ${badgeValidade(l.dias_para_vencer)}`}>
-                          {l.dias_para_vencer < 0 ? 'Vencido' : `${l.dias_para_vencer}d`}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`rounded-full px-2 py-0.5 text-xs ${badgeValidade(l.dias_para_vencer)}`}>
+                            {l.dias_para_vencer < 0 ? 'Vencido' : `${l.dias_para_vencer}d`}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => abrirPromo(l)}
+                            className="text-xs font-medium text-brand-700 hover:underline"
+                          >
+                            {l.desconto_ativo ? 'Alterar' : 'Desconto'}
+                          </button>
+                          {l.desconto_ativo && (
+                            <button
+                              type="button"
+                              onClick={() => removerPromo(l.id)}
+                              className="text-xs text-stone-500 hover:text-red-700"
+                            >
+                              Remover
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+          )}
+
+          {promoLoteId && (
+            <form
+              onSubmit={salvarPromo}
+              className="mt-6 grid gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 sm:grid-cols-3"
+            >
+              <p className="sm:col-span-3 text-sm font-medium text-amber-900">
+                Desconto temporário no lote #{promoLoteId} — expira automaticamente na data escolhida
+              </p>
+              <label className="block">
+                <span className="mb-1 block text-xs text-stone-600">Desconto (%)</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={90}
+                  value={promoPct}
+                  onChange={(e) => setPromoPct(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs text-stone-600">Válido até</span>
+                <input
+                  type="date"
+                  value={promoAte}
+                  onChange={(e) => setPromoAte(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </label>
+              <div className="flex items-end gap-2">
+                <button
+                  type="submit"
+                  className="rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white"
+                >
+                  Salvar promoção
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPromoLoteId(null)}
+                  className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
           )}
         </>
       )}

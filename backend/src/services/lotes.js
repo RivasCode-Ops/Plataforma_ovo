@@ -1,5 +1,115 @@
 import { pool, withTransaction } from '../db.js';
 
+const SQL_DESCONTO_ATIVO =
+  'l.desconto_percentual IS NOT NULL AND l.desconto_percentual > 0 AND l.desconto_ate >= CURRENT_DATE';
+
+export function aplicarDescontoPercentual(precoBase, descontoPercentual) {
+  const base = Number(precoBase);
+  const pct = Number(descontoPercentual);
+  if (!Number.isFinite(base) || !Number.isFinite(pct) || pct <= 0) return base;
+  const preco = base * (1 - pct / 100);
+  return Math.round(preco * 100) / 100;
+}
+
+export function loteComDescontoAtivo(lote) {
+  if (!lote?.desconto_percentual || Number(lote.desconto_percentual) <= 0) return false;
+  if (!lote.desconto_ate) return false;
+  const raw = lote.desconto_ate;
+  const ate =
+    raw instanceof Date
+      ? raw
+      : new Date(`${String(raw).slice(0, 10)}T12:00:00`);
+  const hoje = new Date();
+  hoje.setHours(12, 0, 0, 0);
+  ate.setHours(12, 0, 0, 0);
+  return ate >= hoje;
+}
+
+function mapLoteRow(r) {
+  const desconto_ativo = loteComDescontoAtivo(r);
+  return {
+    ...r,
+    quantidade: Number(r.quantidade),
+    quantidade_inicial: Number(r.quantidade_inicial),
+    desconto_percentual:
+      r.desconto_percentual != null ? Number(r.desconto_percentual) : null,
+    desconto_ativo,
+  };
+}
+
+/** Preço médio ponderado pelo FIFO quando há desconto em lotes. */
+export async function resolverPrecoUnitarioFifo(client, produtoId, quantidade, precoBase) {
+  const qtd = Number(quantidade);
+  if (!Number.isInteger(qtd) || qtd < 1) {
+    throw Object.assign(new Error('Quantidade inválida'), { status: 400 });
+  }
+
+  const { rows } = await client.query(
+    `SELECT id, quantidade, desconto_percentual, desconto_ate
+     FROM lotes
+     WHERE produto_id = $1 AND quantidade > 0
+     ORDER BY data_validade ASC, id ASC`,
+    [produtoId]
+  );
+
+  let restante = qtd;
+  let soma = 0;
+
+  for (const lote of rows) {
+    if (restante <= 0) break;
+    const baixa = Math.min(Number(lote.quantidade), restante);
+    const unit = loteComDescontoAtivo(lote)
+      ? aplicarDescontoPercentual(precoBase, lote.desconto_percentual)
+      : Number(precoBase);
+    soma += baixa * unit;
+    restante -= baixa;
+  }
+
+  if (restante > 0) {
+    soma += restante * Number(precoBase);
+  }
+
+  return Math.round((soma / qtd) * 100) / 100;
+}
+
+/** Menor preço possível com promo ativa em algum lote (exibição no cardápio). */
+export async function mapaPromocaoLotePorProduto(client = pool) {
+  const { rows } = await client.query(
+    `SELECT l.produto_id, MAX(l.desconto_percentual) AS desconto_max,
+            MAX(l.desconto_ate) AS desconto_ate
+     FROM lotes l
+     WHERE l.quantidade > 0 AND ${SQL_DESCONTO_ATIVO}
+     GROUP BY l.produto_id`
+  );
+  const map = {};
+  for (const r of rows) {
+    map[r.produto_id] = {
+      desconto_percentual: Number(r.desconto_max),
+      desconto_ate: r.desconto_ate,
+    };
+  }
+  return map;
+}
+
+export function enriquecerProdutoComPromoLote(produto, promoMap) {
+  const promo = promoMap[produto.id];
+  if (!promo) {
+    return { ...produto, desconto_lote_ativo: false };
+  }
+  const precoBase = Number(produto.preco);
+  const preco_promocional = aplicarDescontoPercentual(
+    precoBase,
+    promo.desconto_percentual
+  );
+  return {
+    ...produto,
+    desconto_lote_ativo: true,
+    desconto_lote_percentual: promo.desconto_percentual,
+    desconto_lote_ate: promo.desconto_ate,
+    preco_promocional,
+  };
+}
+
 export async function listarLotes({ produto_id, apenas_com_estoque } = {}) {
   const params = [];
   const conds = [];
@@ -25,7 +135,7 @@ export async function listarLotes({ produto_id, apenas_com_estoque } = {}) {
   );
 
   return rows.map((r) => ({
-    ...r,
+    ...mapLoteRow(r),
     dias_para_vencer: Number(r.dias_para_vencer),
   }));
 }
@@ -41,7 +151,49 @@ export async function listarAlertasValidade(dias = 7) {
      ORDER BY l.data_validade`,
     [dias]
   );
-  return rows;
+  return rows.map(mapLoteRow);
+}
+
+export async function definirDescontoLote(loteId, { desconto_percentual, desconto_ate }) {
+  const pct = Number(desconto_percentual);
+  if (!Number.isFinite(pct) || pct <= 0 || pct > 90) {
+    throw Object.assign(new Error('desconto_percentual deve ser entre 1 e 90'), {
+      status: 400,
+    });
+  }
+  if (!desconto_ate) {
+    throw Object.assign(new Error('desconto_ate é obrigatório'), { status: 400 });
+  }
+
+  const { rows } = await pool.query(
+    `UPDATE lotes
+     SET desconto_percentual = $1, desconto_ate = $2::date
+     WHERE id = $3 AND quantidade > 0
+     RETURNING *`,
+    [pct, desconto_ate, loteId]
+  );
+
+  if (!rows.length) {
+    throw Object.assign(new Error('Lote não encontrado ou sem estoque'), { status: 404 });
+  }
+
+  return mapLoteRow(rows[0]);
+}
+
+export async function removerDescontoLote(loteId) {
+  const { rows } = await pool.query(
+    `UPDATE lotes
+     SET desconto_percentual = NULL, desconto_ate = NULL
+     WHERE id = $1
+     RETURNING *`,
+    [loteId]
+  );
+
+  if (!rows.length) {
+    throw Object.assign(new Error('Lote não encontrado'), { status: 404 });
+  }
+
+  return mapLoteRow(rows[0]);
 }
 
 export async function registrarLote({

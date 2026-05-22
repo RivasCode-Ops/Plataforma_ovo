@@ -26,6 +26,26 @@ Get-ChildItem $SiteDir -Force | Where-Object {
   Copy-Item $_.FullName -Destination (Join-Path $TempDir $_.Name) -Recurse -Force
 }
 
+$envProd = Join-Path $Root "infra\.env.prod"
+$siteToken = ""
+if (Test-Path $envProd) {
+  foreach ($line in Get-Content $envProd) {
+    if ($line -match '^\s*SITE_PEDIDO_TOKEN=(.+)$') {
+      $siteToken = $Matches[1].Trim().Trim('"')
+      break
+    }
+  }
+}
+if ($siteToken) {
+  @"
+VITE_API_URL=https://app.granjauniao.com.br
+VITE_SITE_PEDIDO_TOKEN=$siteToken
+"@ | Set-Content (Join-Path $TempDir ".env.production") -Encoding UTF8
+  Write-Host "Gerado .env.production com token do site (nao commitar no repo principal)." -ForegroundColor Cyan
+} else {
+  Write-Host "AVISO: infra/.env.prod sem SITE_PEDIDO_TOKEN — configure secret VITE_SITE_PEDIDO_TOKEN no GitHub." -ForegroundColor Yellow
+}
+
 Push-Location $TempDir
 try {
   if (-not (Test-Path ".git")) {

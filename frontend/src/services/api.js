@@ -122,6 +122,13 @@ export const api = {
   lotesAlertas: (dias = 7) => request(`/lotes/alertas?dias=${dias}`),
   registrarLote: (payload) =>
     request('/lotes', { method: 'POST', body: JSON.stringify(payload) }),
+  definirDescontoLote: (loteId, payload) =>
+    request(`/lotes/${loteId}/desconto`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  removerDescontoLote: (loteId) =>
+    request(`/lotes/${loteId}/desconto`, { method: 'DELETE' }),
   listarNotificacoes: () => request('/notificacoes'),
   previsaoDemanda: (dias, periodo) => {
     const q = new URLSearchParams();

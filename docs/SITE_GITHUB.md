@@ -13,13 +13,21 @@ cd C:\_PROJETOS\Plataforma_ovo
 
 Cria/atualiza: `https://github.com/RivasCode-Ops/granjauniao-site`
 
-### 2. Ativar GitHub Pages
+### 2. Pedido online (API)
+
+1. Na VPS: `SITE_PEDIDO_TOKEN` em `infra/.env.prod` (gerar com `.\scripts\gerar-env-prod.ps1` se ainda não tiver)
+2. No repo **granjauniao-site** → Settings → Secrets → `VITE_SITE_PEDIDO_TOKEN` (mesmo valor)
+3. Redeploy do backend na VPS após alterar `.env.prod`
+
+Detalhes: [INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md) §3.
+
+### 3. Ativar GitHub Pages
 
 1. Abra https://github.com/RivasCode-Ops/granjauniao-site/settings/pages
 2. **Build and deployment** → Source: **GitHub Actions**
 3. Após o workflow verde, acesse: https://rivascode-ops.github.io/granjauniao-site/
 
-### 3. Domínio granjauniao.com.br
+### 4. Domínio granjauniao.com.br
 
 Guia completo: [DOMINIO_GRANJAUNIAO.md](DOMINIO_GRANJAUNIAO.md) (DNS, Pages, HTTPS).
 

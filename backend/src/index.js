@@ -19,6 +19,7 @@ import pixRouter from './routes/pix.js';
 import previsaoRouter from './routes/previsao.js';
 import balcaoRouter from './routes/balcao.js';
 import webhookRouter from './routes/webhook.js';
+import sitePedidoRouter from './routes/sitePedido.js';
 import { ensureOperadorDemo, seedOperadorAdmin } from './services/operadores.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -28,6 +29,7 @@ const rotasPublicas = new Set([
   '/health',
   '/cardapio',
   '/cardapio-whatsapp',
+  '/pedido-site',
   '/auth/login',
 ]);
 
@@ -62,6 +64,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth', authRouter);
 app.use('/api/webhook', webhookRouter);
 app.use('/api', cardapioRouter);
+app.use('/api', sitePedidoRouter);
 
 app.use('/api', (req, res, next) => {
   const path = req.path.replace(/\/$/, '') || '/';

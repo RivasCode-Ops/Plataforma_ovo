@@ -9,6 +9,7 @@
 - [x] Pedidos do dia + impressão
 - [x] Assinaturas semanal/quinzenal
 - [x] Lotes e validade (FIFO)
+- [x] Desconto temporário por lote — [DESCONTO_LOTE.md](DESCONTO_LOTE.md)
 - [x] Painel com menu lateral
 - [x] Deploy Docker (documentado)
 - [x] Integração site (preparada, site pausado)

@@ -101,6 +101,8 @@ CREATE TABLE lotes (
   data_validade date NOT NULL,
   data_entrada date NOT NULL DEFAULT CURRENT_DATE,
   observacao text,
+  desconto_percentual numeric(5, 2),
+  desconto_ate date,
   created_at timestamp NOT NULL DEFAULT now()
 );
 

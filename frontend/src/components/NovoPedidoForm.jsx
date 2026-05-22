@@ -47,7 +47,11 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
     (produto) => {
       if (!produto) return 0;
       const atacado = precosAtacado[produto.id];
-      return atacado != null ? Number(atacado) : Number(produto.preco);
+      const base = atacado != null ? Number(atacado) : Number(produto.preco);
+      if (produto.preco_promocional != null) {
+        return Math.min(base, Number(produto.preco_promocional));
+      }
+      return base;
     },
     [precosAtacado]
   );
@@ -367,10 +371,12 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
                 {produtos.map((p) => {
                   const preco = precoUnitario(p);
                   const atacado = precosAtacado[p.id] != null;
+                  const promo = p.desconto_lote_ativo;
                   return (
                     <option key={p.id} value={p.id}>
                       {p.nome} — R$ {preco.toFixed(2)}
-                      {atacado ? ' (atacado)' : ''} · est: {p.estoque}
+                      {atacado ? ' (atacado)' : ''}
+                      {promo ? ' · promo lote' : ''} · est: {p.estoque}
                     </option>
                   );
                 })}
@@ -402,6 +408,7 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
                 const unit = precoUnitario(p);
                 const sub = unit * item.quantidade;
                 const atacado = p && precosAtacado[p.id] != null;
+                const promo = p?.desconto_lote_ativo;
                 return (
                   <li
                     key={item.produto_id}
@@ -411,6 +418,9 @@ export default function NovoPedidoForm({ produtos, onCriado, onIrPara }) {
                       {item.quantidade}× {p?.nome ?? 'Produto'} — R$ {sub.toFixed(2)}
                       {atacado && (
                         <span className="ml-1 text-xs text-blue-600">atacado</span>
+                      )}
+                      {promo && (
+                        <span className="ml-1 text-xs text-amber-700">promo lote</span>
                       )}
                     </span>
                     <button

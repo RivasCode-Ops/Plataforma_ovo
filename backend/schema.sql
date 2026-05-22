@@ -116,7 +116,12 @@ CREATE TABLE IF NOT EXISTS lotes (
   data_validade DATE NOT NULL,
   data_entrada DATE NOT NULL DEFAULT CURRENT_DATE,
   observacao TEXT,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  desconto_percentual NUMERIC(5, 2),
+  desconto_ate DATE,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  CONSTRAINT chk_lotes_desconto_percentual CHECK (
+    desconto_percentual IS NULL OR (desconto_percentual > 0 AND desconto_percentual <= 90)
+  )
 );
 
 CREATE INDEX IF NOT EXISTS idx_lotes_validade ON lotes (data_validade);

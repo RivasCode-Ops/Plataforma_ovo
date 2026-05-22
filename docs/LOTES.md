@@ -12,6 +12,10 @@ Controle de entrada de ovos por **lote** e **data de validade**.
 
 O sistema baixa estoque pelo lote que **vence primeiro** (FIFO).
 
+## Desconto temporário
+
+Promoção por lote (ex.: −15% até sexta) — [DESCONTO_LOTE.md](DESCONTO_LOTE.md).
+
 ## Alertas
 
 Lotes que vencem em **7 dias** ou já vencidos aparecem em vermelho/amarelo no topo.

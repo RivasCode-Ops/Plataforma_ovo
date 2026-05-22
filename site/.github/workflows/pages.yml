@@ -41,6 +41,8 @@ jobs:
         run: npm run build
         env:
           BASE_PATH: ${{ steps.base.outputs.path }}
+          VITE_API_URL: https://app.granjauniao.com.br
+          VITE_SITE_PEDIDO_TOKEN: ${{ secrets.VITE_SITE_PEDIDO_TOKEN }}
 
       - name: SPA fallback (rotas diretas no Pages)
         run: cp out/index.html out/404.html

@@ -1,6 +1,6 @@
 import { withTransaction } from '../db.js';
 import { gerarPixCobranca, pixConfigurado } from '../integrations/pix.js';
-import { baixarEstoqueFifo } from './lotes.js';
+import { baixarEstoqueFifo, resolverPrecoUnitarioFifo } from './lotes.js';
 import { mapaPrecosCliente, resolverPrecoUnitario } from './clientePrecos.js';
 
 const PAGAMENTOS = ['dinheiro', 'pix', 'cartao', 'fiado'];
@@ -71,11 +71,17 @@ export async function registrarVendaBalcao({
           { status: 400 }
         );
       }
-      const precoUnitario = resolverPrecoUnitario(
+      let precoUnitario = resolverPrecoUnitario(
         precosAtacado,
         p.id,
         p.preco,
         item.preco_unitario
+      );
+      precoUnitario = await resolverPrecoUnitarioFifo(
+        client,
+        p.id,
+        qtd,
+        precoUnitario
       );
       const subtotal = qtd * precoUnitario;
       total += subtotal;

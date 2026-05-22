@@ -23,7 +23,8 @@ Gerar `.env.prod` com senhas fortes no Windows:
 - [ ] `JWT_SECRET` — string longa aleatória
 - [ ] `CORS_ORIGIN` — URL HTTPS do painel
 - [ ] `GRANJA_WHATSAPP` — número real da granja
-- [ ] `WEBHOOK_SECRET` — forte (para quando o site voltar)
+- [ ] `WEBHOOK_SECRET` — forte (integração server-side)
+- [ ] `SITE_PEDIDO_TOKEN` — formulário público no site ([INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md))
 
 ## Deploy
 
@@ -40,9 +41,13 @@ curl https://app.SEU-DOMINIO/api/health
 - [ ] Backup: cron com `infra/scripts/backup.sh`
 - [ ] HTTPS (Certbot ou proxy) — ver [DEPLOY_APP_GRANJAUNIAO.md](DEPLOY_APP_GRANJAUNIAO.md) · script `infra/scripts/vps-https.sh`
 
+## Atualização (pedido site + desconto lote)
+
+- [ ] Ver [DEPLOY_ATUALIZACAO.md](DEPLOY_ATUALIZACAO.md) — `.\scripts\deploy-atualizacao-vps.ps1`
+
 ## Opcional (depois)
 
-- [ ] Site granjauniao.com.br — [INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md)
+- [ ] Site granjauniao.com.br — [INTEGRACAO_GRANJAUNIAO.md](INTEGRACAO_GRANJAUNIAO.md) · [SITE_GITHUB.md](SITE_GITHUB.md)
 - [x] Múltiplos operadores — [OPERADORES.md](OPERADORES.md)
 - [x] Lotes e validade (FIFO) — [LOTES.md](LOTES.md)
 - [x] PWA no celular — [PWA.md](PWA.md)

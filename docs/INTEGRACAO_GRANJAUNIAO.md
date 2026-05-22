@@ -8,6 +8,7 @@ Duas formas de integrar (pode usar as duas):
 |------|-------------|----------------------|
 | **Widget WhatsApp** | Mais rápido, qualquer site | Cliente manda no Zap; você lança no painel |
 | **Webhook API** | WordPress com plugin / formulário server-side | Entra automaticamente como status `novo` |
+| **Formulário no site React** | `site/` no GitHub Pages (`granjauniao.com.br`) | `POST /api/pedido-site` → status `novo` |
 
 ---
 
@@ -113,7 +114,57 @@ Invoke-RestMethod -Uri "http://localhost:3000/api/webhook/granjauniao" `
 
 ---
 
-## 3. Cardápio JSON (para o site montar página própria)
+## 3. Formulário no site React (GitHub Pages)
+
+O repositório `site/` publica em `granjauniao.com.br`. O formulário chama a API do painel em HTTPS.
+
+### API (VPS — `infra/.env.prod`)
+
+```env
+SITE_PEDIDO_TOKEN=mesma-chave-do-build-do-site
+SITE_ORIGEM=granjauniao.com.br
+CORS_ORIGIN=https://app.granjauniao.com.br,https://granjauniao.com.br,https://www.granjauniao.com.br
+```
+
+Gere token com `.\scripts\gerar-env-prod.ps1` (campo `SITE_PEDIDO_TOKEN`).
+
+### Build do site
+
+No repositório **granjauniao-site** (GitHub Actions), configure o secret:
+
+- `VITE_SITE_PEDIDO_TOKEN` = valor de `SITE_PEDIDO_TOKEN` na VPS
+
+Ou, ao publicar pelo script local, o token é copiado de `infra/.env.prod` para `.env.production`:
+
+```powershell
+.\scripts\publicar-site-github.ps1
+```
+
+### Endpoint público
+
+```http
+POST https://app.granjauniao.com.br/api/pedido-site
+Content-Type: application/json
+X-Site-Pedido-Token: SEU_SITE_PEDIDO_TOKEN
+```
+
+```json
+{
+  "nome": "Maria Silva",
+  "telefone": "89999954044",
+  "endereco": "Rua Exemplo, 10 — Centro — CEP 64600-000",
+  "observacao": "Entregar de manhã",
+  "itens": [{ "produto_id": 1, "quantidade": 2 }]
+}
+```
+
+- Rate limit: 15 pedidos/hora por IP
+- Não use `WEBHOOK_SECRET` no JavaScript do site (fica visível no bundle)
+- Após deploy da API: `git pull` + `docker compose ... up -d --build backend` na VPS
+
+---
+
+## 4. Cardápio JSON (para o site montar página própria)
 
 ```http
 GET https://SUA-API/api/cardapio
@@ -132,7 +183,7 @@ GET https://SUA-API/api/cardapio
 
 ---
 
-## 4. WordPress — plugins úteis
+## 5. WordPress — plugins úteis
 
 | Plugin | Uso |
 |--------|-----|
@@ -142,7 +193,7 @@ GET https://SUA-API/api/cardapio
 
 ---
 
-## 5. Checklist de produção
+## 6. Checklist de produção
 
 - [ ] API em HTTPS (`https://api...`)
 - [ ] `CORS_ORIGIN` com `https://www.granjauniao.com.br`

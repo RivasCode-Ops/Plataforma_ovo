@@ -1,7 +1,7 @@
 import { pool, withTransaction } from '../db.js';
 import { gerarLinkWhatsApp } from '../integrations/whatsapp.js';
 import { gerarPixCobranca, pixConfigurado } from '../integrations/pix.js';
-import { baixarEstoqueFifo } from './lotes.js';
+import { baixarEstoqueFifo, resolverPrecoUnitarioFifo } from './lotes.js';
 import { mapaPrecosCliente, resolverPrecoUnitario } from './clientePrecos.js';
 
 const STATUS_VALIDOS = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'cancelado'];
@@ -121,11 +121,17 @@ export async function criarPedido({ cliente, itens, observacao, confirmar = true
           { status: 400 }
         );
       }
-      const precoUnitario = resolverPrecoUnitario(
+      let precoUnitario = resolverPrecoUnitario(
         precosAtacado,
         p.id,
         p.preco,
         item.preco_unitario
+      );
+      precoUnitario = await resolverPrecoUnitarioFifo(
+        client,
+        p.id,
+        qtd,
+        precoUnitario
       );
       const subtotal = qtd * precoUnitario;
       total += subtotal;

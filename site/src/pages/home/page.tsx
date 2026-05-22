@@ -3,6 +3,7 @@ import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
 import BenefitsSection from './components/BenefitsSection';
 import ProductsSection from './components/ProductsSection';
+import PedidoOnlineSection from './components/PedidoOnlineSection';
 import LifestyleSection from './components/LifestyleSection';
 import VideoSection from './components/VideoSection';
 import CtaBanner from './components/CtaBanner';
@@ -18,6 +19,7 @@ export default function Home() {
       <AboutSection />
       <BenefitsSection />
       <ProductsSection />
+      <PedidoOnlineSection />
       <LifestyleSection />
       <VideoSection />
       <CtaBanner />
