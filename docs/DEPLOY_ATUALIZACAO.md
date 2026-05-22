@@ -33,16 +33,18 @@ Anote o token se aparecer no terminal (para o GitHub).
 
 ### 3. Site (GitHub Pages)
 
-1. Repo **granjauniao-site** → Settings → Secrets → **VITE_SITE_PEDIDO_TOKEN** = mesmo valor de `SITE_PEDIDO_TOKEN` na VPS  
-   (ou use o valor em `infra\.env.prod` no PC)
-
-2. Publicar:
+**Opção A — build local (recomendado, token no build):**
 
 ```powershell
-.\scripts\publicar-site-github.ps1
+.\scripts\publicar-site-build.ps1
 ```
 
-3. Aguardar workflow verde em Actions.
+No GitHub: **granjauniao-site** → Settings → Pages → Source: **Deploy from branch** → `gh-pages` / `/ (root)`.
+
+**Opção B — GitHub Actions (main):**
+
+1. Secret **VITE_SITE_PEDIDO_TOKEN** = valor de `SITE_PEDIDO_TOKEN` em `infra\.env.prod`
+2. `.\scripts\publicar-site-github.ps1` e aguardar Actions verde
 
 ## Testes rápidos
 

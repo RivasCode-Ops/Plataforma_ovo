@@ -28,13 +28,20 @@ echo ""
 echo "=== 3. Variaveis .env.prod (pedido site) ==="
 NEW_TOKEN=""
 if [ -f "$ENV_FILE" ]; then
-  if ! grep -q '^SITE_PEDIDO_TOKEN=.\+' "$ENV_FILE" 2>/dev/null; then
+  if [ -n "${DEPLOY_SITE_TOKEN:-}" ]; then
+    if grep -q '^SITE_PEDIDO_TOKEN=' "$ENV_FILE" 2>/dev/null; then
+      sed -i "s/^SITE_PEDIDO_TOKEN=.*/SITE_PEDIDO_TOKEN=${DEPLOY_SITE_TOKEN}/" "$ENV_FILE"
+    else
+      echo "SITE_PEDIDO_TOKEN=${DEPLOY_SITE_TOKEN}" >> "$ENV_FILE"
+    fi
+    echo "SITE_PEDIDO_TOKEN sincronizado (mesmo valor do PC)."
+  elif ! grep -q '^SITE_PEDIDO_TOKEN=.\+' "$ENV_FILE" 2>/dev/null; then
     NEW_TOKEN=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 32)
     echo "" >> "$ENV_FILE"
     echo "SITE_PEDIDO_TOKEN=$NEW_TOKEN" >> "$ENV_FILE"
-    echo "SITE_PEDIDO_TOKEN gerado e salvo em .env.prod"
+    echo "SITE_PEDIDO_TOKEN gerado na VPS — copie para infra/.env.prod no PC e republique o site."
   else
-    echo "SITE_PEDIDO_TOKEN ja existe."
+    echo "SITE_PEDIDO_TOKEN ja existe na VPS."
   fi
   if ! grep -q 'granjauniao.com.br' "$ENV_FILE" 2>/dev/null; then
     echo "AVISO: confira CORS_ORIGIN inclui https://granjauniao.com.br"

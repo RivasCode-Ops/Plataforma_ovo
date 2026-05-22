@@ -12,8 +12,20 @@ Write-Host "Deploy atualizacao (pedido site + desconto lote)" -ForegroundColor C
 Write-Host "Certifique-se de ter feito git push do repo principal antes." -ForegroundColor Yellow
 Write-Host ""
 
+$token = ""
+$envProd = Join-Path $Root "infra\.env.prod"
+if (Test-Path $envProd) {
+  $m = Select-String -Path $envProd -Pattern '^SITE_PEDIDO_TOKEN=' | Select-Object -First 1
+  if ($m) { $token = $m.Line -replace '^SITE_PEDIDO_TOKEN=', '' }
+}
+
 $scriptContent = (Get-Content $Bash -Raw -Encoding UTF8) -replace "`r`n", "`n" -replace "`r", ""
-$scriptContent | ssh $Host_ "bash -s"
+if ($token) {
+  $escaped = $token -replace "'", "'\''"
+  $scriptContent | ssh $Host_ "DEPLOY_SITE_TOKEN='$escaped' bash -s"
+} else {
+  $scriptContent | ssh $Host_ "bash -s"
+}
 
 if ($LASTEXITCODE -ne 0) {
   Write-Host "ERRO na VPS." -ForegroundColor Red
