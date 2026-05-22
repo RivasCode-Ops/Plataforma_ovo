@@ -1,7 +1,7 @@
 #!/bin/bash
 # Blocos 1–3: certificado + nginx + testes (ver docs/RUNBOOK_HTTPS_VPS.md)
 # Uso: bash /opt/Plataforma_ovo/infra/scripts/vps-nginx-fix.sh
-set -euo pipefail
+set -eu
 
 DOMAIN="${DOMAIN:-app.granjauniao.com.br}"
 INFRA="${INFRA:-/opt/Plataforma_ovo/infra}"
@@ -20,7 +20,12 @@ fix_cert_symlinks() {
     cd "$INFRA"
     docker compose --env-file .env.prod -f docker-compose.prod.yml stop web
     certbot certonly --standalone -d "$DOMAIN" \
-      --non-interactive --agree-tos -m "$EMAIL"
+      --non-interactive --agree-tos -m "$EMAIL" \
+      || {
+        echo "ERRO certbot (rate limit?). Tente depois ou restaure archive."
+        docker compose --env-file .env.prod -f docker-compose.prod.yml up -d web
+        exit 1
+      }
     docker compose --env-file .env.prod -f docker-compose.prod.yml up -d web
     return
   fi

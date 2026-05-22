@@ -20,18 +20,22 @@ Documento executivo para recuperação e prevenção de recorrência.
 
 ## Execução rápida (recomendado)
 
-Na VPS, após `git pull`:
-
-```bash
-bash /opt/Plataforma_ovo/infra/scripts/vps-nginx-fix.sh
-```
-
-No Windows (envia script e executa; pede senha SSH):
+**Windows (um comando):**
 
 ```powershell
 cd C:\_PROJETOS\Plataforma_ovo
-.\scripts\aplicar-fix-vps.ps1
+git pull
+.\scripts\ativar-https-vps.ps1
 ```
+
+**Na VPS:**
+
+```bash
+cd /opt/Plataforma_ovo && git pull
+bash infra/scripts/vps-ativar-https.sh
+```
+
+Script antigo (só Nginx/cert): `vps-nginx-fix.sh` · envio via `aplicar-fix-vps.ps1`
 
 **Após executar, informe apenas:**
 
