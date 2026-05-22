@@ -1,6 +1,6 @@
 # Chave SSH para deploy sem senha. Rode UMA vez.
 # Uso: .\scripts\configurar-ssh-vps.ps1
-#      .\scripts\configurar-ssh-vps.ps1 -ComSenha   # tenta instalar a chave via senha SSH
+#      .\scripts\configurar-ssh-vps.ps1 -ComSenha
 
 param([switch]$ComSenha)
 
@@ -19,33 +19,34 @@ if (-not (Test-Path $Key)) {
 
 $pub = (Get-Content "$Key.pub" -Raw).Trim()
 
+$linha1 = "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
+$linha2 = "echo '$pub' >> ~/.ssh/authorized_keys"
+$linha3 = "chmod 600 ~/.ssh/authorized_keys"
+$bloco = "$linha1`n$linha2`n$linha3"
+
 Write-Host ""
 Write-Host "=== Instalar chave na VPS ===" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "OPCAO 1 — Console web do provedor (recomendado se a senha SSH falhou):" -ForegroundColor Yellow
+Write-Host "OPCAO 1 - Console web do provedor (recomendado):" -ForegroundColor Yellow
 Write-Host "Cole estas 3 linhas no terminal da VPS:" -ForegroundColor White
 Write-Host ""
-Write-Host "mkdir -p ~/.ssh && chmod 700 ~/.ssh"
-Write-Host "echo '$pub' >> ~/.ssh/authorized_keys"
-Write-Host "chmod 600 ~/.ssh/authorized_keys"
+Write-Host $linha1
+Write-Host $linha2
+Write-Host $linha3
 Write-Host ""
 
 try {
-  Set-Clipboard -Value @"
-mkdir -p ~/.ssh && chmod 700 ~/.ssh
-echo '$pub' >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
-"@
-  Write-Host "(Comandos copiados para a area de transferencia.)" -ForegroundColor Green
+  Set-Clipboard -Value $bloco
+  Write-Host "Comandos copiados para a area de transferencia." -ForegroundColor Green
 } catch {
-  Write-Host "(Copie manualmente as linhas acima.)" -ForegroundColor DarkYellow
+  Write-Host "Copie manualmente as 3 linhas acima." -ForegroundColor DarkYellow
 }
 
 if ($ComSenha) {
   Write-Host ""
-  Write-Host "OPCAO 2 — Senha SSH (ultima vez):" -ForegroundColor Yellow
+  Write-Host "OPCAO 2 - Senha SSH (ultima vez):" -ForegroundColor Yellow
   $pub | ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no $Vps `
-    "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+    "mkdir -p ~/.ssh; chmod 700 ~/.ssh; cat >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys"
   if ($LASTEXITCODE -ne 0) {
     Write-Host "Falhou. Use a OPCAO 1 no console web." -ForegroundColor Red
     exit 1
