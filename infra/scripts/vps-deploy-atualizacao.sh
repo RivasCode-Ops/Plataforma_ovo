@@ -39,15 +39,20 @@ if [ -f "$ENV_FILE" ]; then
     NEW_TOKEN=$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 32)
     echo "" >> "$ENV_FILE"
     echo "SITE_PEDIDO_TOKEN=$NEW_TOKEN" >> "$ENV_FILE"
-    echo "SITE_PEDIDO_TOKEN gerado na VPS — copie para infra/.env.prod no PC e republique o site."
+    echo "SITE_PEDIDO_TOKEN gerado na VPS - copie para infra/.env.prod no PC e republique o site."
   else
     echo "SITE_PEDIDO_TOKEN ja existe na VPS."
   fi
   if ! grep -q 'granjauniao.com.br' "$ENV_FILE" 2>/dev/null; then
-    echo "AVISO: confira CORS_ORIGIN inclui https://granjauniao.com.br"
+    if grep -q '^CORS_ORIGIN=' "$ENV_FILE" 2>/dev/null; then
+      sed -i 's|^CORS_ORIGIN=.*|CORS_ORIGIN=https://app.granjauniao.com.br,https://granjauniao.com.br,https://www.granjauniao.com.br|' "$ENV_FILE"
+      echo "CORS_ORIGIN atualizado com dominios do site."
+    else
+      echo 'CORS_ORIGIN=https://app.granjauniao.com.br,https://granjauniao.com.br,https://www.granjauniao.com.br' >> "$ENV_FILE"
+    fi
   fi
 else
-  echo "AVISO: $ENV_FILE nao encontrado — crie antes do compose."
+  echo "AVISO: $ENV_FILE nao encontrado - crie antes do compose."
 fi
 
 echo ""
@@ -68,5 +73,5 @@ if [ -n "$NEW_TOKEN" ]; then
   echo ">>> Copie para GitHub (repo granjauniao-site) secret VITE_SITE_PEDIDO_TOKEN:"
   echo "$NEW_TOKEN"
   echo ""
-  echo "No PC: .\scripts\publicar-site-github.ps1"
+  echo "No PC: .\scripts\publicar-site-build.ps1"
 fi
