@@ -18,9 +18,22 @@ git push
 
 ### 2. Atualizar a VPS
 
+**Se a senha SSH falhar** (Permission denied) — use o **console web** do provedor:
+
 ```powershell
-.\scripts\deploy-atualizacao-vps.ps1
+.\scripts\deploy-vps-console.ps1
 ```
+
+Cole o bloco gerado (ja vai para a area de transferencia) no terminal da VPS.
+
+**Com SSH funcionando** (ou apos configurar chave):
+
+```powershell
+.\scripts\configurar-ssh-vps.ps1          # uma vez: instala chave (console web ou -ComSenha)
+.\scripts\deploy-atualizacao-vps.ps1      # deploy sem senha
+```
+
+Com senha: `.\scripts\deploy-atualizacao-vps.ps1 -ComSenha`
 
 O script na VPS:
 

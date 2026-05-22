@@ -12,4 +12,6 @@ coverage/
 *.sqlite
 postgres-data/
 infra/.env.prod
+scripts/.deploy-vps-local.sh
+scripts/COLAR_NO_CONSOLE_VPS.txt
 infra/backups/
