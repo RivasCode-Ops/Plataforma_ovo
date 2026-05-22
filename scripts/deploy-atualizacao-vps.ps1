@@ -39,8 +39,8 @@ $remoteCmd = if ($token) {
 
 function Invoke-DeploySsh {
   param([string[]]$ExtraArgs)
-  $all = $ExtraArgs + $Vps $remoteCmd
-  $scriptContent | & ssh @all
+  $sshArgs = @($ExtraArgs) + @($Vps, $remoteCmd)
+  $scriptContent | & ssh @sshArgs
   return $LASTEXITCODE
 }
 
