@@ -2,16 +2,20 @@ import { pool } from '../db.js';
 
 export async function listarRotas({ apenasAtivas = false } = {}) {
   const where = apenasAtivas ? 'WHERE ativo = TRUE' : '';
-  const { rows } = await pool.query(
-    `SELECT r.*,
-            COUNT(c.id)::int AS qtd_clientes
-     FROM rotas r
-     LEFT JOIN clientes c ON c.rota_id = r.id
-     ${where}
-     GROUP BY r.id
-     ORDER BY r.ordem, r.nome`
+  const { rows: rotas } = await pool.query(
+    `SELECT * FROM rotas ${where} ORDER BY ordem, nome`
   );
-  return rows;
+  const { rows: contagens } = await pool.query(
+    `SELECT rota_id, COUNT(*)::int AS qtd
+     FROM clientes
+     WHERE rota_id IS NOT NULL
+     GROUP BY rota_id`
+  );
+  const porRota = new Map(contagens.map((c) => [c.rota_id, c.qtd]));
+  return rotas.map((r) => ({
+    ...r,
+    qtd_clientes: porRota.get(r.id) ?? 0,
+  }));
 }
 
 export async function criarRota({ nome, ordem }) {

@@ -67,6 +67,7 @@ Sintoma?
 
 | Sintoma | Ação |
 |---------|------|
+| **502 Bad Gateway** no app | [VPS_502_DIAGNOSTICO.md](VPS_502_DIAGNOSTICO.md) · `bash infra/scripts/vps-diagnostico-502.sh` · `vps-subir-502.sh` |
 | `git pull` / deploy falhou | [DEPLOY_VPS_PASSO_A_PASSO.md](DEPLOY_VPS_PASSO_A_PASSO.md) |
 | API só na 8080 | `vps-nginx-fix.sh` + `ufw allow 80,443` |
 | Migração / coluna desconto | `bash infra/scripts/vps-migrate-all.sh` |
