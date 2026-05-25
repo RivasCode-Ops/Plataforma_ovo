@@ -4,7 +4,8 @@ Domínios: **app.granjauniao.com.br** (painel/VPS) · **granjauniao.com.br** (si
 
 Validação crítica: [VALIDACAO_PRODUCAO.md](VALIDACAO_PRODUCAO.md) — decisão atual: **AJUSTAR**.
 
-Retrofit (Agente 13): [RETROFIT_PLATAFORMA_OVO.md](RETROFIT_PLATAFORMA_OVO.md).
+Retrofit (Agente 13): [RETROFIT_PLATAFORMA_OVO.md](RETROFIT_PLATAFORMA_OVO.md).  
+Triagem / incidentes (Agente 14): [14-TRIAGEM.md](14-TRIAGEM.md).
 
 Deploy passo a passo: [DEPLOY_VPS_PASSO_A_PASSO.md](DEPLOY_VPS_PASSO_A_PASSO.md).
 

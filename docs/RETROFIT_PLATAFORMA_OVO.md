@@ -145,6 +145,7 @@ Sem microserviços; um VPS + Pages é suficiente para o piloto.
 | Gap | Agente |
 |-----|--------|
 | Validação pós-retrofit | 12-VALIDADOR |
+| Triagem / primeiro atendimento | [14-TRIAGEM](14-TRIAGEM.md) |
 | Infra/Docker | 04-INFRAESTRUTURA |
 | Segurança tokens | 07-SEGURANCA |
 | Deploy já documentado | CHECKLIST + DEPLOY_VPS_PASSO_A_PASSO |
