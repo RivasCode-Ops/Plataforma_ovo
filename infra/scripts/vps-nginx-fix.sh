@@ -54,9 +54,22 @@ fix_cert_symlinks() {
   echo "Certificado OK — $issuer"
 }
 
+install_rate_limit_conf() {
+  local src="$INFRA/nginx-host/meuzovo-rate-limit.conf"
+  local dest="/etc/nginx/conf.d/meuzovo-rate-limit.conf"
+  if [ -f "$src" ]; then
+    cp "$src" "$dest"
+    echo "Rate limit: $dest"
+  fi
+}
+
 write_nginx_config() {
   echo "=== NGINX ==="
-  cat > "$CONF" << 'NGINX'
+  local template="$INFRA/nginx-host/app.granjauniao.com.br.conf"
+  if [ -f "$template" ]; then
+    cp "$template" "$CONF"
+  else
+    cat > "$CONF" << 'NGINX'
 server {
     listen 80;
     server_name app.granjauniao.com.br;
@@ -73,6 +86,16 @@ server {
     ssl_prefer_server_ciphers off;
     client_max_body_size 10m;
 
+    location = /api/pedido-site {
+        limit_req zone=meuzovo_pedido_site burst=5 nodelay;
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
     location / {
         proxy_pass http://127.0.0.1:8080;
         proxy_http_version 1.1;
@@ -83,9 +106,11 @@ server {
     }
 }
 NGINX
+  fi
 
   ln -sf "$CONF" "/etc/nginx/sites-enabled/$DOMAIN"
   rm -f /etc/nginx/sites-enabled/default
+  install_rate_limit_conf
 }
 
 ensure_docker() {
