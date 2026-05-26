@@ -71,3 +71,19 @@ export function requireAdmin(req, res, next) {
   }
   next();
 }
+
+/** Operador: somente turno/rota (+ sessão auth já tratada em /api/auth). */
+const OPERADOR_API_PREFIX = /^\/api\/turnos-entrega(\/|$)/;
+
+export function restrictOperadorPapel(req, res, next) {
+  if (req.usuario?.papel !== 'operador') {
+    return next();
+  }
+  const url = (req.originalUrl || '').split('?')[0];
+  if (OPERADOR_API_PREFIX.test(url)) {
+    return next();
+  }
+  return res.status(403).json({
+    erro: 'Operador restrito ao módulo Turno/Rota. Solicite acesso administrador.',
+  });
+}

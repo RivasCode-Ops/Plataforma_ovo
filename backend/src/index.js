@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import { requireAuth } from './middleware/auth.js';
+import { requireAuth, restrictOperadorPapel } from './middleware/auth.js';
 import { auditoriaMiddleware } from './middleware/auditoria.js';
 import authRouter from './routes/auth.js';
 import healthRouter from './routes/health.js';
@@ -84,7 +84,10 @@ app.use('/api', (req, res, next) => {
   ) {
     return next();
   }
-  requireAuth(req, res, next);
+  requireAuth(req, res, (err) => {
+    if (err) return next(err);
+    restrictOperadorPapel(req, res, next);
+  });
 });
 
 app.use('/api', auditoriaMiddleware);

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireAdmin } from '../middleware/auth.js';
 import * as lotes from '../services/lotes.js';
 
 const router = Router();
@@ -43,7 +44,7 @@ router.patch('/:id/desconto', async (req, res, next) => {
   }
 });
 
-router.delete('/:id/desconto', async (req, res, next) => {
+router.delete('/:id/desconto', requireAdmin, async (req, res, next) => {
   try {
     const data = await lotes.removerDescontoLote(Number(req.params.id));
     res.json({ data });

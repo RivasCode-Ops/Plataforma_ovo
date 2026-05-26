@@ -41,20 +41,8 @@ const MENU = [
   { id: 'entrega-turno', label: 'Turno / Rota' },
 ];
 
-const SECOES_OPERADOR = new Set([
-  'inicio',
-  'alertas',
-  'novo',
-  'balcao',
-  'hoje',
-  'entrega-turno',
-  'rotas',
-  'pedidos',
-  'assinaturas',
-  'lotes',
-  'clientes',
-  'whatsapp',
-]);
+/** Operador: apenas início + turno/rota (demais módulos = admin). */
+const SECOES_OPERADOR = new Set(['inicio', 'entrega-turno']);
 
 function menuVisivel(papel) {
   if (papel === 'admin') return MENU;
@@ -133,6 +121,10 @@ export default function App() {
   useEffect(() => {
     setOffsetPedidos(0);
     setTemMaisPedidos(false);
+    if (papel === 'operador') {
+      setCarregando(false);
+      return;
+    }
     (async () => {
       setCarregando(true);
       setErro('');
@@ -162,7 +154,7 @@ export default function App() {
         setCarregando(false);
       }
     })();
-  }, [filtro, buscaPedidos]);
+  }, [filtro, buscaPedidos, papel]);
 
   useEffect(() => {
     if (!menu.some((m) => m.id === secao)) {

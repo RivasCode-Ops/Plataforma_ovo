@@ -10,6 +10,10 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
 
   useEffect(() => {
     async function load() {
+      if (papel === 'operador') {
+        setStats({ modo: 'operador' });
+        return;
+      }
       try {
         const [hoje, alertas, assinaturas, resumo, notif] = await Promise.all([
           api.pedidosDoDia(hojeISO()),
@@ -34,10 +38,32 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
       }
     }
     load();
-  }, [produtos]);
+  }, [produtos, papel]);
 
   if (!stats) {
     return <p className="text-sm text-stone-500">Carregando resumo…</p>;
+  }
+
+  if (stats.modo === 'operador') {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-lg font-medium">Operação de rota</h2>
+          <p className="text-sm text-stone-500">
+            Use o módulo Turno/Rota para saída, entregas e prestação de contas com o admin.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onIrPara?.('entrega-turno')}
+          className="w-full rounded-xl border border-violet-200 bg-violet-50 p-6 text-left transition hover:shadow-md"
+        >
+          <p className="text-xs font-medium uppercase tracking-wide text-violet-800">Turno / Rota</p>
+          <p className="mt-2 text-2xl font-semibold text-violet-900">Abrir rota do dia →</p>
+          <p className="mt-1 text-sm text-violet-700">Iniciar turno, paradas, vendas avulsas e demandas</p>
+        </button>
+      </div>
+    );
   }
 
   const cards = [
@@ -99,12 +125,7 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {cards
-          .filter((c) => {
-            if (papel === 'admin') return true;
-            return c.acao !== 'produtos';
-          })
-          .map((c) => (
+        {cards.map((c) => (
           <button
             key={c.acao}
             type="button"
