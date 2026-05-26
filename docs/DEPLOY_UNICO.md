@@ -135,3 +135,12 @@ bash /opt/Plataforma_ovo/infra/scripts/vps-subir-502.sh
 - `curl` no PowerShell para testar a VPS (use SSH ou `curl.exe` só no PC)
 
 Mais detalhes: [07-SEGURANCA.md](07-SEGURANCA.md), [VPS_502_DIAGNOSTICO.md](VPS_502_DIAGNOSTICO.md).
+
+---
+
+## Plano 10/10 (ordem recomendada)
+
+1. **Backup** (5 min, sem risco): `bash /opt/Plataforma_ovo/infra/scripts/vps-setup-backup.sh`
+2. **HTTPS**: `bash /opt/Plataforma_ovo/infra/scripts/vps-ativar-https.sh`
+3. **GitHub Actions** — Secrets no repo: `VPS_HOST`, `VPS_PASSWORD`, `POSTGRES_PASSWORD`, `JWT_SECRET`, `ADMIN_PASSWORD`, `WEBHOOK_SECRET`, `SITE_PEDIDO_TOKEN` (só se `.env.prod` ainda não existir na VPS)
+4. **UptimeRobot** — monitorar `https://app.granjauniao.com.br/api/health`

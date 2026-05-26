@@ -9,8 +9,12 @@ ENV_FILE="${ENV_FILE:-$INFRA_DIR/.env.prod}"
 
 if [ -f "$ENV_FILE" ]; then
   set -a
-  # shellcheck disable=SC1090
-  . "$ENV_FILE"
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      ''|'#'*) continue ;;
+      *=*) export "$line" ;;
+    esac
+  done < "$ENV_FILE"
   set +a
 fi
 

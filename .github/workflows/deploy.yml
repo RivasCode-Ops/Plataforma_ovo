@@ -49,49 +49,79 @@ jobs:
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
+          SITE_PEDIDO_TOKEN: ${{ secrets.SITE_PEDIDO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: root
           password: ${{ secrets.VPS_PASSWORD }}
           command_timeout: 30m
-          envs: GITHUB_TOKEN,GITHUB_ACTOR,POSTGRES_PASSWORD,SITE_PEDIDO_TOKEN
+          envs: POSTGRES_PASSWORD,JWT_SECRET,ADMIN_PASSWORD,WEBHOOK_SECRET,SITE_PEDIDO_TOKEN,GITHUB_TOKEN,GITHUB_ACTOR
           script: |
-            set -e
+            set -eu
+            REPO=/opt/Plataforma_ovo
+            INFRA=$REPO/infra
 
-            # Clona repo se nao existir
-            if [ ! -d /opt/plataforma_ovo ]; then
-              git clone https://github.com/RivasCode-Ops/Plataforma_ovo /opt/plataforma_ovo
+            if [ -d /opt/plataforma_ovo ] && [ ! -d "$REPO" ]; then
+              mv /opt/plataforma_ovo "$REPO"
+            elif [ -d /opt/plataforma_ovo ] && [ -d "$REPO" ]; then
+              echo "AVISO: existem /opt/plataforma_ovo e $REPO — usando $REPO"
             fi
 
-            cd /opt/plataforma_ovo
-            git pull origin main
+            if [ ! -d "$REPO/.git" ]; then
+              git clone https://github.com/RivasCode-Ops/Plataforma_ovo.git "$REPO"
+            fi
 
-            # Cria .env.prod se nao existir (valores vem de secrets via envs:)
-            ENV_FILE=/opt/plataforma_ovo/infra/.env.prod
-            if [ ! -f "$ENV_FILE" ]; then
-              cat > "$ENV_FILE" <<EOF
-            POSTGRES_USER=plataforma
-            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-            POSTGRES_DB=plataforma_ovo
-            SITE_PEDIDO_TOKEN=${SITE_PEDIDO_TOKEN}
-            NODE_ENV=production
-            PORT=3000
-            HTTP_PORT=80
-            EOF
-              echo ".env.prod criado."
+            cd "$REPO"
+            git pull --ff-only origin main
+
+            cd "$INFRA"
+            if [ ! -f .env.prod ]; then
+              if [ -z "${POSTGRES_PASSWORD:-}" ] || [ -z "${JWT_SECRET:-}" ] || [ -z "${ADMIN_PASSWORD:-}" ]; then
+                echo "ERRO: .env.prod ausente na VPS."
+                echo "Configure GitHub Secrets ou crie .env.prod manualmente."
+                exit 1
+              fi
+              {
+                echo 'HTTP_PORT=8080'
+                echo 'POSTGRES_USER=plataforma'
+                echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+                echo 'POSTGRES_DB=plataforma_ovo'
+                echo "JWT_SECRET=${JWT_SECRET}"
+                echo 'ADMIN_USER=admin'
+                echo "ADMIN_PASSWORD=${ADMIN_PASSWORD}"
+                echo 'CORS_ORIGIN=https://app.granjauniao.com.br,https://granjauniao.com.br,https://www.granjauniao.com.br'
+                echo 'GRANJA_WHATSAPP=5589999754044'
+                echo 'GRANJA_PIX_CHAVE='
+                echo 'GRANJA_PIX_NOME=Granja Uniao'
+                echo 'GRANJA_PIX_CIDADE=PICOS'
+                echo 'SITE_ORIGEM=granjauniao.com.br'
+                echo 'SITE_NOME=Granja Uniao'
+                echo "WEBHOOK_SECRET=${WEBHOOK_SECRET}"
+                echo "SITE_PEDIDO_TOKEN=${SITE_PEDIDO_TOKEN}"
+                echo 'DOMAIN=app.granjauniao.com.br'
+              } > .env.prod
+              chmod 600 .env.prod
+              echo "Criado .env.prod a partir de GitHub Secrets (primeira vez)."
             else
-              echo ".env.prod ja existe, mantendo."
+              echo "Usando .env.prod existente na VPS (nao sobrescreve)."
             fi
 
-            # Login GHCR
-            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+            sed -i 's/^HTTP_PORT=808080/HTTP_PORT=8080/' .env.prod
+            grep -q '^HTTP_PORT=8080' .env.prod || sed -i 's/^HTTP_PORT=.*/HTTP_PORT=8080/' .env.prod
 
-            cd /opt/plataforma_ovo/infra
-            docker compose -f docker-compose.prod.yml --env-file .env.prod pull backend web
-            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --remove-orphans
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+            docker compose --env-file .env.prod -f docker-compose.prod.yml pull backend web
+            docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --remove-orphans
+
+            sleep 5
+            curl -sf http://127.0.0.1:8080/api/health && echo "" || echo "AVISO: health 8080 falhou apos deploy"
+
             docker image prune -f
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          SITE_PEDIDO_TOKEN: ${{ secrets.SITE_PEDIDO_TOKEN }}

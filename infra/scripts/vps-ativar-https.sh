@@ -11,6 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "=== 1. Preparar Docker (porta 8080) ==="
 if [ -f "$ENV_FILE" ]; then
   sed -i 's/^HTTP_PORT=808080/HTTP_PORT=8080/' "$ENV_FILE"
+  sed -i 's/^HTTP_PORT=8080[80]*/HTTP_PORT=8080/' "$ENV_FILE"
   sed -i 's/^HTTP_PORT=80$/HTTP_PORT=8080/' "$ENV_FILE"
   grep -q '^HTTP_PORT=' "$ENV_FILE" || echo 'HTTP_PORT=8080' >> "$ENV_FILE"
   if grep -q '^CORS_ORIGIN=http://' "$ENV_FILE"; then
