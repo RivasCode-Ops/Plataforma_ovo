@@ -21,6 +21,7 @@ import balcaoRouter from './routes/balcao.js';
 import webhookRouter from './routes/webhook.js';
 import sitePedidoRouter from './routes/sitePedido.js';
 import { ensureOperadorDemo, seedOperadorAdmin } from './services/operadores.js';
+import { assertProductionConfig } from './config/productionGuard.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -100,12 +101,19 @@ app.use((err, _req, res, _next) => {
   });
 });
 
+assertProductionConfig();
+
 app.listen(port, async () => {
   try {
     await seedOperadorAdmin();
-    await ensureOperadorDemo();
+    if (process.env.NODE_ENV !== 'production') {
+      await ensureOperadorDemo();
+    }
   } catch (err) {
     console.error('[auth] Falha ao criar operadores iniciais:', err.message);
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
   }
   console.log(`API meuzovo em http://localhost:${port}`);
 });

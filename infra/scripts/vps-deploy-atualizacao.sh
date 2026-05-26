@@ -15,17 +15,27 @@ cd "$REPO"
 git pull --ff-only
 
 echo ""
-echo "=== 2. Migracoes PostgreSQL ==="
-for mig in 008_lote_desconto.sql; do
-  f="$REPO/backend/migrations/$mig"
-  if [ -f "$f" ]; then
-    echo "Aplicando $mig ..."
-    docker exec -i "$DB_CONTAINER" psql -U plataforma plataforma_ovo < "$f" || true
+echo "=== 2. Postgres (garantir rodando) ==="
+cd "$INFRA"
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d postgres
+for i in $(seq 1 24); do
+  if docker exec "$DB_CONTAINER" pg_isready -U plataforma -q 2>/dev/null; then
+    echo "Postgres OK"
+    break
   fi
+  sleep 5
 done
 
 echo ""
-echo "=== 3. Variaveis .env.prod (pedido site) ==="
+echo "=== 3. Migracoes PostgreSQL ==="
+if docker ps --format '{{.Names}}' | grep -qx "$DB_CONTAINER"; then
+  bash "$REPO/infra/scripts/vps-migrate-all.sh"
+else
+  echo "ERRO: $DB_CONTAINER nao esta rodando — migracoes ignoradas"
+fi
+
+echo ""
+echo "=== 4. Variaveis .env.prod (pedido site) ==="
 NEW_TOKEN=""
 if [ -f "$ENV_FILE" ]; then
   if [ -n "${DEPLOY_SITE_TOKEN:-}" ]; then
@@ -56,12 +66,12 @@ else
 fi
 
 echo ""
-echo "=== 4. Rebuild containers ==="
+echo "=== 5. Rebuild containers ==="
 cd "$INFRA"
 docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build backend web
 
 echo ""
-echo "=== 5. Health ==="
+echo "=== 6. Health ==="
 sleep 3
 curl -sf "https://$DOMAIN/api/health" && echo "" || curl -sf "http://127.0.0.1:8080/api/health" && echo ""
 

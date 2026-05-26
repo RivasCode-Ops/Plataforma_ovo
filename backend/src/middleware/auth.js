@@ -3,7 +3,12 @@ import crypto from 'crypto';
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function secret() {
-  return process.env.JWT_SECRET || 'dev-secret-altere-em-producao';
+  const value = process.env.JWT_SECRET?.trim();
+  if (value) return value;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET nao configurado');
+  }
+  return 'dev-secret-altere-em-producao';
 }
 
 export function criarToken({ login, papel }) {

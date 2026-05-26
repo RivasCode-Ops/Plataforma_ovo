@@ -1,12 +1,13 @@
 import { pool } from '../db.js';
 import { hashSenha, verificarSenha } from '../utils/senha.js';
+import { resolveAdminPassword } from '../config/productionGuard.js';
 
 export async function seedOperadorAdmin() {
   const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM operadores');
   if (rows[0].n > 0) return;
 
   const login = process.env.ADMIN_USER || 'admin';
-  const senha = process.env.ADMIN_PASSWORD || 'plataforma123';
+  const senha = resolveAdminPassword();
   const senha_hash = await hashSenha(senha);
 
   await pool.query(

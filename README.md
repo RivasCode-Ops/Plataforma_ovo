@@ -46,7 +46,7 @@ cp env.prod.example .env.prod   # edite senhas e domínio
 docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
 ```
 
-Guia completo: [docs/DEPLOY.md](docs/DEPLOY.md)
+Guia completo: [docs/DEPLOY.md](docs/DEPLOY.md) · **Produção VPS:** [docs/DEPLOY_UNICO.md](docs/DEPLOY_UNICO.md) · [docs/07-SEGURANCA.md](docs/07-SEGURANCA.md)
 
 ## Como rodar (desenvolvimento)
 

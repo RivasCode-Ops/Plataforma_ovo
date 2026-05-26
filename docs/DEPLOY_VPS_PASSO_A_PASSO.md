@@ -1,5 +1,7 @@
 # Deploy VPS — passo a passo (Contabo)
 
+> **Fonte da verdade:** [DEPLOY_UNICO.md](DEPLOY_UNICO.md) — use aquele documento primeiro.
+
 Ordem para sair de **AJUSTAR** → produção piloto.
 
 ---
@@ -7,7 +9,7 @@ Ordem para sair de **AJUSTAR** → produção piloto.
 ## Passo 0 — No PC (2 min)
 
 ```powershell
-cd C:\_PROJETOS\Plataforma_ovo
+cd D:\PROJETOS\04_LABS\Plataforma_ovo
 .\scripts\gerar-vps-tudo-console.ps1
 ```
 
