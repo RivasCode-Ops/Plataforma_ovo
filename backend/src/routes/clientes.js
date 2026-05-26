@@ -10,6 +10,34 @@ import {
 
 const router = Router();
 
+router.post('/', async (req, res, next) => {
+  try {
+    const { nome, telefone, endereco, rota_id } = req.body || {};
+    if (!nome?.trim() || !telefone?.trim()) {
+      return res.status(400).json({ erro: 'nome e telefone são obrigatórios' });
+    }
+    const tel = String(telefone).trim();
+    const existente = await pool.query('SELECT id FROM clientes WHERE telefone = $1', [tel]);
+    if (existente.rows.length) {
+      return res.status(409).json({ erro: 'Já existe cliente com este telefone' });
+    }
+    const { rows } = await pool.query(
+      `INSERT INTO clientes (nome, telefone, endereco, rota_id)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, nome, telefone, endereco, rota_id, created_at`,
+      [
+        nome.trim(),
+        tel,
+        endereco?.trim() || null,
+        rota_id != null && rota_id !== '' ? Number(rota_id) : null,
+      ]
+    );
+    res.status(201).json({ data: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/precos', async (req, res, next) => {
   try {
     const telefone = String(req.query.telefone || '').trim();

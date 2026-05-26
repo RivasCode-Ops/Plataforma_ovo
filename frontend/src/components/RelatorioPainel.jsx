@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api, downloadRelatorioCsv } from '../services/api.js';
+import { STATUS_LABEL } from '../utils/statusPedido.js';
 
 function hojeISO() {
   return new Date().toISOString().slice(0, 10);
@@ -137,7 +138,7 @@ export default function RelatorioPainel() {
                 <tbody>
                   {dados.por_status.map((s) => (
                     <tr key={s.status} className="border-b border-stone-50">
-                      <td className="py-2 capitalize">{s.status}</td>
+                      <td className="py-2">{STATUS_LABEL[s.status] || s.status}</td>
                       <td className="py-2">{s.qtd}</td>
                       <td className="py-2 tabular-nums">R$ {s.total.toFixed(2)}</td>
                     </tr>

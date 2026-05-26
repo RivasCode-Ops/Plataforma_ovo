@@ -150,6 +150,15 @@ export default function LotesPainel({ produtos, onAtualizado, onIrPara }) {
         </p>
       )}
 
+      {lotes.length === 0 &&
+        produtos.some((p) => p.estoque > 0) &&
+        !carregando && (
+          <p className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            Há estoque nos produtos, mas nenhum lote cadastrado. O estoque atual não tem rastreio de
+            validade — registre um lote de produção para vincular entrada e vencimento.
+          </p>
+        )}
+
       {form && (
         <form onSubmit={registrar} className="mb-6 grid gap-3 rounded-lg bg-stone-50 p-4 sm:grid-cols-2 lg:grid-cols-3">
           <label className="block">

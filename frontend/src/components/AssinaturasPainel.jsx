@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import { formatarData } from '../utils/datas.js';
 import BotaoWhatsApp from './BotaoWhatsApp.jsx';
 
 const DIAS = [
@@ -31,6 +32,7 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
   const [msg, setMsg] = useState('');
   const [whatsappAcao, setWhatsappAcao] = useState(null);
   const [carregando, setCarregando] = useState(true);
+  const [editando, setEditando] = useState(null);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -99,7 +101,7 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
           proximaEntrega: data.proxima_entrega,
         },
       });
-      setMsg(`Assinatura #${data.assinatura_id} criada. Próxima entrega: ${data.proxima_entrega}`);
+      setMsg(`Assinatura #${data.assinatura_id} criada. Próxima entrega: ${formatarData(data.proxima_entrega)}`);
       setMostrarForm(false);
       setNome('');
       setTelefone('');
@@ -153,8 +155,105 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
     }
   }
 
+  async function salvarEdicao(e) {
+    e.preventDefault();
+    if (!editando) return;
+    setErro('');
+    try {
+      await api.atualizarAssinatura(editando.id, {
+        frequencia: editando.frequencia,
+        dia_semana: editando.dia_semana,
+        proxima_entrega: editando.proxima_entrega,
+        itens: editando.itens,
+      });
+      setMsg('Assinatura atualizada.');
+      setEditando(null);
+      await carregar();
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
+
   function CardAssinatura({ a, destacar }) {
-    const atrasada = a.proxima_entrega <= new Date().toISOString().slice(0, 10);
+    const proximaStr = String(a.proxima_entrega).slice(0, 10);
+    const atrasada = proximaStr <= new Date().toISOString().slice(0, 10);
+    const emEdicao = editando?.id === a.id;
+
+    if (emEdicao) {
+      return (
+        <form onSubmit={salvarEdicao} className="rounded-lg border border-brand-300 bg-brand-50 p-4">
+          <p className="mb-2 font-medium">{a.cliente_nome}</p>
+          <div className="mb-2 flex flex-wrap gap-2">
+            <select
+              value={editando.frequencia}
+              onChange={(e) => setEditando({ ...editando, frequencia: e.target.value })}
+              className={inputClass}
+            >
+              <option value="semanal">Semanal</option>
+              <option value="quinzenal">Quinzenal</option>
+            </select>
+            <select
+              value={editando.dia_semana}
+              onChange={(e) => setEditando({ ...editando, dia_semana: Number(e.target.value) })}
+              className={inputClass}
+            >
+              {DIAS.map((d) => (
+                <option key={d.v} value={d.v}>
+                  {d.l}
+                </option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={editando.proxima_entrega}
+              onChange={(e) => setEditando({ ...editando, proxima_entrega: e.target.value })}
+              className={inputClass}
+            />
+          </div>
+          <ul className="mb-2 text-sm">
+            {editando.itens.map((i, idx) => (
+              <li key={i.produto_id} className="flex gap-2 py-1">
+                <select
+                  value={i.produto_id}
+                  onChange={(e) => {
+                    const itens = [...editando.itens];
+                    itens[idx] = { ...itens[idx], produto_id: Number(e.target.value) };
+                    setEditando({ ...editando, itens });
+                  }}
+                  className={inputClass}
+                >
+                  {produtos.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nome}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={1}
+                  value={i.quantidade}
+                  onChange={(e) => {
+                    const itens = [...editando.itens];
+                    itens[idx] = { ...itens[idx], quantidade: Number(e.target.value) };
+                    setEditando({ ...editando, itens });
+                  }}
+                  className={`${inputClass} w-16`}
+                />
+              </li>
+            ))}
+          </ul>
+          <div className="flex gap-2">
+            <button type="submit" className="rounded bg-brand-600 px-3 py-1 text-xs text-white">
+              Salvar
+            </button>
+            <button type="button" onClick={() => setEditando(null)} className="text-xs">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      );
+    }
+
     return (
       <article
         className={`rounded-lg border p-4 ${
@@ -171,7 +270,7 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
           <span className="text-sm capitalize text-stone-600">{a.status}</span>
         </div>
         <p className="mt-2 text-sm">
-          Próxima entrega: <strong>{a.proxima_entrega}</strong>
+          Próxima entrega: <strong>{formatarData(a.proxima_entrega)}</strong>
         </p>
         <ul className="mt-2 text-sm text-stone-600">
           {a.itens?.map((i) => (
@@ -188,6 +287,24 @@ export default function AssinaturasPainel({ produtos, onPedidoGerado }) {
               className="rounded bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-700"
             >
               Gerar pedido desta entrega
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setEditando({
+                  id: a.id,
+                  frequencia: a.frequencia,
+                  dia_semana: a.dia_semana,
+                  proxima_entrega: proximaStr,
+                  itens: a.itens.map((i) => ({
+                    produto_id: i.produto_id,
+                    quantidade: i.quantidade,
+                  })),
+                })
+              }
+              className="rounded border border-stone-300 px-2 py-1 text-xs"
+            >
+              Editar
             </button>
             <button
               type="button"

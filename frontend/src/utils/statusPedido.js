@@ -9,12 +9,36 @@ export const STATUS_PEDIDO = [
 
 export const STATUS_LABEL = {
   novo: 'Novo',
-  confirmado: 'Aguardando pagamento',
+  confirmado: 'Confirmado',
   pago: 'Pago',
   enviado: 'Enviado',
   entregue: 'Entregue',
   cancelado: 'Cancelado',
 };
+
+/** Opções do filtro da lista de pedidos (sem rótulos duplicados). */
+export const FILTRO_PEDIDOS = [
+  { value: '', label: 'Todos os status' },
+  { value: '__aguardando__', label: 'Aguardando pagamento' },
+  { value: 'novo', label: 'Novo (site)' },
+  { value: 'confirmado', label: 'Confirmado' },
+  { value: 'pago', label: 'Pago' },
+  { value: 'enviado', label: 'Enviado' },
+  { value: 'entregue', label: 'Entregue' },
+  { value: 'cancelado', label: 'Cancelado' },
+];
+
+const FORMA_PAGAMENTO_LABEL = {
+  pix: 'PIX',
+  dinheiro: 'Dinheiro',
+  cartao: 'Cartão',
+  fiado: 'Fiado',
+};
+
+export function labelFormaPagamento(forma) {
+  if (!forma) return '—';
+  return FORMA_PAGAMENTO_LABEL[forma] || forma;
+}
 
 export const STATUS_COR = {
   novo: 'bg-brand-100 text-brand-800',

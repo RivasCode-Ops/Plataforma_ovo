@@ -80,35 +80,82 @@ export default function App() {
   const [pedidos, setPedidos] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [filtro, setFiltro] = useState('');
+  const [buscaPedidos, setBuscaPedidos] = useState('');
+  const [offsetPedidos, setOffsetPedidos] = useState(0);
+  const [temMaisPedidos, setTemMaisPedidos] = useState(false);
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(true);
 
-  const carregar = useCallback(async () => {
-    setCarregando(true);
-    setErro('');
-    try {
-      const pedidosQuery =
-        filtro === '__aguardando__'
-          ? { aguardandoPagamento: true }
-          : filtro
-            ? { status: filtro }
-            : {};
-      const [peds, prods] = await Promise.all([
-        api.listarPedidos({ ...pedidosQuery, limite: 100 }),
-        api.listarProdutos(),
-      ]);
-      setPedidos(peds);
-      setProdutos(prods);
-    } catch (e) {
-      setErro(e.message);
-    } finally {
-      setCarregando(false);
-    }
-  }, [filtro]);
+  const LIMITE_PEDIDOS = 50;
+
+  const carregar = useCallback(
+    async (append = false) => {
+      setCarregando(true);
+      setErro('');
+      try {
+        const offset = append ? offsetPedidos : 0;
+        const pedidosQuery =
+          filtro === '__aguardando__'
+            ? { aguardandoPagamento: true }
+            : filtro
+              ? { status: filtro }
+              : {};
+        const [peds, prods] = await Promise.all([
+          api.listarPedidos({
+            ...pedidosQuery,
+            limite: LIMITE_PEDIDOS,
+            offset,
+            q: buscaPedidos.trim() || undefined,
+          }),
+          api.listarProdutos(),
+        ]);
+        const novoOffset = offset + peds.length;
+        setPedidos(append ? (prev) => [...prev, ...peds] : peds);
+        setOffsetPedidos(novoOffset);
+        setTemMaisPedidos(peds.length >= LIMITE_PEDIDOS);
+        setProdutos(prods);
+      } catch (e) {
+        setErro(e.message);
+      } finally {
+        setCarregando(false);
+      }
+    },
+    [filtro, buscaPedidos, offsetPedidos]
+  );
 
   useEffect(() => {
-    carregar();
-  }, [carregar]);
+    setOffsetPedidos(0);
+    setTemMaisPedidos(false);
+    (async () => {
+      setCarregando(true);
+      setErro('');
+      try {
+        const pedidosQuery =
+          filtro === '__aguardando__'
+            ? { aguardandoPagamento: true }
+            : filtro
+              ? { status: filtro }
+              : {};
+        const [peds, prods] = await Promise.all([
+          api.listarPedidos({
+            ...pedidosQuery,
+            limite: LIMITE_PEDIDOS,
+            offset: 0,
+            q: buscaPedidos.trim() || undefined,
+          }),
+          api.listarProdutos(),
+        ]);
+        setPedidos(peds);
+        setOffsetPedidos(peds.length);
+        setTemMaisPedidos(peds.length >= LIMITE_PEDIDOS);
+        setProdutos(prods);
+      } catch (e) {
+        setErro(e.message);
+      } finally {
+        setCarregando(false);
+      }
+    })();
+  }, [filtro, buscaPedidos]);
 
   useEffect(() => {
     if (!menu.some((m) => m.id === secao)) {
@@ -176,11 +223,15 @@ export default function App() {
           <PedidosLista
             pedidos={pedidos}
             filtro={filtro}
+            busca={buscaPedidos}
             onFiltroChange={setFiltro}
+            onBuscaChange={setBuscaPedidos}
             carregando={carregando}
             onMudarStatus={mudarStatus}
             onMarcarPago={marcarPedidoPago}
             onConfirmarPedido={confirmarPedido}
+            onCarregarMais={() => carregar(true)}
+            temMais={temMaisPedidos}
           />
         );
       case 'assinaturas':

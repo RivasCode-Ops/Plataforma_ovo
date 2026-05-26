@@ -9,7 +9,9 @@ router.get('/', async (req, res, next) => {
     const data = await pedidosService.listarPedidos({
       status: req.query.status,
       aguardando_pagamento: req.query.aguardando_pagamento === '1',
+      q: req.query.q,
       limite: Number(req.query.limite) || 50,
+      offset: Number(req.query.offset) || 0,
     });
     res.json({ data });
   } catch (err) {

@@ -43,21 +43,35 @@ export async function previsaoDemanda({ diasHistorico = 14, diasPrevisao = 7 } =
      GROUP BY ip.produto_id`
   );
 
-  const { rows: assinaturas } = await pool.query(
-    `SELECT ai.produto_id, SUM(ai.quantidade)::int AS quantidade
+  const { rows: assinaturasAtivas } = await pool.query(
+    `SELECT a.frequencia, a.proxima_entrega::text AS proxima_entrega, ai.produto_id, ai.quantidade
      FROM assinaturas a
      JOIN assinatura_itens ai ON ai.assinatura_id = a.id
-     WHERE a.status = 'ativa'
-       AND a.proxima_entrega >= CURRENT_DATE
-       AND a.proxima_entrega <= CURRENT_DATE + ($1::int - 1) * interval '1 day'
-     GROUP BY ai.produto_id`,
-    [previsaoDias]
+     WHERE a.status = 'ativa'`
   );
+
+  const mapAss = {};
+  const hojeStr = hoje();
+  const fim = new Date();
+  fim.setDate(fim.getDate() + previsaoDias - 1);
+  const fimStr = fim.toISOString().slice(0, 10);
+
+  for (const row of assinaturasAtivas) {
+    const step = row.frequencia === 'quinzenal' ? 14 : 7;
+    let d = new Date(String(row.proxima_entrega).slice(0, 10) + 'T12:00:00');
+    while (d.toISOString().slice(0, 10) < hojeStr) {
+      d.setDate(d.getDate() + step);
+    }
+    const qtd = Number(row.quantidade);
+    while (d.toISOString().slice(0, 10) <= fimStr) {
+      mapAss[row.produto_id] = (mapAss[row.produto_id] || 0) + qtd;
+      d.setDate(d.getDate() + step);
+    }
+  }
 
   const mapVendas = Object.fromEntries(
     vendas.map((v) => [v.produto_id, { total: Number(v.quantidade_total), dias: Number(v.dias_com_venda) }])
   );
-  const mapAss = Object.fromEntries(assinaturas.map((a) => [a.produto_id, Number(a.quantidade)]));
   const mapRecente = Object.fromEntries(vendasSemanaRecente.map((r) => [r.produto_id, Number(r.qtd)]));
   const mapAnterior = Object.fromEntries(vendasSemanaAnterior.map((r) => [r.produto_id, Number(r.qtd)]));
 

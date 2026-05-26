@@ -82,9 +82,15 @@ export default function RotasPainel({ onIrPara }) {
 
   async function atribuirCliente(clienteId, rotaId) {
     setErro('');
+    const cliente = clientes.find((c) => c.id === clienteId);
+    const rota = rotas.find((r) => r.id === rotaId);
     try {
       await api.atribuirClienteRota(clienteId, rotaId || null);
-      setMsg('Cliente atualizado.');
+      setMsg(
+        rotaId
+          ? `${cliente?.nome || 'Cliente'} atribuído à rota "${rota?.nome || 'selecionada'}".`
+          : `${cliente?.nome || 'Cliente'} removido da rota.`
+      );
       await carregar();
     } catch (err) {
       setErro(err.message);

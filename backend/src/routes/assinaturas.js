@@ -32,6 +32,15 @@ router.post('/', async (req, res, next) => {
   }
 });
 
+router.patch('/:id', async (req, res, next) => {
+  try {
+    const data = await assinaturas.atualizarAssinatura(req.params.id, req.body);
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.patch('/:id/status', async (req, res, next) => {
   try {
     const { status } = req.body;

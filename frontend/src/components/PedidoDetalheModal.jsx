@@ -1,4 +1,5 @@
-import { STATUS_LABEL } from '../utils/statusPedido.js';
+import { formatarDataHora } from '../utils/datas.js';
+import { STATUS_LABEL, labelFormaPagamento } from '../utils/statusPedido.js';
 
 export default function PedidoDetalheModal({ pedido, onFechar }) {
   if (!pedido) return null;
@@ -19,7 +20,7 @@ export default function PedidoDetalheModal({ pedido, onFechar }) {
             <h3 className="text-lg font-semibold">Pedido #{pedido.id}</h3>
             <p className="text-sm text-stone-500">
               {STATUS_LABEL[pedido.status] || pedido.status} ·{' '}
-              {new Date(pedido.data_pedido).toLocaleString('pt-BR')}
+              {formatarDataHora(pedido.data_pedido)}
             </p>
           </div>
           <button
@@ -44,6 +45,10 @@ export default function PedidoDetalheModal({ pedido, onFechar }) {
               <span className="text-stone-500">Endereço:</span> {pedido.cliente_endereco}
             </p>
           )}
+          <p>
+            <span className="text-stone-500">Pagamento:</span>{' '}
+            {labelFormaPagamento(pedido.forma_pagamento)}
+          </p>
           {pedido.observacao && (
             <p>
               <span className="text-stone-500">Obs.:</span> {pedido.observacao}

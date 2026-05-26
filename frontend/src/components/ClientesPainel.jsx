@@ -19,6 +19,11 @@ export default function ClientesPainel({ onIrPara }) {
   const [msg, setMsg] = useState('');
   const [carregando, setCarregando] = useState(true);
   const [clienteSalvo, setClienteSalvo] = useState(null);
+  const [mostrarNovo, setMostrarNovo] = useState(false);
+  const [novoNome, setNovoNome] = useState('');
+  const [novoTel, setNovoTel] = useState('');
+  const [novoEndereco, setNovoEndereco] = useState('');
+  const [novoRotaId, setNovoRotaId] = useState('');
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -43,6 +48,30 @@ export default function ClientesPainel({ onIrPara }) {
       api.listarProdutosGerenciar().then(setProdutos).catch(() => {});
     }
   }, [isAdmin]);
+
+  async function criarCliente(e) {
+    e.preventDefault();
+    setErro('');
+    setMsg('');
+    try {
+      const criado = await api.criarCliente({
+        nome: novoNome.trim(),
+        telefone: novoTel.trim(),
+        endereco: novoEndereco.trim() || undefined,
+        rota_id: novoRotaId ? Number(novoRotaId) : undefined,
+      });
+      setMsg(`Cliente "${criado.nome}" cadastrado.`);
+      setMostrarNovo(false);
+      setNovoNome('');
+      setNovoTel('');
+      setNovoEndereco('');
+      setNovoRotaId('');
+      await carregar();
+      await verCliente(criado.id);
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
 
   async function verCliente(id) {
     setErro('');
@@ -105,10 +134,78 @@ export default function ClientesPainel({ onIrPara }) {
 
   return (
     <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
-      <h2 className="mb-1 text-lg font-medium">Clientes</h2>
-      <p className="mb-4 text-sm text-stone-500">
-        Cadastro automático ao criar pedidos. Admin pode definir preço atacado por produto.
-      </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 className="text-lg font-medium">Clientes</h2>
+          <p className="text-sm text-stone-500">
+            Cadastro manual ou automático ao criar pedidos. Preço atacado por produto (admin).
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setMostrarNovo(!mostrarNovo)}
+          className="rounded-lg bg-stone-800 px-3 py-1.5 text-sm font-medium text-white"
+        >
+          {mostrarNovo ? 'Fechar' : '+ Novo cliente'}
+        </button>
+      </div>
+
+      {mostrarNovo && (
+        <form
+          onSubmit={criarCliente}
+          className="mb-4 grid gap-3 rounded-lg border bg-stone-50 p-4 sm:grid-cols-2"
+        >
+          <label className="block">
+            <span className="mb-1 block text-xs text-stone-500">Nome</span>
+            <input
+              value={novoNome}
+              onChange={(e) => setNovoNome(e.target.value)}
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+              required
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs text-stone-500">Telefone</span>
+            <input
+              value={novoTel}
+              onChange={(e) => setNovoTel(e.target.value)}
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+              required
+            />
+          </label>
+          <label className="block sm:col-span-2">
+            <span className="mb-1 block text-xs text-stone-500">Endereço</span>
+            <input
+              value={novoEndereco}
+              onChange={(e) => setNovoEndereco(e.target.value)}
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs text-stone-500">Rota (opcional)</span>
+            <select
+              value={novoRotaId}
+              onChange={(e) => setNovoRotaId(e.target.value)}
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm"
+            >
+              <option value="">Sem rota</option>
+              {rotas.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Salvar cliente
+            </button>
+          </div>
+        </form>
+      )}
 
       <input
         type="search"

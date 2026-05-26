@@ -24,29 +24,53 @@ function podeTransicionar(de, para) {
   return Array.isArray(proximos) && proximos.includes(para);
 }
 
-export async function listarPedidos({ status, aguardando_pagamento, limite = 50 } = {}) {
+export async function listarPedidos({
+  status,
+  aguardando_pagamento,
+  q,
+  limite = 50,
+  offset = 0,
+} = {}) {
   const params = [];
-  let where = '';
+  const condicoes = [];
 
   if (aguardando_pagamento) {
-    where = `WHERE p.status = ANY($1::text[])`;
     params.push(AGUARDANDO_PAGAMENTO);
+    condicoes.push(`p.status = ANY($${params.length}::text[])`);
   } else if (status) {
     params.push(status);
-    where = `WHERE p.status = $${params.length}`;
+    condicoes.push(`p.status = $${params.length}`);
   }
 
-  params.push(limite);
+  if (q?.trim()) {
+    const busca = q.trim();
+    params.push(`%${busca}%`);
+    const i = params.length;
+    params.push(busca);
+    condicoes.push(
+      `(LOWER(c.nome) LIKE LOWER($${i}) OR c.telefone LIKE $${i} OR CAST(p.id AS TEXT) = $${i + 1})`
+    );
+  }
+
+  const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : '';
+
+  params.push(Math.min(Math.max(Number(limite) || 50, 1), 200));
   const limiteIdx = params.length;
+  params.push(Math.max(Number(offset) || 0, 0));
+  const offsetIdx = params.length;
 
   const { rows } = await pool.query(
-    `SELECT p.id, p.status, p.total, p.data_pedido, p.observacao,
-            c.id AS cliente_id, c.nome AS cliente_nome, c.telefone AS cliente_telefone
+    `SELECT p.id, p.status, p.total, p.data_pedido, p.observacao, p.forma_pagamento,
+            c.id AS cliente_id, c.nome AS cliente_nome, c.telefone AS cliente_telefone,
+            (SELECT string_agg(pr.nome || ' ×' || ip.quantidade, ', ' ORDER BY ip.id)
+             FROM itens_pedido ip
+             JOIN produtos pr ON pr.id = ip.produto_id
+             WHERE ip.pedido_id = p.id) AS itens_resumo
      FROM pedidos p
      JOIN clientes c ON c.id = p.cliente_id
      ${where}
      ORDER BY p.data_pedido DESC
-     LIMIT $${limiteIdx}`,
+     LIMIT $${limiteIdx} OFFSET $${offsetIdx}`,
     params
   );
 

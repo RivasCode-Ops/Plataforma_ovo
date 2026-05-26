@@ -74,14 +74,20 @@ export const api = {
     }),
   removerPrecoAtacado: (clienteId, produtoId) =>
     request(`/clientes/${clienteId}/precos/${produtoId}`, { method: 'DELETE' }),
-  listarPedidos: ({ status, aguardandoPagamento, limite } = {}) => {
+  listarPedidos: ({ status, aguardandoPagamento, limite, offset, q: busca } = {}) => {
     const q = new URLSearchParams();
     if (status) q.set('status', status);
     if (aguardandoPagamento) q.set('aguardando_pagamento', '1');
     if (limite) q.set('limite', String(limite));
+    if (offset) q.set('offset', String(offset));
+    if (busca) q.set('q', busca);
     const s = q.toString();
     return request(`/pedidos${s ? `?${s}` : ''}`);
   },
+  criarCliente: (payload) =>
+    request('/clientes', { method: 'POST', body: JSON.stringify(payload) }),
+  atualizarAssinatura: (id, payload) =>
+    request(`/assinaturas/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }),
   obterPedido: (id) => request(`/pedidos/${id}`),
   confirmarPedido: (id) =>
     request(`/pedidos/${id}/confirmar`, { method: 'POST' }),

@@ -1,6 +1,17 @@
 import { pool } from '../db.js';
 import { listarAlertasValidade } from './lotes.js';
 
+function formatarDataBr(valor) {
+  if (!valor) return '—';
+  const s =
+    valor instanceof Date
+      ? valor.toISOString().slice(0, 10)
+      : String(valor).slice(0, 10);
+  const [y, m, d] = s.split('-');
+  if (y && m && d) return `${d}/${m}/${y}`;
+  return s;
+}
+
 function item({ id, tipo, nivel, titulo, mensagem, acao, ref_id }) {
   return { id, tipo, nivel, titulo, mensagem, acao, ref_id: ref_id ?? null };
 }
@@ -94,7 +105,7 @@ export async function listarNotificacoes({ papel = 'admin' } = {}) {
         tipo: 'assinatura_atrasada',
         nivel: 'alta',
         titulo: 'Assinatura atrasada',
-        mensagem: `${a.cliente_nome} — entrega era ${a.proxima_entrega}`,
+        mensagem: `${a.cliente_nome} — entrega era ${formatarDataBr(a.proxima_entrega)}`,
         acao: 'assinaturas',
         ref_id: a.id,
       })

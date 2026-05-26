@@ -48,8 +48,14 @@ export async function listarAssinaturas({ status } = {}) {
        WHERE ai.assinatura_id = $1`,
       [a.id]
     );
+    const proxima =
+      a.proxima_entrega instanceof Date
+        ? a.proxima_entrega.toISOString().slice(0, 10)
+        : String(a.proxima_entrega).slice(0, 10);
+
     result.push({
       ...a,
+      proxima_entrega: proxima,
       dia_semana_nome: nomeDiaSemana(a.dia_semana),
       itens: itens.rows.map((i) => ({
         produto_id: i.produto_id,
@@ -130,6 +136,54 @@ export async function criarAssinatura({ cliente, frequencia, dia_semana, itens, 
     }
 
     return { assinatura_id: assinaturaId, proxima_entrega: proxima };
+  });
+}
+
+export async function atualizarAssinatura(
+  id,
+  { frequencia, dia_semana, itens, observacao, proxima_entrega } = {}
+) {
+  const atual = await listarAssinaturas();
+  const ass = atual.find((a) => a.id === Number(id));
+  if (!ass) throw Object.assign(new Error('Assinatura não encontrada'), { status: 404 });
+  if (ass.status === 'cancelada') {
+    throw Object.assign(new Error('Assinatura cancelada não pode ser editada'), { status: 400 });
+  }
+
+  const freq = frequencia ?? ass.frequencia;
+  const dia = dia_semana != null ? Number(dia_semana) : ass.dia_semana;
+  if (!['semanal', 'quinzenal'].includes(freq)) {
+    throw Object.assign(new Error('frequencia inválida'), { status: 400 });
+  }
+  if (!Number.isInteger(dia) || dia < 0 || dia > 6) {
+    throw Object.assign(new Error('dia_semana inválido'), { status: 400 });
+  }
+
+  let proxima = proxima_entrega ?? ass.proxima_entrega;
+  if (!proxima_entrega && (frequencia || dia_semana != null)) {
+    proxima = calcularProximaEntrega(dia);
+  }
+
+  return withTransaction(async (client) => {
+    await client.query(
+      `UPDATE assinaturas
+       SET frequencia = $1, dia_semana = $2, proxima_entrega = $3,
+           observacao = COALESCE($4, observacao), updated_at = NOW()
+       WHERE id = $5`,
+      [freq, dia, proxima, observacao ?? null, id]
+    );
+
+    if (Array.isArray(itens) && itens.length > 0) {
+      await client.query('DELETE FROM assinatura_itens WHERE assinatura_id = $1', [id]);
+      for (const item of itens) {
+        await client.query(
+          `INSERT INTO assinatura_itens (assinatura_id, produto_id, quantidade) VALUES ($1, $2, $3)`,
+          [id, item.produto_id, item.quantidade]
+        );
+      }
+    }
+
+    return (await listarAssinaturas()).find((a) => a.id === Number(id));
   });
 }
 

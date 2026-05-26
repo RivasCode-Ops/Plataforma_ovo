@@ -43,7 +43,8 @@ export default function WhatsAppPainel() {
     <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-medium">WhatsApp</h2>
       <p className="mb-4 text-sm text-stone-500">
-        Link direto (wa.me) — sem integração com sistemas anteriores
+        Gera link <strong>wa.me</strong> para envio manual pelo celular — não há API de envio
+        automático. Nos pedidos e rotas, use os botões WhatsApp com mensagem já montada.
       </p>
 
       {carregando ? (

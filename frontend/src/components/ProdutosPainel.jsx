@@ -89,38 +89,48 @@ export default function ProdutosPainel({ onAtualizado }) {
       {form && (
         <form
           onSubmit={isNovo ? criar : (e) => { e.preventDefault(); salvar(); }}
-          className="mb-4 grid gap-2 rounded-lg border border-brand-200 bg-brand-50 p-4 sm:grid-cols-2 lg:grid-cols-6"
+          className="mb-4 grid gap-3 rounded-lg border border-brand-200 bg-brand-50 p-4 sm:grid-cols-2 lg:grid-cols-3"
         >
-          <input
-            placeholder="Nome"
-            value={form.nome}
-            onChange={(e) => setForm({ ...form, nome: e.target.value })}
-            className={inputClass}
-            required
-          />
-          <input
-            placeholder="Unidade"
-            value={form.unidade}
-            onChange={(e) => setForm({ ...form, unidade: e.target.value })}
-            className={inputClass}
-            required
-          />
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Preço"
-            value={form.preco}
-            onChange={(e) => setForm({ ...form, preco: e.target.value })}
-            className={inputClass}
-            required
-          />
-          <input
-            type="number"
-            placeholder="Estoque"
-            value={form.estoque}
-            onChange={(e) => setForm({ ...form, estoque: e.target.value })}
-            className={inputClass}
-          />
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-stone-600">Nome</span>
+            <input
+              value={form.nome}
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
+              className={inputClass}
+              required
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-stone-600">Unidade</span>
+            <input
+              value={form.unidade}
+              onChange={(e) => setForm({ ...form, unidade: e.target.value })}
+              className={inputClass}
+              required
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-stone-600">Preço (R$)</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.preco}
+              onChange={(e) => setForm({ ...form, preco: e.target.value })}
+              className={inputClass}
+              required
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-stone-600">Estoque inicial</span>
+            <input
+              type="number"
+              min="0"
+              value={form.estoque}
+              onChange={(e) => setForm({ ...form, estoque: e.target.value })}
+              className={inputClass}
+            />
+          </label>
           {!isNovo && (
             <label className="flex items-center gap-2 text-sm">
               <input

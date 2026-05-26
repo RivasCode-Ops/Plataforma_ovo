@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { api } from '../services/api.js';
+import { formatarDataHora } from '../utils/datas.js';
 import {
+  FILTRO_PEDIDOS,
   STATUS_COR,
   STATUS_LABEL,
-  STATUS_PEDIDO,
   aguardaPagamento,
+  labelFormaPagamento,
   opcoesStatusAtual,
 } from '../utils/statusPedido.js';
 import PedidoDetalheModal from './PedidoDetalheModal.jsx';
@@ -13,11 +15,15 @@ import PixPedidoModal from './PixPedidoModal.jsx';
 export default function PedidosLista({
   pedidos,
   filtro,
+  busca,
   onFiltroChange,
+  onBuscaChange,
   carregando,
   onMudarStatus,
   onMarcarPago,
   onConfirmarPedido,
+  onCarregarMais,
+  temMais,
 }) {
   const [pixAtivo, setPixAtivo] = useState(false);
   const [pixModal, setPixModal] = useState(null);
@@ -98,16 +104,21 @@ export default function PedidosLista({
             </p>
           )}
         </div>
+        <input
+          type="search"
+          value={busca}
+          onChange={(e) => onBuscaChange(e.target.value)}
+          placeholder="Buscar cliente, telefone ou #"
+          className="min-w-[180px] rounded-lg border border-stone-300 px-3 py-2 text-sm"
+        />
         <select
           value={filtro}
           onChange={(e) => onFiltroChange(e.target.value)}
           className="rounded-lg border border-stone-300 px-3 py-2 text-sm"
         >
-          <option value="">Todos os status</option>
-          <option value="__aguardando__">Aguardando pagamento</option>
-          {STATUS_PEDIDO.map((s) => (
-            <option key={s} value={s}>
-              {STATUS_LABEL[s]}
+          {FILTRO_PEDIDOS.map((o) => (
+            <option key={o.value || '_'} value={o.value}>
+              {o.label}
             </option>
           ))}
         </select>
@@ -129,8 +140,11 @@ export default function PedidosLista({
             <thead>
               <tr className="border-b text-stone-500">
                 <th className="py-2 pr-4">#</th>
+                <th className="py-2 pr-4">Data</th>
                 <th className="py-2 pr-4">Cliente</th>
+                <th className="py-2 pr-4">Itens</th>
                 <th className="py-2 pr-4">Total</th>
+                <th className="py-2 pr-4">Pagamento</th>
                 <th className="py-2 pr-4">Status</th>
                 <th className="py-2">Ações</th>
               </tr>
@@ -147,21 +161,19 @@ export default function PedidosLista({
                         : ''
                   }`}
                 >
-                  <td className="py-3 pr-4 font-medium">
-                    <button
-                      type="button"
-                      onClick={() => verDetalhe(p.id)}
-                      className="text-brand-700 underline-offset-2 hover:underline"
-                      disabled={abrindoDetalhe === p.id}
-                    >
-                      {abrindoDetalhe === p.id ? '…' : p.id}
-                    </button>
+                  <td className="py-3 pr-4 font-medium">{p.id}</td>
+                  <td className="py-3 pr-4 whitespace-nowrap text-xs text-stone-600">
+                    {formatarDataHora(p.data_pedido)}
                   </td>
                   <td className="py-3 pr-4">
                     <div>{p.cliente_nome}</div>
                     <div className="text-xs text-stone-500">{p.cliente_telefone}</div>
                   </td>
+                  <td className="py-3 pr-4 max-w-[200px] truncate text-xs text-stone-600" title={p.itens_resumo}>
+                    {p.itens_resumo || '—'}
+                  </td>
                   <td className="py-3 pr-4 tabular-nums">R$ {Number(p.total).toFixed(2)}</td>
+                  <td className="py-3 pr-4 text-xs">{labelFormaPagamento(p.forma_pagamento)}</td>
                   <td className="py-3 pr-4">
                     <div className="flex flex-wrap items-center gap-1">
                       <span
@@ -180,6 +192,14 @@ export default function PedidosLista({
                   </td>
                   <td className="py-3">
                     <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => verDetalhe(p.id)}
+                        disabled={abrindoDetalhe === p.id}
+                        className="rounded border border-stone-300 px-2 py-1 text-xs hover:bg-stone-50"
+                      >
+                        {abrindoDetalhe === p.id ? '…' : 'Detalhes'}
+                      </button>
                       {p.status === 'novo' && (
                         <button
                           type="button"
@@ -239,6 +259,18 @@ export default function PedidosLista({
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {temMais && !carregando && (
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={onCarregarMais}
+            className="rounded-lg border border-stone-300 px-4 py-2 text-sm hover:bg-stone-50"
+          >
+            Carregar mais pedidos
+          </button>
         </div>
       )}
 
