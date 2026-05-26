@@ -122,6 +122,11 @@ jobs:
 
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
+            set -a
+            # shellcheck disable=SC1091
+            . ./.env.prod
+            set +a
+
             docker compose --env-file .env.prod -f docker-compose.prod.yml pull backend web
             docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --remove-orphans
 
