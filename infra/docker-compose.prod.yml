@@ -1,5 +1,5 @@
 # Produção — VPS (um domínio: painel + API em /api)
-# Uso: cd infra && cp env.prod.example .env.prod && docker compose -f docker-compose.prod.yml up -d --build
+# Uso: cd infra && docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d
 
 services:
   postgres:
@@ -22,9 +22,7 @@ services:
       - internal
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: ${BACKEND_IMAGE:-ghcr.io/rivascode-ops/plataforma_ovo/backend:latest}
     container_name: plataforma_ovo_api
     restart: unless-stopped
     env_file:
@@ -40,9 +38,7 @@ services:
       - internal
 
   web:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: ${FRONTEND_IMAGE:-ghcr.io/rivascode-ops/plataforma_ovo/frontend:latest}
     container_name: plataforma_ovo_web
     restart: unless-stopped
     ports:
