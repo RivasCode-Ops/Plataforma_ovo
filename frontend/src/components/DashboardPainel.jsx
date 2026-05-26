@@ -61,6 +61,13 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
       cor: 'bg-brand-50 border-brand-200',
     },
     {
+      label: 'Turno / Rota',
+      valor: '→',
+      sub: 'saída e prestação',
+      acao: 'entrega-turno',
+      cor: 'bg-violet-50 border-violet-200',
+    },
+    {
       label: 'Assinaturas (7 dias)',
       valor: stats.assinaturasSemana,
       sub: 'entregas programadas',
@@ -93,7 +100,10 @@ export default function DashboardPainel({ produtos, papel = 'admin', onIrPara })
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {cards
-          .filter((c) => papel === 'admin' || c.acao !== 'produtos')
+          .filter((c) => {
+            if (papel === 'admin') return true;
+            return c.acao !== 'produtos';
+          })
           .map((c) => (
           <button
             key={c.acao}

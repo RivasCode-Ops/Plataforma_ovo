@@ -24,6 +24,7 @@ import webhookRouter from './routes/webhook.js';
 import sitePedidoRouter from './routes/sitePedido.js';
 import contasReceberRouter from './routes/contasReceber.js';
 import stoneRouter from './routes/stone.js';
+import turnoEntregaRouter from './routes/turnoEntrega.js';
 import { pool } from './db.js';
 import { ensureOperadorDemo, seedOperadorAdmin } from './services/operadores.js';
 import { assertProductionConfig } from './config/productionGuard.js';
@@ -102,6 +103,7 @@ app.use('/api/pix', pixRouter);
 app.use('/api/previsao', previsaoRouter);
 app.use('/api/balcao', balcaoRouter);
 app.use('/api/contas-receber', contasReceberRouter);
+app.use('/api/turnos-entrega', turnoEntregaRouter);
 
 app.use((err, _req, res, _next) => {
   const status = err.status || 500;

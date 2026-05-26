@@ -70,7 +70,7 @@ export default function OperadoresPainel() {
       <div>
         <h2 className="text-lg font-medium">Operadores</h2>
         <p className="text-sm text-stone-500">
-          Contas de quem usa o painel. Operador: pedidos e clientes. Admin: tudo, incluindo produtos.
+          Operador: vendas, pedidos e turno de rota. Admin: tudo + prestação de contas.
         </p>
       </div>
 

@@ -4,8 +4,10 @@
 
 | Perfil | Acesso |
 |--------|--------|
-| **admin** | Painel completo, produtos, relatório, cadastro de operadores |
-| **operador** | Pedidos, clientes, assinaturas, lotes, WhatsApp |
+| **admin** | Painel completo, produtos, relatório, operadores, prestação de contas |
+| **operador** | Pedidos, clientes, assinaturas, lotes, **turno/rota de entrega** |
+
+Não há perfil “entregador”. A rota de entrega é um **turno** com `responsavel_nome` (ex.: “Marcos”, “Van 2”).
 
 ## Primeiro acesso
 
@@ -22,14 +24,9 @@ Altere no `.env` antes de ir para produção.
 2. Menu **Operadores** → preencha nome, login, senha e perfil
 3. O operador entra com o login em minúsculas
 
-## Banco existente (PostgreSQL)
+## Turno de entrega
 
-```bash
-psql $DATABASE_URL -f backend/migrations/004_operadores.sql
-```
+Ver `docs/MODULO_ENTREGA_TURNO.md`.
 
-Reinicie a API para criar o admin inicial (se a tabela estiver vazia).
-
-## Migração de tokens antigos
-
-Após atualizar, peça a todos que façam **login novamente** (tokens antigos continuam válidos como admin até expirar).
+- Menu **Turno / Rota** → informar responsável pela saída → iniciar.
+- Admin fecha em **Prestação**.

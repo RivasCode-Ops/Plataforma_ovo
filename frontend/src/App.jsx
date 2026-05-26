@@ -15,6 +15,8 @@ import OperadoresPainel from './components/OperadoresPainel.jsx';
 import NotificacoesPainel from './components/NotificacoesPainel.jsx';
 import RotasPainel from './components/RotasPainel.jsx';
 import PrevisaoPainel from './components/PrevisaoPainel.jsx';
+import EntregaTurnoPainel from './components/EntregaTurnoPainel.jsx';
+import PrestacaoContasPainel from './components/PrestacaoContasPainel.jsx';
 import { useNotificacoes } from './hooks/useNotificacoes.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { api } from './services/api.js';
@@ -35,6 +37,8 @@ const MENU = [
   { id: 'previsao', label: 'Previsão', admin: true },
   { id: 'whatsapp', label: 'WhatsApp' },
   { id: 'operadores', label: 'Operadores', admin: true },
+  { id: 'prestacao', label: 'Prestação', admin: true },
+  { id: 'entrega-turno', label: 'Turno / Rota' },
 ];
 
 const SECOES_OPERADOR = new Set([
@@ -43,6 +47,7 @@ const SECOES_OPERADOR = new Set([
   'novo',
   'balcao',
   'hoje',
+  'entrega-turno',
   'rotas',
   'pedidos',
   'assinaturas',
@@ -63,6 +68,8 @@ const SECAO_QUERY = {
   balcao: 'balcao',
   'pedidos-dia': 'hoje',
   hoje: 'hoje',
+  rota: 'entrega-turno',
+  'minha-rota': 'entrega-turno',
 };
 
 function secaoInicial() {
@@ -215,7 +222,9 @@ export default function App() {
           <VendaBalcaoForm produtos={produtos} onVenda={() => carregar()} />
         );
       case 'hoje':
-        return <PedidosHojePainel onMarcarPago={marcarPedidoPago} />;
+        return (
+          <PedidosHojePainel onMarcarPago={marcarPedidoPago} onMudarStatus={mudarStatus} />
+        );
       case 'rotas':
         return <RotasPainel onIrPara={setSecao} />;
       case 'pedidos':
@@ -252,6 +261,10 @@ export default function App() {
         return <WhatsAppPainel />;
       case 'operadores':
         return papel === 'admin' ? <OperadoresPainel /> : null;
+      case 'prestacao':
+        return papel === 'admin' ? <PrestacaoContasPainel /> : null;
+      case 'entrega-turno':
+        return <EntregaTurnoPainel />;
       default:
         return null;
     }
@@ -326,9 +339,9 @@ export default function App() {
               {usuario?.nome || usuario?.login}
             </span>
             <span className="text-stone-500"> — meuzovo</span>
-            {usuario?.papel === 'operador' && (
-              <span className="ml-2 rounded bg-stone-100 px-2 py-0.5 text-xs text-stone-600">
-                operador
+            {usuario?.papel && usuario.papel !== 'admin' && (
+              <span className="ml-2 rounded bg-stone-100 px-2 py-0.5 text-xs text-stone-600 capitalize">
+                {usuario.papel}
               </span>
             )}
           </p>

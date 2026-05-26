@@ -16,6 +16,8 @@ MIGRATIONS=(
   008_lote_desconto.sql
   009_webhook_idempotencia.sql
   010_plataforma_producao.sql
+  011_entrega_turno.sql
+  012_entrega_turno_sem_perfil.sql
   002_assinaturas.sql
   002_balcao_fiado.sql
 )

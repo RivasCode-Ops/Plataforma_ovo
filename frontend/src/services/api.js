@@ -179,6 +179,46 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ senha }),
     }),
+
+  turnoEntregaAtual: (turnoId) => {
+    const q = turnoId ? `?turno_id=${encodeURIComponent(turnoId)}` : '';
+    return request(`/turnos-entrega/atual${q}`);
+  },
+  listarTurnosAbertos: (dataRef) => {
+    const q = dataRef ? `?data_ref=${encodeURIComponent(dataRef)}` : '';
+    return request(`/turnos-entrega/abertos${q}`);
+  },
+  iniciarTurnoEntrega: (payload) =>
+    request('/turnos-entrega/iniciar', { method: 'POST', body: JSON.stringify(payload) }),
+  detalheTurnoEntrega: (id) => request(`/turnos-entrega/${id}`),
+  encerrarTurnoEntrega: (id) =>
+    request(`/turnos-entrega/${id}/encerrar`, { method: 'POST' }),
+  concluirParadaEntrega: (turnoId, paradaId, payload) =>
+    request(`/turnos-entrega/${turnoId}/paradas/${paradaId}/concluir`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  vendaAvulsaTurno: (turnoId, payload) =>
+    request(`/turnos-entrega/${turnoId}/vendas-avulsas`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  responderDemandaTurno: (turnoId, demandaId, payload) =>
+    request(`/turnos-entrega/${turnoId}/demandas/${demandaId}/responder`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  listarTurnosEntrega: (status) => {
+    const q = status ? `?status=${encodeURIComponent(status)}` : '';
+    return request(`/turnos-entrega${q}`);
+  },
+  criarDemandaTurno: (payload) =>
+    request('/turnos-entrega/demandas', { method: 'POST', body: JSON.stringify(payload) }),
+  confirmarPrestacaoTurno: (turnoId, payload) =>
+    request(`/turnos-entrega/${turnoId}/prestacao`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
 };
 
 export async function downloadRelatorioCsv(de, ate) {
