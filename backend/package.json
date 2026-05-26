@@ -11,6 +11,7 @@
     "db:schema": "node scripts/apply-schema.js",
     "seed:demo": "node scripts/seed-demo.js",
     "criar:demo": "node scripts/criar-usuario-demo.js",
+    "reset:senha": "node scripts/reset-senha.js",
     "test:ci": "node scripts/ci-test-pedido-estoque.mjs"
   },
   "dependencies": {
