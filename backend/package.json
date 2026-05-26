@@ -10,7 +10,8 @@
     "start:local": "cross-env USE_MEMORY_DB=1 node src/index.js",
     "db:schema": "node scripts/apply-schema.js",
     "seed:demo": "node scripts/seed-demo.js",
-    "criar:demo": "node scripts/criar-usuario-demo.js"
+    "criar:demo": "node scripts/criar-usuario-demo.js",
+    "test:ci": "node scripts/ci-test-pedido-estoque.mjs"
   },
   "dependencies": {
     "cors": "^2.8.5",

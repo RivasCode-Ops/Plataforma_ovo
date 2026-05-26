@@ -94,7 +94,7 @@ export default function App() {
             ? { status: filtro }
             : {};
       const [peds, prods] = await Promise.all([
-        api.listarPedidos(pedidosQuery),
+        api.listarPedidos({ ...pedidosQuery, limite: 100 }),
         api.listarProdutos(),
       ]);
       setPedidos(peds);
@@ -122,6 +122,16 @@ export default function App() {
       await carregar();
     } catch (e) {
       setErro(e.message);
+    }
+  }
+
+  async function confirmarPedido(id) {
+    try {
+      await api.confirmarPedido(id);
+      await carregar();
+    } catch (e) {
+      setErro(e.message);
+      throw e;
     }
   }
 
@@ -170,6 +180,7 @@ export default function App() {
             carregando={carregando}
             onMudarStatus={mudarStatus}
             onMarcarPago={marcarPedidoPago}
+            onConfirmarPedido={confirmarPedido}
           />
         );
       case 'assinaturas':

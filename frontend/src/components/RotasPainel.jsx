@@ -17,6 +17,9 @@ export default function RotasPainel({ onIrPara }) {
   const [erro, setErro] = useState('');
   const [msg, setMsg] = useState('');
   const [rotaSalva, setRotaSalva] = useState(null);
+  const [editandoId, setEditandoId] = useState(null);
+  const [editNome, setEditNome] = useState('');
+  const [editOrdem, setEditOrdem] = useState('0');
 
   const carregar = useCallback(async () => {
     setErro('');
@@ -47,6 +50,30 @@ export default function RotasPainel({ onIrPara }) {
       setNome('');
       setOrdem('0');
       setMsg('Rota criada.');
+      await carregar();
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
+
+  function iniciarEdicao(rota) {
+    setEditandoId(rota.id);
+    setEditNome(rota.nome);
+    setEditOrdem(String(rota.ordem ?? 0));
+    setMsg('');
+  }
+
+  async function salvarEdicao(e) {
+    e.preventDefault();
+    if (!isAdmin || !editandoId) return;
+    setErro('');
+    try {
+      await api.atualizarRota(editandoId, {
+        nome: editNome,
+        ordem: Number(editOrdem),
+      });
+      setEditandoId(null);
+      setMsg('Rota atualizada.');
       await carregar();
     } catch (err) {
       setErro(err.message);
@@ -123,15 +150,55 @@ export default function RotasPainel({ onIrPara }) {
           ) : (
             <ul className="space-y-2 text-sm">
               {rotas.map((r) => (
-                <li
-                  key={r.id}
-                  className="flex justify-between rounded-lg bg-stone-50 px-3 py-2"
-                >
-                  <span>
-                    <strong>{r.nome}</strong>
-                    <span className="ml-2 text-stone-400">ordem {r.ordem}</span>
-                  </span>
-                  <span className="text-stone-500">{r.qtd_clientes} cliente(s)</span>
+                <li key={r.id} className="rounded-lg bg-stone-50 px-3 py-2">
+                  {isAdmin && editandoId === r.id ? (
+                    <form onSubmit={salvarEdicao} className="flex flex-wrap items-end gap-2">
+                      <input
+                        className={inputClass}
+                        value={editNome}
+                        onChange={(e) => setEditNome(e.target.value)}
+                        required
+                      />
+                      <input
+                        type="number"
+                        className={inputClass + ' w-16'}
+                        value={editOrdem}
+                        onChange={(e) => setEditOrdem(e.target.value)}
+                      />
+                      <button
+                        type="submit"
+                        className="rounded bg-brand-600 px-2 py-1 text-xs text-white"
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditandoId(null)}
+                        className="rounded border px-2 py-1 text-xs"
+                      >
+                        Cancelar
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="flex justify-between gap-2">
+                      <span>
+                        <strong>{r.nome}</strong>
+                        <span className="ml-2 text-stone-400">ordem {r.ordem}</span>
+                      </span>
+                      <span className="flex items-center gap-2 text-stone-500">
+                        {r.qtd_clientes} cliente(s)
+                        {isAdmin && (
+                          <button
+                            type="button"
+                            onClick={() => iniciarEdicao(r)}
+                            className="text-xs text-brand-700 hover:underline"
+                          >
+                            Editar
+                          </button>
+                        )}
+                      </span>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

@@ -5,7 +5,9 @@ import {
   STATUS_LABEL,
   STATUS_PEDIDO,
   aguardaPagamento,
+  opcoesStatusAtual,
 } from '../utils/statusPedido.js';
+import PedidoDetalheModal from './PedidoDetalheModal.jsx';
 import PixPedidoModal from './PixPedidoModal.jsx';
 
 export default function PedidosLista({
@@ -15,13 +17,18 @@ export default function PedidosLista({
   carregando,
   onMudarStatus,
   onMarcarPago,
+  onConfirmarPedido,
 }) {
   const [pixAtivo, setPixAtivo] = useState(false);
   const [pixModal, setPixModal] = useState(null);
   const [pixErro, setPixErro] = useState('');
   const [marcandoId, setMarcandoId] = useState(null);
+  const [confirmandoId, setConfirmandoId] = useState(null);
+  const [detalhe, setDetalhe] = useState(null);
+  const [abrindoDetalhe, setAbrindoDetalhe] = useState(null);
 
   const aguardando = pedidos.filter((p) => aguardaPagamento(p.status)).length;
+  const novosSite = pedidos.filter((p) => p.status === 'novo').length;
 
   useEffect(() => {
     api.pixStatus().then((s) => setPixAtivo(s.configurado)).catch(() => setPixAtivo(false));
@@ -50,11 +57,41 @@ export default function PedidosLista({
     }
   }
 
+  async function confirmarPedido(id) {
+    setConfirmandoId(id);
+    setPixErro('');
+    try {
+      await onConfirmarPedido(id);
+    } catch (e) {
+      setPixErro(e.message);
+    } finally {
+      setConfirmandoId(null);
+    }
+  }
+
+  async function verDetalhe(id) {
+    setAbrindoDetalhe(id);
+    setPixErro('');
+    try {
+      const pedido = await api.obterPedido(id);
+      setDetalhe(pedido);
+    } catch (e) {
+      setPixErro(e.message);
+    } finally {
+      setAbrindoDetalhe(null);
+    }
+  }
+
   return (
     <section className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-medium">Todos os pedidos</h2>
+          {novosSite > 0 && (
+            <p className="mt-1 text-sm text-sky-800">
+              {novosSite} pedido(s) novos — confirme para reservar estoque
+            </p>
+          )}
           {aguardando > 0 && (
             <p className="mt-1 text-sm text-amber-800">
               {aguardando} pedido(s) aguardando confirmação de pagamento
@@ -103,10 +140,23 @@ export default function PedidosLista({
                 <tr
                   key={p.id}
                   className={`border-b border-stone-100 ${
-                    aguardaPagamento(p.status) ? 'bg-amber-50/60' : ''
+                    p.status === 'novo'
+                      ? 'bg-sky-50/50'
+                      : aguardaPagamento(p.status)
+                        ? 'bg-amber-50/60'
+                        : ''
                   }`}
                 >
-                  <td className="py-3 pr-4 font-medium">{p.id}</td>
+                  <td className="py-3 pr-4 font-medium">
+                    <button
+                      type="button"
+                      onClick={() => verDetalhe(p.id)}
+                      className="text-brand-700 underline-offset-2 hover:underline"
+                      disabled={abrindoDetalhe === p.id}
+                    >
+                      {abrindoDetalhe === p.id ? '…' : p.id}
+                    </button>
+                  </td>
                   <td className="py-3 pr-4">
                     <div>{p.cliente_nome}</div>
                     <div className="text-xs text-stone-500">{p.cliente_telefone}</div>
@@ -130,7 +180,17 @@ export default function PedidosLista({
                   </td>
                   <td className="py-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      {aguardaPagamento(p.status) && (
+                      {p.status === 'novo' && (
+                        <button
+                          type="button"
+                          disabled={confirmandoId === p.id}
+                          onClick={() => confirmarPedido(p.id)}
+                          className="rounded bg-sky-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-sky-700 disabled:opacity-50"
+                        >
+                          {confirmandoId === p.id ? '…' : 'Confirmar pedido'}
+                        </button>
+                      )}
+                      {aguardaPagamento(p.status) && p.status !== 'novo' && (
                         <button
                           type="button"
                           disabled={marcandoId === p.id}
@@ -138,6 +198,17 @@ export default function PedidosLista({
                           className="rounded bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
                         >
                           {marcandoId === p.id ? '…' : 'Pagamento recebido'}
+                        </button>
+                      )}
+                      {p.status === 'novo' && (
+                        <button
+                          type="button"
+                          disabled={marcandoId === p.id}
+                          onClick={() => confirmarPagamento(p.id, 'pix')}
+                          className="rounded border border-emerald-600 px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+                          title="Confirma estoque e marca como pago"
+                        >
+                          Pago direto
                         </button>
                       )}
                       {pixAtivo && p.status !== 'cancelado' && p.status !== 'pago' && (
@@ -150,12 +221,13 @@ export default function PedidosLista({
                         </button>
                       )}
                       <select
+                        key={`${p.id}-${p.status}`}
                         defaultValue={p.status}
                         onChange={(e) => onMudarStatus(p.id, e.target.value)}
                         className="rounded border border-stone-300 px-2 py-1 text-xs"
-                        title="Alterar status manualmente"
+                        title="Alterar status"
                       >
-                        {STATUS_PEDIDO.map((s) => (
+                        {opcoesStatusAtual(p.status).map((s) => (
                           <option key={s} value={s}>
                             {STATUS_LABEL[s]}
                           </option>
@@ -169,6 +241,8 @@ export default function PedidosLista({
           </table>
         </div>
       )}
+
+      {detalhe && <PedidoDetalheModal pedido={detalhe} onFechar={() => setDetalhe(null)} />}
 
       {pixModal && (
         <PixPedidoModal

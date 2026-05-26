@@ -24,13 +24,23 @@ async function request(path, options = {}) {
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, { ...options, headers });
+  } catch {
+    throw new Error('Sem conexão com o servidor. Verifique a internet e tente de novo.');
+  }
+
   const body = await res.json().catch(() => ({}));
 
   if (res.status === 401) {
     setToken(null);
     onUnauthorized();
     throw new Error(body.erro || 'Sessão expirada. Faça login novamente.');
+  }
+
+  if (res.status === 403) {
+    throw new Error(body.erro || 'Você não tem permissão para esta ação.');
   }
 
   if (!res.ok) throw new Error(body.erro || res.statusText);
@@ -64,13 +74,17 @@ export const api = {
     }),
   removerPrecoAtacado: (clienteId, produtoId) =>
     request(`/clientes/${clienteId}/precos/${produtoId}`, { method: 'DELETE' }),
-  listarPedidos: ({ status, aguardandoPagamento } = {}) => {
+  listarPedidos: ({ status, aguardandoPagamento, limite } = {}) => {
     const q = new URLSearchParams();
     if (status) q.set('status', status);
     if (aguardandoPagamento) q.set('aguardando_pagamento', '1');
+    if (limite) q.set('limite', String(limite));
     const s = q.toString();
     return request(`/pedidos${s ? `?${s}` : ''}`);
   },
+  obterPedido: (id) => request(`/pedidos/${id}`),
+  confirmarPedido: (id) =>
+    request(`/pedidos/${id}/confirmar`, { method: 'POST' }),
   marcarPedidoPago: (id, forma_pagamento = 'pix') =>
     request(`/pedidos/${id}/pagar`, {
       method: 'PATCH',

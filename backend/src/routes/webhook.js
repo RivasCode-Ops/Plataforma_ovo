@@ -4,10 +4,14 @@ import { processarPedidoDoSite } from '../services/webhookPedido.js';
 
 const router = Router();
 
+function idempotencyKey(req) {
+  return req.headers['idempotency-key'] || req.headers['x-idempotency-key'] || null;
+}
+
 router.post('/pedido', verificarWebhook, async (req, res, next) => {
   try {
-    const data = await processarPedidoDoSite(req.body);
-    res.status(201).json({ data });
+    const data = await processarPedidoDoSite(req.body, { idempotencyKey: idempotencyKey(req) });
+    res.status(data.duplicado ? 200 : 201).json({ data });
   } catch (err) {
     next(err);
   }
@@ -20,8 +24,8 @@ router.post('/granjauniao', verificarWebhook, async (req, res, next) => {
       ...req.body,
       origem: req.body?.origem || 'granjauniao.com.br',
     };
-    const data = await processarPedidoDoSite(payload);
-    res.status(201).json({ data });
+    const data = await processarPedidoDoSite(payload, { idempotencyKey: idempotencyKey(req) });
+    res.status(data.duplicado ? 200 : 201).json({ data });
   } catch (err) {
     next(err);
   }

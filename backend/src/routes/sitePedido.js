@@ -30,6 +30,7 @@ router.post(
       res.status(201).json({
         data: {
           pedido_id: resultado.pedido_id,
+          status: resultado.status,
           total: resultado.total,
           mensagem:
             'Pedido recebido! Em breve entraremos em contato pelo WhatsApp para confirmar entrega e pagamento.',

@@ -25,7 +25,51 @@ async function resolverProdutoId(item) {
   return rows[0].id;
 }
 
-export async function processarPedidoDoSite(body) {
+async function buscarIdempotencia(chave) {
+  if (!chave?.trim()) return null;
+  try {
+    const { rows } = await pool.query(
+      'SELECT pedido_id FROM webhook_idempotencia WHERE chave = $1',
+      [chave.trim()]
+    );
+    return rows[0]?.pedido_id ?? null;
+  } catch (err) {
+    if (err.code === '42P01') return null;
+    throw err;
+  }
+}
+
+async function gravarIdempotencia(chave, pedidoId) {
+  if (!chave?.trim()) return;
+  try {
+    await pool.query(
+      `INSERT INTO webhook_idempotencia (chave, pedido_id) VALUES ($1, $2)
+       ON CONFLICT (chave) DO NOTHING`,
+      [chave.trim(), pedidoId]
+    );
+  } catch (err) {
+    if (err.code === '42P01') return;
+    throw err;
+  }
+}
+
+export async function processarPedidoDoSite(body, { idempotencyKey } = {}) {
+  const chave = idempotencyKey || body?.idempotency_key;
+  if (chave) {
+    const pedidoId = await buscarIdempotencia(chave);
+    if (pedidoId) {
+      const pedido = await pedidosService.obterPedido(pedidoId);
+      if (pedido) {
+        return {
+          pedido_id: pedido.id,
+          status: pedido.status,
+          total: pedido.total,
+          duplicado: true,
+        };
+      }
+    }
+  }
+
   const { cliente, itens, observacao, origem, confirmar } = body || {};
 
   if (!cliente?.nome || !cliente?.telefone) {
@@ -54,10 +98,16 @@ export async function processarPedidoDoSite(body) {
   const obsPrefix = `[Site: ${siteOrigem}]`;
   const obsCompleta = observacao ? `${obsPrefix} ${observacao}` : obsPrefix;
 
-  return pedidosService.criarPedido({
+  const resultado = await pedidosService.criarPedido({
     cliente,
     itens: itensResolvidos,
     observacao: obsCompleta,
     confirmar: confirmar === true,
   });
+
+  if (chave && resultado.pedido_id) {
+    await gravarIdempotencia(chave, resultado.pedido_id);
+  }
+
+  return resultado;
 }

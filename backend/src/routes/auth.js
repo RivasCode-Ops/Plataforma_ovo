@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { criarToken, requireAuth } from '../middleware/auth.js';
+import { rateLimitLogin } from '../middleware/rateLimitLogin.js';
 import { autenticar, obterPorLogin } from '../services/operadores.js';
 
 const router = Router();
 
-router.post('/login', async (req, res, next) => {
+router.post('/login', rateLimitLogin, async (req, res, next) => {
   try {
     const { usuario, senha } = req.body || {};
     if (!usuario || !senha) {

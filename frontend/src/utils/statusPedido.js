@@ -28,3 +28,18 @@ export const STATUS_COR = {
 export function aguardaPagamento(status) {
   return status === 'novo' || status === 'confirmado';
 }
+
+/** Próximos status permitidos no painel (espelha o backend). */
+export const PROXIMOS_STATUS = {
+  novo: ['confirmado', 'cancelado'],
+  confirmado: ['pago', 'cancelado'],
+  pago: ['enviado', 'entregue', 'cancelado'],
+  enviado: ['entregue', 'cancelado'],
+  entregue: [],
+  cancelado: [],
+};
+
+export function opcoesStatusAtual(status) {
+  const proximos = PROXIMOS_STATUS[status] || [];
+  return [status, ...proximos.filter((s) => s !== status)];
+}

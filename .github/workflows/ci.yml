@@ -39,6 +39,13 @@ jobs:
       - run: npm run db:schema
         env:
           DATABASE_URL: postgresql://plataforma:plataforma_dev@localhost:5432/plataforma_ovo
+      - name: Apply migrations
+        run: |
+          for f in migrations/009_webhook_idempotencia.sql; do
+            psql "$DATABASE_URL" -f "$f" || true
+          done
+        env:
+          DATABASE_URL: postgresql://plataforma:plataforma_dev@localhost:5432/plataforma_ovo
       - name: Start API
         run: |
           node src/index.js &
@@ -48,6 +55,11 @@ jobs:
           PORT: "3000"
           SITE_PEDIDO_TOKEN: ci-test-token
       - run: sleep 4 && bash scripts/ci-smoke.sh http://localhost:3000
+      - run: npm run test:ci
+        env:
+          API_BASE: http://localhost:3000
+          SITE_PEDIDO_TOKEN: ci-test-token
+          ADMIN_PASSWORD: plataforma123
       - name: Stop API
         if: always()
         run: kill "$(cat /tmp/api.pid)" 2>/dev/null || true

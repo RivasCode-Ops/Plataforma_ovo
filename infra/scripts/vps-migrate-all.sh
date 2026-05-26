@@ -14,6 +14,7 @@ MIGRATIONS=(
   006_cliente_precos.sql
   007_rotas.sql
   008_lote_desconto.sql
+  009_webhook_idempotencia.sql
   002_assinaturas.sql
   002_balcao_fiado.sql
 )

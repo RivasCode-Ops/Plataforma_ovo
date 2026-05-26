@@ -4,7 +4,7 @@ const inputClass =
   'w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
 
 export default function Login({ onLogin }) {
-  const [usuario, setUsuario] = useState('admin');
+  const [usuario, setUsuario] = useState(import.meta.env.PROD ? '' : 'admin');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);

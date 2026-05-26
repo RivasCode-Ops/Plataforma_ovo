@@ -8,6 +8,22 @@ const STATUS_VALIDOS = ['novo', 'confirmado', 'pago', 'enviado', 'entregue', 'ca
 
 const AGUARDANDO_PAGAMENTO = ['novo', 'confirmado'];
 
+/** Transições permitidas no painel (novo→confirmado baixa estoque). */
+export const TRANSICOES_STATUS = {
+  novo: ['confirmado', 'cancelado'],
+  confirmado: ['pago', 'cancelado'],
+  pago: ['enviado', 'entregue', 'cancelado'],
+  enviado: ['entregue', 'cancelado'],
+  entregue: [],
+  cancelado: [],
+};
+
+function podeTransicionar(de, para) {
+  if (de === para) return true;
+  const proximos = TRANSICOES_STATUS[de];
+  return Array.isArray(proximos) && proximos.includes(para);
+}
+
 export async function listarPedidos({ status, aguardando_pagamento, limite = 50 } = {}) {
   const params = [];
   let where = '';
@@ -194,9 +210,91 @@ export async function criarPedido({ cliente, itens, observacao, confirmar = true
   };
 }
 
+/** Confirma pedido do site (status novo) e baixa estoque FIFO. */
+export async function confirmarPedidoComEstoque(id) {
+  return withTransaction(async (client) => {
+    const pedRes = await client.query(
+      'SELECT id, status FROM pedidos WHERE id = $1 FOR UPDATE',
+      [id]
+    );
+    if (pedRes.rows.length === 0) {
+      throw Object.assign(new Error('Pedido não encontrado'), { status: 404 });
+    }
+    const atual = pedRes.rows[0].status;
+    if (atual === 'confirmado') {
+      return obterPedido(id);
+    }
+    if (atual !== 'novo') {
+      throw Object.assign(
+        new Error(`Só pedidos "novo" podem ser confirmados (atual: ${atual})`),
+        { status: 400 }
+      );
+    }
+
+    const { rows: itens } = await client.query(
+      `SELECT produto_id, quantidade FROM itens_pedido WHERE pedido_id = $1`,
+      [id]
+    );
+
+    for (const item of itens) {
+      const prod = await client.query(
+        'SELECT id, nome, estoque, ativo FROM produtos WHERE id = $1 FOR UPDATE',
+        [item.produto_id]
+      );
+      if (prod.rows.length === 0) {
+        throw Object.assign(new Error(`Produto ${item.produto_id} não encontrado`), {
+          status: 400,
+        });
+      }
+      const p = prod.rows[0];
+      if (!p.ativo) {
+        throw Object.assign(new Error(`Produto ${p.nome} está inativo`), { status: 400 });
+      }
+      if (p.estoque < item.quantidade) {
+        throw Object.assign(
+          new Error(`Estoque insuficiente para ${p.nome} (disponível: ${p.estoque})`),
+          { status: 400 }
+        );
+      }
+    }
+
+    for (const item of itens) {
+      await baixarEstoqueFifo(client, item.produto_id, item.quantidade);
+    }
+
+    await client.query(
+      `UPDATE pedidos SET status = 'confirmado', updated_at = NOW() WHERE id = $1`,
+      [id]
+    );
+
+    return obterPedido(id);
+  });
+}
+
 export async function atualizarStatusPedido(id, status) {
   if (!STATUS_VALIDOS.includes(status)) {
     throw Object.assign(new Error(`Status inválido: ${status}`), { status: 400 });
+  }
+
+  const atualRes = await pool.query('SELECT status FROM pedidos WHERE id = $1', [id]);
+  if (atualRes.rows.length === 0) {
+    throw Object.assign(new Error('Pedido não encontrado'), { status: 404 });
+  }
+
+  const atual = atualRes.rows[0].status;
+  if (atual === status) {
+    return obterPedido(id);
+  }
+
+  if (!podeTransicionar(atual, status)) {
+    throw Object.assign(
+      new Error(`Transição inválida: ${atual} → ${status}`),
+      { status: 400 }
+    );
+  }
+
+  if (atual === 'novo' && status === 'confirmado') {
+    return confirmarPedidoComEstoque(id);
   }
 
   const { rows } = await pool.query(
@@ -204,16 +302,12 @@ export async function atualizarStatusPedido(id, status) {
     [status, id]
   );
 
-  if (rows.length === 0) {
-    throw Object.assign(new Error('Pedido não encontrado'), { status: 404 });
-  }
-
-  return rows[0];
+  return obterPedido(id);
 }
 
 /** Confirma pagamento manual (PIX, dinheiro, etc.) */
 export async function marcarPedidoPago(id, { forma_pagamento = 'pix' } = {}) {
-  const pedido = await obterPedido(id);
+  let pedido = await obterPedido(id);
   if (!pedido) {
     throw Object.assign(new Error('Pedido não encontrado'), { status: 404 });
   }
@@ -222,6 +316,9 @@ export async function marcarPedidoPago(id, { forma_pagamento = 'pix' } = {}) {
   }
   if (pedido.status === 'pago') {
     return pedido;
+  }
+  if (pedido.status === 'novo') {
+    pedido = await confirmarPedidoComEstoque(id);
   }
   if (!AGUARDANDO_PAGAMENTO.includes(pedido.status)) {
     throw Object.assign(

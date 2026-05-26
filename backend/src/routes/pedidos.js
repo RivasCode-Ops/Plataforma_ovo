@@ -61,6 +61,15 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
+router.post('/:id/confirmar', async (req, res, next) => {
+  try {
+    const data = await pedidosService.confirmarPedidoComEstoque(req.params.id);
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.patch('/:id/status', async (req, res, next) => {
   try {
     const { status } = req.body;
