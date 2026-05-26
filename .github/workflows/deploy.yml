@@ -79,7 +79,11 @@ jobs:
             fi
 
             cd "$REPO"
-            git pull --ff-only origin main
+            git fetch origin main
+            if ! git pull --ff-only origin main; then
+              echo "AVISO: pull bloqueado por alteracoes locais — reset para origin/main ( .env.prod nao versionado )"
+              git reset --hard origin/main
+            fi
 
             cd "$INFRA"
             if [ ! -f .env.prod ]; then
