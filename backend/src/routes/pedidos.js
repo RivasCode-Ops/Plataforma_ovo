@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import * as pedidosService from '../services/pedidos.js';
 import { gerarPixCobranca } from '../integrations/pix.js';
+import { idempotenciaMiddleware } from '../middleware/idempotencia.js';
+import { criticoLimiter, operadorLimiter } from '../middleware/rateLimit.js';
 
 const router = Router();
+
+router.use(operadorLimiter);
 
 router.get('/', async (req, res, next) => {
   try {
@@ -19,7 +23,7 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', criticoLimiter, idempotenciaMiddleware, async (req, res, next) => {
   try {
     const { cliente, itens, observacao, confirmar } = req.body;
     const data = await pedidosService.criarPedido({
@@ -63,7 +67,7 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-router.post('/:id/confirmar', async (req, res, next) => {
+router.post('/:id/confirmar', criticoLimiter, idempotenciaMiddleware, async (req, res, next) => {
   try {
     const data = await pedidosService.confirmarPedidoComEstoque(req.params.id);
     res.json({ data });
@@ -83,7 +87,7 @@ router.patch('/:id/status', async (req, res, next) => {
   }
 });
 
-router.patch('/:id/pagar', async (req, res, next) => {
+router.patch('/:id/pagar', criticoLimiter, idempotenciaMiddleware, async (req, res, next) => {
   try {
     const { forma_pagamento } = req.body || {};
     const data = await pedidosService.marcarPedidoPago(req.params.id, { forma_pagamento });

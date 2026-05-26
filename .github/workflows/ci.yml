@@ -41,7 +41,7 @@ jobs:
           DATABASE_URL: postgresql://plataforma:plataforma_dev@localhost:5432/plataforma_ovo
       - name: Apply migrations
         run: |
-          for f in migrations/009_webhook_idempotencia.sql; do
+          for f in migrations/009_webhook_idempotencia.sql migrations/010_plataforma_producao.sql; do
             psql "$DATABASE_URL" -f "$f" || true
           done
         env:

@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { registrarVendaBalcao } from '../services/balcao.js';
+import { idempotenciaMiddleware } from '../middleware/idempotencia.js';
+import { criticoLimiter, clienteLimiter } from '../middleware/rateLimit.js';
 
 const router = Router();
 
-router.post('/', async (req, res, next) => {
+router.post('/', criticoLimiter, clienteLimiter, idempotenciaMiddleware, async (req, res, next) => {
   try {
     const { cliente_id, nome_avulso, itens, pagamento, troco } = req.body || {};
     const data = await registrarVendaBalcao({

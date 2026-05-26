@@ -1,4 +1,5 @@
 import { withTransaction } from '../db.js';
+import { criarContaReceber } from './contasReceber.js';
 import { gerarPixCobranca, pixConfigurado } from '../integrations/pix.js';
 import { baixarEstoqueFifo, resolverPrecoUnitarioFifo } from './lotes.js';
 import { mapaPrecosCliente, resolverPrecoUnitario } from './clientePrecos.js';
@@ -129,6 +130,7 @@ export async function registrarVendaBalcao({
     }
 
     let fiadoId = null;
+    let contaReceberId = null;
     if (pagamento === 'fiado') {
       const fiado = await client.query(
         `INSERT INTO fiado (cliente_id, pedido_id, valor)
@@ -138,7 +140,7 @@ export async function registrarVendaBalcao({
       fiadoId = fiado.rows[0].id;
     }
 
-    return { pedido, clienteId, clienteNome, itensResolvidos, total, fiadoId };
+    return { pedido, clienteId, clienteNome, itensResolvidos, total, fiadoId, contaReceberId };
   });
 
   let pix = null;
@@ -157,6 +159,20 @@ export async function registrarVendaBalcao({
     }
   }
 
+  let contaReceberId = resultado.contaReceberId;
+  if (pagamento === 'fiado' && resultado.fiadoId && !contaReceberId) {
+    try {
+      const conta = await criarContaReceber({
+        cliente_id: resultado.clienteId,
+        pedido_id: resultado.pedido.id,
+        valor: resultado.total,
+      });
+      contaReceberId = conta.id;
+    } catch (err) {
+      if (err.code !== '42P01') console.error('[balcao] conta a receber:', err.message);
+    }
+  }
+
   return {
     pedido_id: resultado.pedido.id,
     status: resultado.pedido.status,
@@ -165,6 +181,7 @@ export async function registrarVendaBalcao({
     cliente_id: resultado.clienteId,
     cliente_nome: resultado.clienteNome,
     fiado_id: resultado.fiadoId,
+    conta_receber_id: contaReceberId,
     pix,
   };
 }
