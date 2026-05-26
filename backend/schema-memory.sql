@@ -129,8 +129,8 @@ INSERT INTO rotas (nome, ordem) VALUES
 CREATE TABLE idempotencia (
   chave varchar(255) PRIMARY KEY,
   resposta text NOT NULL,
-  expira_em timestamp NOT NULL,
-  created_at timestamp NOT NULL DEFAULT now()
+  expira_em timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE auditoria (

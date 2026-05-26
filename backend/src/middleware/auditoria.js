@@ -22,7 +22,9 @@ export function auditoriaMiddleware(req, res, next) {
   res.json = function comAuditoria(payload) {
     const status = res.statusCode;
     if (status < 400) {
-      const ip = req.ip || req.socket?.remoteAddress;
+      const rawIp = req.ip || req.socket?.remoteAddress || '';
+      const ip =
+        rawIp.startsWith('::ffff:') ? rawIp.slice(7) : rawIp === '::1' ? '127.0.0.1' : rawIp;
       const userAgent = req.headers['user-agent'];
       const acao = `${req.method} ${path}`;
       const entidade = entidadeDaUrl(path);
@@ -31,13 +33,13 @@ export function auditoriaMiddleware(req, res, next) {
       pool
         .query(
           `INSERT INTO auditoria (usuario_login, acao, entidade, entidade_id, ip, user_agent, dados_novos)
-           VALUES ($1, $2, $3, $4, $5::inet, $6, $7)`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
           [
             req.usuario?.login ?? null,
             acao,
             entidade,
             Number.isFinite(entidadeId) ? entidadeId : null,
-            ip && ip !== '::ffff:' ? ip.replace('::ffff:', '') : null,
+            ip || null,
             userAgent ?? null,
             JSON.stringify(payload),
           ]
