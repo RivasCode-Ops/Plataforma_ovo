@@ -125,3 +125,29 @@ INSERT INTO rotas (nome, ordem) VALUES
   ('Centro', 1),
   ('Zona Norte', 2),
   ('Zona Sul', 3);
+
+CREATE TABLE idempotencia (
+  chave varchar(255) PRIMARY KEY,
+  resposta text NOT NULL,
+  expira_em timestamp NOT NULL,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE auditoria (
+  id serial PRIMARY KEY,
+  usuario_login varchar(100),
+  acao varchar(120) NOT NULL,
+  entidade varchar(50) NOT NULL,
+  entidade_id integer,
+  dados_anteriores text,
+  dados_novos text,
+  ip varchar(45),
+  user_agent text,
+  created_at timestamp NOT NULL DEFAULT now()
+);
+
+CREATE TABLE webhook_idempotencia (
+  chave text PRIMARY KEY,
+  pedido_id integer NOT NULL REFERENCES pedidos (id),
+  created_at timestamp NOT NULL DEFAULT now()
+);

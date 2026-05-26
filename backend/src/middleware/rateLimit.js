@@ -4,6 +4,7 @@ const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS) || 60_000;
 const maxOperador = Number(process.env.RATE_LIMIT_MAX) || 30;
 const maxCritico = Number(process.env.RATE_LIMIT_CRITICO_MAX) || 10;
 
+/** req.usuario vem de requireAuth em index.js (ANTES das rotas /api/pedidos). */
 function keyUsuarioOuIp(req) {
   return req.usuario?.login || req.ip || 'unknown';
 }

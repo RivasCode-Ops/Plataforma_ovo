@@ -1,5 +1,9 @@
 import { pool } from '../db.js';
 import * as pedidosService from './pedidos.js';
+import {
+  buscarWebhookIdempotencia,
+  gravarWebhookIdempotencia,
+} from './webhookIdempotencia.js';
 
 const ORIGEM_PADRAO = process.env.SITE_ORIGEM || 'granjauniao.com.br';
 
@@ -25,38 +29,10 @@ async function resolverProdutoId(item) {
   return rows[0].id;
 }
 
-async function buscarIdempotencia(chave) {
-  if (!chave?.trim()) return null;
-  try {
-    const { rows } = await pool.query(
-      'SELECT pedido_id FROM webhook_idempotencia WHERE chave = $1',
-      [chave.trim()]
-    );
-    return rows[0]?.pedido_id ?? null;
-  } catch (err) {
-    if (err.code === '42P01') return null;
-    throw err;
-  }
-}
-
-async function gravarIdempotencia(chave, pedidoId) {
-  if (!chave?.trim()) return;
-  try {
-    await pool.query(
-      `INSERT INTO webhook_idempotencia (chave, pedido_id) VALUES ($1, $2)
-       ON CONFLICT (chave) DO NOTHING`,
-      [chave.trim(), pedidoId]
-    );
-  } catch (err) {
-    if (err.code === '42P01') return;
-    throw err;
-  }
-}
-
 export async function processarPedidoDoSite(body, { idempotencyKey } = {}) {
   const chave = idempotencyKey || body?.idempotency_key;
   if (chave) {
-    const pedidoId = await buscarIdempotencia(chave);
+    const pedidoId = await buscarWebhookIdempotencia(chave);
     if (pedidoId) {
       const pedido = await pedidosService.obterPedido(pedidoId);
       if (pedido) {
@@ -106,7 +82,7 @@ export async function processarPedidoDoSite(body, { idempotencyKey } = {}) {
   });
 
   if (chave && resultado.pedido_id) {
-    await gravarIdempotencia(chave, resultado.pedido_id);
+    await gravarWebhookIdempotencia(chave, resultado.pedido_id);
   }
 
   return resultado;

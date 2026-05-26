@@ -18,7 +18,13 @@ router.get('/', async (_req, res) => {
     console.error('[health] database:', err.message);
   }
 
-  checks.stone_api = process.env.STONE_TOKEN?.trim() ? 'configured' : 'not_configured';
+  const stoneToken = Boolean(process.env.STONE_TOKEN?.trim());
+  checks.stone_api = stoneToken ? 'configured' : 'not_configured';
+
+  const warnings = [];
+  if (!stoneToken) {
+    warnings.push('STONE_TOKEN não configurado — pagamentos Stone desativados (opcional).');
+  }
 
   const healthy = checks.database === true;
   res.status(healthy ? 200 : 503).json({
@@ -28,6 +34,7 @@ router.get('/', async (_req, res) => {
     timestamp: new Date().toISOString(),
     response_time_ms: Date.now() - start,
     checks,
+    warnings,
   });
 });
 

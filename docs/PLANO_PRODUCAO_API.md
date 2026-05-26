@@ -19,9 +19,28 @@ docker exec -i plataforma_ovo_db psql -U plataforma plataforma_ovo < backend/mig
 | GET | `/api/stone/status` | Stone ativo? |
 | POST | `/api/stone/webhook` | Eventos (header webhook secret) |
 
-## Idempotência
+## Idempotência (duas tabelas)
 
-Envie header `Idempotency-Key: <uuid>` em POST/PATCH críticos (pedidos, balcão).
+| Uso | Tabela | TTL |
+|-----|--------|-----|
+| `POST /api/pedidos`, balcão | `idempotencia` | 24 h |
+| Webhook site (`/api/webhook/*`) | `webhook_idempotencia` | permanente |
+| Webhook Stone (`/api/stone/webhook`) | `idempotencia` chave `stone:…` | 7 dias |
+
+Envie header `Idempotency-Key: <uuid>` em POST/PATCH críticos.
+
+## Ordem dos middlewares
+
+1. `requireAuth` (define `req.usuario`)
+2. `auditoriaMiddleware`
+3. `operadorLimiter` / `criticoLimiter` nas rotas (usa `req.usuario.login`)
+
+## Testes
+
+```bash
+node backend/scripts/test-producao.mjs
+# API_BASE=http://127.0.0.1:8080 DATABASE_URL=... ADMIN_PASSWORD=...
+```
 
 ## Variáveis opcionais
 
